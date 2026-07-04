@@ -22,14 +22,17 @@ export class ResultScene extends Phaser.Scene {
     }
 
     createTitle(width, height) {
-        this.add.text(width / 2, 60, 'RACE RESULTS', {
-            fontSize: '48px',
+        this.add.text(width / 2, 60, 'KẾT QUẢ ĐUA', {
+            fontSize: '52px',
+            fontFamily: 'Creepster, cursive',
             color: '#ffffff',
-            fontStyle: 'bold'
+            stroke: '#000',
+            strokeThickness: 6
         }).setOrigin(0.5);
 
-        this.add.text(width / 2, 110, `Time: ${this.formatTime(this.raceTime)}`, {
-            fontSize: '24px',
+        this.add.text(width / 2, 110, `Thời gian: ${this.formatTime(this.raceTime)}`, {
+            fontSize: '26px',
+            fontFamily: 'Creepster, cursive',
             color: '#888888'
         }).setOrigin(0.5);
     }
@@ -48,7 +51,7 @@ export class ResultScene extends Phaser.Scene {
             }).setOrigin(0.5);
 
             // Tên marble
-            this.add.text(150, y, result.name || `Marble ${index + 1}`, {
+            this.add.text(150, y, result.name || `Bi ${index + 1}`, {
                 fontSize: '24px',
                 color: '#ffffff'
             }).setOrigin(0, 0.5);
@@ -70,10 +73,12 @@ export class ResultScene extends Phaser.Scene {
         const buttonY = height - 80;
 
         // Nút Race Again
-        const raceAgainBtn = this.add.text(width / 2 - 80, buttonY, '🔄 RACE AGAIN', {
-            fontSize: '24px',
+        const raceAgainBtn = this.add.text(width / 2 - 80, buttonY, '🔄 ĐUA LẠI', {
+            fontSize: '28px',
+            fontFamily: 'Creepster, cursive',
             color: '#00ff00',
-            fontStyle: 'bold'
+            stroke: '#000',
+            strokeThickness: 3
         }).setOrigin(0.5).setInteractive();
 
         raceAgainBtn.on('pointerover', () => raceAgainBtn.setColor('#ffff00'));
@@ -83,8 +88,9 @@ export class ResultScene extends Phaser.Scene {
         });
 
         // Nút Menu
-        const menuBtn = this.add.text(width / 2 + 80, buttonY, '🏠 MENU', {
-            fontSize: '24px',
+        const menuBtn = this.add.text(width / 2 + 80, buttonY, '🏠 TRANG CHỦ', {
+            fontSize: '28px',
+            fontFamily: 'Creepster, cursive',
             color: '#888888'
         }).setOrigin(0.5).setInteractive();
 

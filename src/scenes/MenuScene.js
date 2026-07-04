@@ -17,20 +17,29 @@ export class MenuScene extends Phaser.Scene {
     }
 
     createTitle(width, height) {
-        this.add.text(width / 2, height / 3, 'MARBLE RACE', {
-            fontSize: '64px',
+        this.add.text(width / 2, height / 3, 'ĐUA BI', {
+            fontSize: '72px',
+            fontFamily: 'Creepster, cursive',
             color: '#ffffff',
-            fontStyle: 'bold',
             stroke: '#000000',
-            strokeThickness: 6
+            strokeThickness: 8,
+            shadow: {
+                offsetX: 3,
+                offsetY: 3,
+                color: '#000',
+                blur: 5,
+                fill: true
+            }
         }).setOrigin(0.5);
     }
 
     createPlayButton(width, height) {
-        const playBtn = this.add.text(width / 2, height / 2, '▶ PLAY', {
-            fontSize: '36px',
+        const playBtn = this.add.text(width / 2, height / 2, '▶ CHƠI', {
+            fontSize: '40px',
+            fontFamily: 'Creepster, cursive',
             color: '#00ff00',
-            fontStyle: 'bold'
+            stroke: '#000',
+            strokeThickness: 4
         }).setOrigin(0.5).setInteractive();
 
         playBtn.on('pointerover', () => {
@@ -49,8 +58,9 @@ export class MenuScene extends Phaser.Scene {
     }
 
     createSettingsButton(width, height) {
-        const settingsBtn = this.add.text(width / 2, height / 2 + 80, '⚙ SETTINGS', {
-            fontSize: '24px',
+        const settingsBtn = this.add.text(width / 2, height / 2 + 80, '⚙ CÀI ĐẶT', {
+            fontSize: '28px',
+            fontFamily: 'Creepster, cursive',
             color: '#888888'
         }).setOrigin(0.5).setInteractive();
 

@@ -6,10 +6,22 @@ export class BootScene extends Phaser.Scene {
     preload() {
         this.createLoadingBar();
         this.loadAssets();
+        this.loadFont();
     }
 
     create() {
-        this.scene.start('MenuScene');
+        // Đợi font load xong
+        this.time.delayedCall(500, () => {
+            this.scene.start('MenuScene');
+        });
+    }
+
+    loadFont() {
+        // Đợi Google Fonts load
+        document.fonts.ready.then(() => {
+            this.loadingText.setText('Sẵn sàng!');
+            this.loadingText.setFontFamily('Creepster, cursive');
+        });
     }
 
     createLoadingBar() {
@@ -17,8 +29,9 @@ export class BootScene extends Phaser.Scene {
         const height = this.cameras.main.height;
         
         this.loadingBar = this.add.rectangle(width / 2, height / 2, 0, 20, 0x00ff00);
-        this.loadingText = this.add.text(width / 2, height / 2 - 30, 'Loading...', {
-            fontSize: '20px',
+        this.loadingText = this.add.text(width / 2, height / 2 - 30, 'Đang tải...', {
+            fontSize: '24px',
+            fontFamily: 'Creepster, cursive',
             color: '#ffffff'
         }).setOrigin(0.5);
 
@@ -27,7 +40,7 @@ export class BootScene extends Phaser.Scene {
         });
 
         this.load.on('complete', () => {
-            this.loadingText.setText('Ready!');
+            this.loadingText.setText('Sẵn sàng!');
         });
     }
 
