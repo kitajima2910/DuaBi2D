@@ -1,94 +1,93 @@
+/**
+ * TimerSystem — Countdown 3 → 2 → 1 → GO bằng delta time
+ * Không dùng setTimeout.
+ */
 export class TimerSystem {
     constructor(scene) {
         this.scene = scene;
-        this.startTime = 0;
-        this.elapsedTime = 0;
-        this.isRunning = false;
-        this.laps = [];
-        this.currentLap = 0;
+
+        /** Thời lượng mỗi tick (ms) */
+        this.tickDuration = 1000;
+
+        /** Countdown sequence */
+        this.countdownSteps = [3, 2, 1, 'GO'];
+        this.currentStepIndex = 0;
+
+        /** Accumulator delta time */
+        this.accumulator = 0;
+
+        /** Trạng thái */
+        this.isCountingDown = false;
+        this.isFinished = false;
     }
 
-    start() {
-        this.startTime = this.scene.time.now;
-        this.isRunning = true;
-        this.elapsedTime = 0;
+    /**
+     * Bắt đầu countdown từ 3 → 2 → 1 → GO
+     */
+    startCountdown() {
+        this.currentStepIndex = 0;
+        this.accumulator = 0;
+        this.isCountingDown = true;
+        this.isFinished = false;
+
+        // Phát step đầu tiên ngay lập tức
+        this._emitCurrentStep();
     }
 
+    /**
+     * Dừng countdown
+     */
     stop() {
-        this.isRunning = false;
+        this.isCountingDown = false;
     }
 
+    /**
+     * Reset timer về trạng thái ban đầu
+     */
     reset() {
-        this.startTime = 0;
-        this.elapsedTime = 0;
-        this.isRunning = false;
-        this.laps = [];
-        this.currentLap = 0;
+        this.currentStepIndex = 0;
+        this.accumulator = 0;
+        this.isCountingDown = false;
+        this.isFinished = false;
     }
 
-    pause() {
-        this.isRunning = false;
+    /**
+     * Lấy giá trị hiển thị hiện tại (số hoặc 'GO')
+     */
+    getCurrentDisplay() {
+        if (this.isFinished) return null;
+        return this.countdownSteps[this.currentStepIndex] ?? null;
     }
 
-    resume() {
-        this.isRunning = true;
+    // ─── internal ───
+
+    _emitCurrentStep() {
+        const value = this.countdownSteps[this.currentStepIndex];
+        this.scene.events.emit('countdown-tick', value);
     }
 
-    lap() {
-        if (!this.isRunning) return null;
-
-        const lapTime = this.elapsedTime;
-        this.laps.push(lapTime);
-        this.currentLap++;
-        return lapTime;
-    }
-
-    getElapsedTime() {
-        if (!this.isRunning) return this.elapsedTime;
-        return this.scene.time.now - this.startTime;
-    }
-
-    getCurrentLapTime() {
-        if (this.laps.length === 0) {
-            return this.getElapsedTime();
+    _advance() {
+        this.currentStepIndex++;
+        if (this.currentStepIndex >= this.countdownSteps.length) {
+            // Countdown xong
+            this.isCountingDown = false;
+            this.isFinished = true;
+            this.scene.events.emit('countdown-complete');
+            return;
         }
-        return this.getElapsedTime() - this.laps[this.laps.length - 1];
+        this._emitCurrentStep();
     }
 
-    getBestLap() {
-        if (this.laps.length === 0) return null;
-        return Math.min(...this.laps);
-    }
+    // ─── lifecycle ───
 
-    getWorstLap() {
-        if (this.laps.length === 0) return null;
-        return Math.max(...this.laps);
-    }
+    update(_time, delta) {
+        if (!this.isCountingDown) return;
 
-    getAverageLap() {
-        if (this.laps.length === 0) return null;
-        const total = this.laps.reduce((sum, lap) => sum + lap, 0);
-        return total / this.laps.length;
-    }
+        this.accumulator += delta;
 
-    formatTime(ms) {
-        const minutes = Math.floor(ms / 60000);
-        const seconds = Math.floor((ms % 60000) / 1000);
-        const milliseconds = Math.floor((ms % 1000) / 10);
-
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
-    }
-
-    formatTimeShort(ms) {
-        const seconds = Math.floor(ms / 1000);
-        const milliseconds = Math.floor((ms % 1000) / 10);
-
-        return `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
-    }
-
-    update(time, delta) {
-        if (this.isRunning) {
-            this.elapsedTime = time - this.startTime;
+        while (this.accumulator >= this.tickDuration && this.isCountingDown) {
+            this.accumulator -= this.tickDuration;
+            this._advance();
         }
     }
 
