@@ -1,12 +1,35 @@
+# Countries Marble Race
+
 node_modules/
-.env
 dist/
-.next/
+.env
+*.local
+.DS_Store
+Thumbs.db
 *.log
-__pycache__/
-*.pyc
-.venv/
-*.egg-info/
-target/
+coverage/
+.tmp/
+
+# Editor
+.idea/
+.vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Test
+coverage/
+
+# Env
+.env
+.env.local
+.env.*.local
+
 .opencode/
-.playwright-mcp/
+.github/

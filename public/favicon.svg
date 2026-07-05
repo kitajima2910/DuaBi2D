@@ -1,0 +1,26 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <linearGradient id="marble" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="35%" cy="30%" r="55%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.5"/>
+      <stop offset="60%" style="stop-color:#ffffff;stop-opacity:0.05"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#3b82f6" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <rect width="100" height="100" rx="20" fill="url(#bg)"/>
+  <circle cx="50" cy="50" r="42" fill="url(#marble)" stroke="#fbbf24" stroke-width="2" filter="url(#glow)"/>
+  <circle cx="36" cy="34" r="16" fill="url(#shine)"/>
+  <text x="50" y="62" font-family="Arial,sans-serif" font-size="40" font-weight="bold"
+        fill="#ffffff" text-anchor="middle" dominant-baseline="central">M</text>
+</svg>

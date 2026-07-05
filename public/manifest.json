@@ -1,0 +1,36 @@
+﻿{
+  "name": "Countries Marble Race",
+  "short_name": "Marble Race",
+  "description": "Đua bi 2D với cờ các nước! 40+ quốc gia, vật lý chân thực, đường đua procedural.",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "categories": ["games", "sports", "entertainment"],
+  "lang": "vi",
+  "dir": "ltr",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "prefer_related_applications": false,
+  "display_override": ["fullscreen", "standalone", "minimal-ui"]
+}
