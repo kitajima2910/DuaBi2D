@@ -38,6 +38,26 @@ export class PhysicsSystem {
   }
 
   /**
+   * Toggle a body between static (immovable) and dynamic.
+   * Used by CountdownSystem to lock/unlock marbles.
+   * @param {MatterJS.BodyType} body
+   * @param {boolean} isStatic
+   */
+  setStatic(body, isStatic) {
+    Phaser.Physics.Matter.Matter.Body.setStatic(body, isStatic);
+  }
+
+  /**
+   * Convenience — set static by marble ID.
+   * @param {string} marbleId
+   * @param {boolean} isStatic
+   */
+  setStaticById(marbleId, isStatic) {
+    const body = this.bodies.get(marbleId);
+    if (body) this.setStatic(body, isStatic);
+  }
+
+  /**
    * Store reference to MarbleRenderer for visual syncing.
    * @param {import('./MarbleRenderer.js').MarbleRenderer} marbleRenderer
    */
