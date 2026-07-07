@@ -17,5 +17,7 @@ export class Marble {
     this.strength = config.strength ?? 50;
     this.agility = config.agility ?? 50;
     this.luck = config.luck ?? 50;
+    this.gameObject = null;   // Phaser.GameObjects.Arc — will be set by MarbleRenderer
+    this.body = null;          // Matter body — will be set by PhysicsSystem
   }
 }

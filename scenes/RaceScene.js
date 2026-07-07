@@ -1,6 +1,9 @@
 import { CountrySystem } from '../systems/CountrySystem.js';
 import { RaceSystem } from '../systems/RaceSystem.js';
 import { EventBus } from '../systems/EventBus.js';
+import { MarbleRenderer } from '../systems/MarbleRenderer.js';
+import { PhysicsSystem } from '../systems/PhysicsSystem.js';
+import { SpawnSystem } from '../systems/SpawnSystem.js';
 
 export class RaceScene extends Phaser.Scene {
   constructor() {
@@ -22,12 +25,12 @@ export class RaceScene extends Phaser.Scene {
     this.raceSystem.createRace(marbles);
     this.raceSystem.startCountdown();
 
-    // ── UI placeholder ──────────────────────────────────────
-    this.add.text(width / 2, height / 2, 'RaceScene — Đã khởi tạo hệ thống', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '36px',
-      color: '#e0e0e0',
-    }).setOrigin(0.5);
+    // ── Systems: renderer, physics, spawn ───────────────────
+    this.marbleRenderer = new MarbleRenderer(this);
+    this.physicsSystem = new PhysicsSystem(this, this.eventBus);
+    this.physicsSystem.setRenderer(this.marbleRenderer);
+    this.spawnSystem = new SpawnSystem(this.marbleRenderer, this.physicsSystem);
+    this.spawnSystem.spawn(marbles, width, height);
 
     // ESC or click → back to MenuScene
     this.input.keyboard.on('keydown-ESC', () => {
@@ -36,5 +39,9 @@ export class RaceScene extends Phaser.Scene {
     this.input.on('pointerdown', () => {
       this.scene.start('MenuScene');
     });
+  }
+
+  update() {
+    this.physicsSystem?.update();
   }
 }
