@@ -4,6 +4,8 @@ import { EventBus } from '../systems/EventBus.js';
 import { MarbleRenderer } from '../systems/MarbleRenderer.js';
 import { PhysicsSystem } from '../systems/PhysicsSystem.js';
 import { SpawnSystem } from '../systems/SpawnSystem.js';
+import { TrackLoader } from '../systems/TrackLoader.js';
+import { TrackSystem } from '../systems/TrackSystem.js';
 
 export class RaceScene extends Phaser.Scene {
   constructor() {
@@ -19,6 +21,12 @@ export class RaceScene extends Phaser.Scene {
     this.countrySystem = new CountrySystem();
     await this.countrySystem.init();
     this.raceSystem = new RaceSystem(this.eventBus);
+
+    // ── Track system ───────────────────────────────────────
+    this.trackLoader = new TrackLoader();
+    await this.trackLoader.init();
+    this.trackSystem = new TrackSystem(this, this.trackLoader.getTrack(0));
+    this.trackSystem.build();
 
     // ── Create first race ───────────────────────────────────
     const marbles = this.countrySystem.getRandomMarbles(4);
