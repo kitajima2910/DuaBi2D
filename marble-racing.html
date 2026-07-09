@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Marble Racing 2D</title>
+<title>Đua Bi 2D</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='b' cx='35%25' cy='35%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23ff6b6b'/%3E%3Cstop offset='50%25' stop-color='%23ef4444'/%3E%3Cstop offset='100%25' stop-color='%23b91c1c'/%3E%3C/radialGradient%3E%3Cpattern id='c' width='4' height='4' patternUnits='userSpaceOnUse'%3E%3Crect width='2' height='2' fill='%23fff'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23fff'/%3E%3C/pattern%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23b)' stroke='%23800' stroke-width='.5'/%3E%3Cellipse cx='11' cy='10' rx='5' ry='3' fill='%23fff' opacity='.35' transform='rotate(-30 11 10)'/%3E%3Cpath d='M10 24h12v3H10z' fill='url(%23c)' opacity='.8'/%3E%3Ctext x='16' y='21' text-anchor='middle' fill='%23fff' font-family='Arial,monospace' font-size='13' font-weight='900'%3EM%3C/text%3E%3C/svg%3E"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -99,94 +99,94 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 <div id="ui-overlay">
   <div id="hud">
     <div id="hud-speed">0 km/h</div>
-    <div id="hud-lap">Lap: 0/3</div>
-    <div id="hud-pos">Position: 0/8</div>
-    <div id="hud-coins">Coins: 0</div>
-    <div>Boost</div>
+    <div id="hud-lap">Vòng: 0/3</div>
+    <div id="hud-pos">Hạng: 0/8</div>
+    <div id="hud-coins">Xu: 0</div>
+    <div>Tăng Tốc</div>
     <div id="hud-boost-bar"><div id="hud-boost-fill" style="width:100%"></div></div>
   </div>
   <div id="pos-indicator"></div>
-  <div id="controls-help">WASD / Arrows — Steer | Space — Boost | P — Pause</div>
-  <div id="leaderboard"><div class="lb-title">STANDINGS</div></div>
+  <div id="controls-help">WASD / Phím Mũi Tên Để Lái | Space Để Tăng Tốc | P Để Tạm Dừng</div>
+  <div id="leaderboard"><div class="lb-title">BẢNG XẾP HẠNG</div></div>
   </div>
   <canvas id="mini-map" width="160" height="160"></canvas>
-  <button id="pause-btn">⏸ Pause</button>
-  <button id="fullscreen-btn">⛶ Full</button>
+  <button id="pause-btn">⏸ Tạm Dừng</button>
+  <button id="fullscreen-btn">⛶ Toàn Màn</button>
   <div id="mobile-controls">
-    <div id="mctrl-left" class="mctrl-btn">◀</div>
-    <div id="mctrl-right" class="mctrl-btn">▶</div>
-    <div id="mctrl-boost" class="mctrl-btn">BOOST</div>
-    <div id="mctrl-brake" class="mctrl-btn">BRAKE</div>
+    <div id="mctrl-left" class="mctrl-btn">?</div>
+    <div id="mctrl-right" class="mctrl-btn">?</div>
+    <div id="mctrl-boost" class="mctrl-btn">Tăng Tốc</div>
+    <div id="mctrl-brake" class="mctrl-btn">PHANH</div>
   </div>
   <div id="overlay"></div>
   <div id="lap-notification"></div>
   <div id="countdown-overlay"><div id="countdown-text">3</div></div>
   <div id="result-overlay">
-    <h2>🏁 Race Complete!</h2>
+    <h2>🏁 Kết Thúc!</h2>
     <div id="result-list"></div>
-    <button class="menu-btn primary" onclick="game.showMenu()">Back to Menu</button>
+    <button class="menu-btn primary" onclick="game.showMenu()">V? Menu</button>
   </div>
 </div>
 <div id="menu-screen">
-  <h1>⚫ MARBLE RACING</h1>
-  <div class="subtitle">2D - Pure Canvas Racing</div>
-  <button class="menu-btn primary" onclick="game.startRace()">▶ PLAY</button>
-  <button class="menu-btn" onclick="game.showShop()">🎨 SKINS</button>
-  <button class="menu-btn" onclick="game.showOptions()">⚙ OPTIONS</button>
+  <h1>🏁 ĐUA BI 2D</h1>
+  <div class="subtitle">Đua xe bi - Canvas thuần</div>
+  <button class="menu-btn primary" onclick="game.startRace()">🏁 CHƠI</button>
+  <button class="menu-btn" onclick="game.showShop()">🏪 SKIN</button>
+  <button class="menu-btn" onclick="game.showOptions()">⚙ CÀI ĐẶT</button>
 </div>
 <div id="shop-screen">
-  <h2>🎨 Skin Shop</h2>
+  <h2>🏪 Cửa Hàng Skin</h2>
   <div class="shop-grid" id="shop-grid"></div>
-  <button class="menu-btn" onclick="game.showMenu()" style="margin:20px">← Back</button>
-  <div style="color:#fbbf24;font-size:16px;margin-bottom:20px" id="shop-coins">Coins: 0</div>
+  <button class="menu-btn" onclick="game.showMenu()" style="margin:20px">↩ Quay Lại</button>
+  <div style="color:#fbbf24;font-size:16px;margin-bottom:20px" id="shop-coins">Xu: 0</div>
 </div>
 <div id="options-screen">
-  <h2>⚙ Options</h2>
-  <div class="option-row"><label>Sound Volume</label><input type="range" id="opt-volume" min="0" max="100" value="70"></div>
-  <div class="option-row"><label>Difficulty</label><select id="opt-difficulty" style="padding:4px 8px;font-size:14px">
-    <option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option>
+  <h2>⚙ CÀI ĐẶT</h2>
+  <div class="option-row"><label>Âm Lượng</label><input type="range" id="opt-volume" min="0" max="100" value="70"></div>
+  <div class="option-row"><label>Độ Khó</label><select id="opt-Độ Khó" style="padding:4px 8px;font-size:14px">
+    <option value="easy">Dễ</option><option value="medium" selected>Trung Bình</option><option value="hard">Khó</option>
   </select></div>
-  <div class="option-row"><label>Reset All Data</label><button onclick="if(confirm('Reset all data?')){localStorage.removeItem('mr_save');game.loadSave();alert('Reset done!')}" style="padding:4px 12px;cursor:pointer">Reset</button></div>
-  <button class="menu-btn" onclick="game.showMenu()" style="margin:30px">← Back</button>
+  <div class="option-row"><label>Xóa Dữ Liệu</label><button onclick="if(confirm('Xóa Dữ Liệu?')){localStorage.removeItem('mr_save');game.loadSave();alert('Đã xóa!')}" style="padding:4px 12px;cursor:pointer">Xóa</button></div>
+  <button class="menu-btn" onclick="game.showMenu()" style="margin:30px">↩ Quay Lại</button>
 </div>
 </div>
 <script>
 'use strict';
 
 // ============================================================
-//  CẤU HÌNH GAME (Configuration)
-//  Toàn bộ thông số game tập trung tại đây để dễ chỉnh sửa
+//  C?U H�NH GAME (Configuration)
+//  To�n b? th�ng s? game t?p trung t?i d�y d? d? ch?nh s?a
 // ============================================================
 const CFG = {
-  canvasW: 0, canvasH: 0,          // Kích thước canvas (sẽ được set khi resize)
-  TRACK_MIN_RADIUS: 380,            // Bán kính tối thiểu (to hơn cho track rộng rãi)
-  TRACK_MAX_RADIUS: 650,            // Bán kính tối đa — track rộng, đường chạy dài hơn
-  TRACK_WIDTH: 160,                 // Chiều rộng đường đua (pixel)
-  TRACK_RESOLUTION: 12,            // Số điểm nội suy giữa 2 control point (càng cao càng mượt)
-  NUM_CONTROL_POINTS: 14,          // Số điểm điều khiển (14 ≈ oval nhẹ, không xoắn)
-  MARBLE_RADIUS: 10,                // Bán kính viên bi
-  FRICTION: 0.985,                  // Hệ số ma sát (càng thấp càng trơn, 1 = không ma sát)
-  WALL_BOUNCE: 0.7,                 // Hệ số nảy khi va vào tường (0 = dính, 1 = nảy hoàn toàn)
-  CENTERING_FORCE: 0.02,            // Lực kéo về tâm track (chống bám biên)
-  GRAVITY: 0.0,                     // Trọng lực (chưa dùng trong top-down view)
-  ACCELERATION: 0.15,               // Gia tốc cơ bản của xe
-  BRAKE_FORCE: 0.08,                // Lực phanh (càng cao càng dừng nhanh)
-  MAX_SPEED: 8,                     // Tốc độ tối đa (pixel/frame)
-  BOOST_SPEED_MULT: 1.8,            // Hệ số nhân tốc độ khi boost
-  BOOST_DRAIN: 0.5,                 // Tốc độ tiêu hao boost mỗi frame
-  BOOST_REGEN: 0.15,               // Tốc độ hồi boost mỗi frame
-  STEER_SPEED: 0.12,               // Tốc độ đánh lái của người chơi
-  AI_STEER_SPEED: 0.10,            // Tốc độ đánh lái của AI (thấp hơn player 1 chút)
-  NUM_AI: 7,                        // Số lượng AI racers (tổng = 8 racers)
-  TOTAL_RACERS: 8,                  // Tổng số racers (1 player + 7 AI)
-  LAPS: 3,                          // Số lap mỗi race
-  NUM_CHECKPOINTS: 8,              // Số checkpoint trên track
+  canvasW: 0, canvasH: 0,          // K�ch thu?c canvas (s? du?c set khi resize)
+  TRACK_MIN_RADIUS: 380,            // B�n k�nh t?i thi?u (to hon cho track r?ng r�i)
+  TRACK_MAX_RADIUS: 650,            // B�n k�nh t?i da � track r?ng, du?ng ch?y d�i hon
+  TRACK_WIDTH: 160,                 // Chi?u r?ng du?ng dua (pixel)
+  TRACK_RESOLUTION: 12,            // S? di?m n?i suy gi?a 2 control point (c�ng cao c�ng mu?t)
+  NUM_CONTROL_POINTS: 14,          // S? di?m di?u khi?n (14 � oval nh?, kh�ng xo?n)
+  MARBLE_RADIUS: 10,                // B�n k�nh vi�n bi
+  FRICTION: 0.985,                  // H? s? ma s�t (c�ng th?p c�ng tron, 1 = kh�ng ma s�t)
+  WALL_BOUNCE: 0.7,                 // H? s? n?y khi va v�o tu?ng (0 = d�nh, 1 = n?y ho�n to�n)
+  CENTERING_FORCE: 0.02,            // L?c k�o v? t�m track (ch?ng b�m bi�n)
+  GRAVITY: 0.0,                     // Tr?ng l?c (chua d�ng trong top-down view)
+  ACCELERATION: 0.15,               // Gia t?c co b?n c?a xe
+  BRAKE_FORCE: 0.08,                // L?c phanh (c�ng cao c�ng d?ng nhanh)
+  MAX_SPEED: 8,                     // T?c d? t?i da (pixel/frame)
+  BOOST_SPEED_MULT: 1.8,            // H? s? nh�n t?c d? khi boost
+  BOOST_DRAIN: 0.5,                 // T?c d? ti�u hao boost m?i frame
+  BOOST_REGEN: 0.15,               // T?c d? h?i boost m?i frame
+  STEER_SPEED: 0.12,               // T?c d? d�nh l�i c?a ngu?i choi
+  AI_STEER_SPEED: 0.10,            // T?c d? d�nh l�i c?a AI (th?p hon player 1 ch�t)
+  NUM_AI: 7,                        // S? lu?ng AI racers (t?ng = 8 racers)
+  TOTAL_RACERS: 8,                  // T?ng s? racers (1 player + 7 AI)
+  LAPS: 3,                          // S? lap m?i race
+  NUM_CHECKPOINTS: 8,              // S? checkpoint tr�n track
 };
 
 // ============================================================
-//  SKIN DATA — Danh sách skins cho marble
-//  price: 0 = skin mặc định, free ai cũng có
-//  rainbow: hiệu ứng đổi màu liên tục
+//  SKIN DATA � Danh s�ch skins cho marble
+//  price: 0 = skin m?c d?nh, free ai cung c�
+//  rainbow: hi?u ?ng d?i m�u li�n t?c
 // ============================================================
 const SKINS = [
   { id:'red',     name:'Red Comet',         color:'#ef4444', trail:'#ef444480', price:0 },
@@ -208,10 +208,10 @@ const SKINS = [
 // ============================================================
 function defaultSave() {
   return {
-    coins: 0,
+    Xu: 0,
     ownedSkins: ['red','blue','green','yellow','purple','orange'],
     equippedSkin: 'red',
-    difficulty: 'medium',
+    'Độ Khó': 'medium',
     volume: 70,
     highScores: [],
   };
@@ -228,18 +228,18 @@ function writeSave() { localStorage.setItem('mr_save', JSON.stringify(saveData))
 let saveData = loadSave();
 
 // ============================================================
-//  HÀM TIỆN ÍCH (Utility functions)
-//  Các hàm toán học và xử lý cơ bản dùng trong game
+//  H�M TI?N �CH (Utility functions)
+//  C�c h�m to�n h?c v� x? l� co b?n d�ng trong game
 // ============================================================
-function lerp(a, b, t) { return a + (b - a) * t; }           // Nội suy tuyến tính
-function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); } // Giới hạn giá trị
-function dist(x1,y1,x2,y2) { return Math.hypot(x2-x1, y2-y1); }    // Khoảng cách Euclid
-function rng(mn, mx) { return mn + Math.random() * (mx - mn); }    // Số thực ngẫu nhiên
-function rngInt(mn, mx) { return Math.floor(rng(mn, mx + 1)); }    // Số nguyên ngẫu nhiên
-function vecNormalize(x, y) { const l = Math.hypot(x, y); return l > 0 ? { x: x/l, y: y/l } : { x: 0, y: 0 }; } // Chuẩn hóa vector
+function lerp(a, b, t) { return a + (b - a) * t; }           // N?i suy tuy?n t�nh
+function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); } // Gi?i h?n gi� tr?
+function dist(x1,y1,x2,y2) { return Math.hypot(x2-x1, y2-y1); }    // Kho?ng c�ch Euclid
+function rng(mn, mx) { return mn + Math.random() * (mx - mn); }    // S? th?c ng?u nhi�n
+function rngInt(mn, mx) { return Math.floor(rng(mn, mx + 1)); }    // S? nguy�n ng?u nhi�n
+function vecNormalize(x, y) { const l = Math.hypot(x, y); return l > 0 ? { x: x/l, y: y/l } : { x: 0, y: 0 }; } // Chu?n h�a vector
 
 // ============================================================
-//  AUDIO ENGINE (Web Audio API — async khởi tạo khi user click)
+//  AUDIO ENGINE (Web Audio API � async kh?i t?o khi user click)
 // ============================================================
 class AudioEngine {
   constructor() {
@@ -320,7 +320,7 @@ class AudioEngine {
     });
   }
   startEngine() {
-    // Engine hum — continuous low oscillator
+    // Engine hum � continuous low oscillator
     if (!this.initialized || !this.ctx || this.oscillators.engine) return;
     try {
       const osc = this.ctx.createOscillator();
@@ -345,7 +345,7 @@ class AudioEngine {
       try {
         const freq = 55 + Math.min(speed, CFG.MAX_SPEED) * 30;
         this.oscillators.engine.osc.frequency.value = freq;
-        // Tăng âm lượng theo speed
+        // Tang �m lu?ng theo speed
         const vol = 0.02 + (speed / CFG.MAX_SPEED) * 0.06;
         if (this.oscillators.engine.gain) {
           this.oscillators.engine.gain.gain.value = vol * this.volume;
@@ -505,11 +505,11 @@ class ParticleSystem {
 }
 
 // ============================================================
-//  TRACK GENERATOR — Procedural closed circuit
+//  TRACK GENERATOR � Procedural closed circuit
 // ============================================================
 class TrackGenerator {
   generate(seed) {
-    // Sinh control points tạo circuit dạng oval nhẹ, không tự cắt nhau
+    // Sinh control points t?o circuit d?ng oval nh?, kh�ng t? c?t nhau
     const cx = 0, cy = 0;
     const n = CFG.NUM_CONTROL_POINTS;
     const pts = [];
@@ -517,7 +517,7 @@ class TrackGenerator {
     const baseRY = rng(380, 520);
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
-      // Hình oval cơ bản + gợn sóng nhẹ cho đa dạng
+      // H�nh oval co b?n + g?n s�ng nh? cho da d?ng
       const wave = rng(0.88, 1.12);
       const rx = baseRX * (0.92 + 0.08 * Math.sin(a * 2.5)) * wave;
       const ry = baseRY * (0.92 + 0.08 * Math.cos(a * 1.8)) / wave;
@@ -527,7 +527,7 @@ class TrackGenerator {
       pts.push({ x: px, y: py });
     }
 
-    // Catmull-Rom → centerline
+    // Catmull-Rom ? centerline
     const cl = [];
     const segs = CFG.TRACK_RESOLUTION;
     for (let i = 0; i < n; i++) {
@@ -544,7 +544,7 @@ class TrackGenerator {
       }
     }
 
-    // Tính normals + wall points
+    // T�nh normals + wall points
     const m = cl.length;
     const norms = [];
     const iw = [], ow = [];
@@ -596,7 +596,7 @@ class TrackGenerator {
       });
     }
 
-    // Checkpoints — lines across track
+    // Checkpoints � lines across track
     const cps = [];
     const cpStep = Math.floor(m / CFG.NUM_CHECKPOINTS);
     for (let i = 0; i < CFG.NUM_CHECKPOINTS; i++) {
@@ -614,9 +614,9 @@ class TrackGenerator {
       });
     }
 
-    // Obstacles — bố trí theo pattern logic, không random lộn xộn
+    // Obstacles � b? tr� theo pattern logic, kh�ng random l?n x?n
     const obs = [];
-    // Helper: thêm obstacle tại vị trí trên track
+    // Helper: th�m obstacle t?i v? tr� tr�n track
     function addObs(trackIdx, sideFrac, radius, type, moving) {
       if (trackIdx < 0 || trackIdx >= m) trackIdx = ((trackIdx % m) + m) % m;
       const n = smoothNorms[trackIdx];
@@ -630,21 +630,21 @@ class TrackGenerator {
       return ((section * secStep + offset) % m + m) % m;
     }
 
-    // Section 0: START/FINISH — không obstacle (đường thoáng)
-    // Section 1: SLALOM — obstacle trái-phải xen kẽ
+    // Section 0: START/FINISH � kh�ng obstacle (du?ng tho�ng)
+    // Section 1: SLALOM � obstacle tr�i-ph?i xen k?
     for (let i = 0; i < 5; i++) {
       const side = i % 2 === 0 ? -0.4 : 0.4;
       addObs(idxInSection(1, 5 + i * 8), side, 10, 'bumper', false);
     }
 
-    // Section 2: GAUNTLET — 2 hàng obstacle tạo hành lang hẹp
+    // Section 2: GAUNTLET � 2 h�ng obstacle t?o h�nh lang h?p
     for (let i = 0; i < 3; i++) {
       const base = 10 + i * 12;
       addObs(idxInSection(2, base), -0.42, 9, 'hazard', false);
       addObs(idxInSection(2, base), 0.42, 9, 'hazard', false);
     }
 
-    // Section 3: MOVING OBSTACLES — obstacle di động
+    // Section 3: MOVING OBSTACLES � obstacle di d?ng
     for (let i = 0; i < 4; i++) {
       const idx = idxInSection(3, 8 + i * 15);
       const n = smoothNorms[idx];
@@ -661,13 +661,13 @@ class TrackGenerator {
       });
     }
 
-    // Section 4: WALL HAZARDS — obstacle sát tường
+    // Section 4: WALL HAZARDS � obstacle s�t tu?ng
     for (let i = 0; i < 4; i++) {
       addObs(idxInSection(4, 5 + i * 18), -0.46, 9, 'hazard', false);
       addObs(idxInSection(4, 10 + i * 18), 0.46, 9, 'hazard', false);
     }
 
-    // Section 5: CLUSTER — chùm obstacle 3 cái ở giữa track
+    // Section 5: CLUSTER � ch�m obstacle 3 c�i ? gi?a track
     for (let c = 0; c < 3; c++) {
       const base = idxInSection(5, 8 + c * 20);
       const n = smoothNorms[base];
@@ -676,19 +676,19 @@ class TrackGenerator {
       addObs(base + 10, -0.05, 12, 'hazard', false);
     }
 
-    // Section 6: BOOST LANE — booster + obstacle nhẹ
+    // Section 6: BOOST LANE � booster + obstacle nh?
     for (let i = 0; i < 4; i++) {
       addObs(idxInSection(6, 3 + i * 16), rng(-0.15, 0.15), 8, 'bumper', false);
     }
 
-    // Section 7: MIXED — obstacle rải đều, có khoảng cách
+    // Section 7: MIXED � obstacle r?i d?u, c� kho?ng c�ch
     for (let i = 0; i < 4; i++) {
       const idx = idxInSection(7, 5 + i * 18);
       const side = (i % 2 === 0 ? -1 : 1) * rng(0.2, 0.4);
       addObs(idx, side, rng(8, 12), i % 2 === 0 ? 'bumper' : 'hazard', false);
     }
 
-    // Boosters — ưu tiên các section thẳng + sau obstacle
+    // Boosters � uu ti�n c�c section th?ng + sau obstacle
     const boosters = [];
     const boosterSections = [1, 3, 6, 7];
     for (const s of boosterSections) {
@@ -703,7 +703,7 @@ class TrackGenerator {
       }
     }
 
-    // Coins — rải đều quanh track, hơi lệch tâm
+    // Coins � r?i d?u quanh track, hoi l?ch t�m
     const coins = [];
     for (let i = 0; i < 50; i++) {
       const idx = Math.floor((i / 50) * m + rng(0, 20));
@@ -737,16 +737,16 @@ class TrackGenerator {
 }
 
 // ============================================================
-//  PHYSICS ENGINE — Circle collision, wall collision
-//  Toàn bộ vật lý tự code (custom), không dùng thư viện
-//  Gồm: phát hiện va chạm circle-circle, circle-line,
-//  phản hồi va chạm (elastic), ràng buộc track
+//  PHYSICS ENGINE � Circle collision, wall collision
+//  To�n b? v?t l� t? code (custom), kh�ng d�ng thu vi?n
+//  G?m: ph�t hi?n va ch?m circle-circle, circle-line,
+//  ph?n h?i va ch?m (elastic), r�ng bu?c track
 // ============================================================
 class Physics {
   /**
-   * Tìm điểm gần nhất trên centerline của track so với vị trí (px, py)
-   * Dùng 2-pass: coarse scan (step = 1/200 chiều dài) → refine local
-   * Trả về { index, dist, point }
+   * T�m di?m g?n nh?t tr�n centerline c?a track so v?i v? tr� (px, py)
+   * D�ng 2-pass: coarse scan (step = 1/200 chi?u d�i) ? refine local
+   * Tr? v? { index, dist, point }
    */
   static closestPointOnPath(px, py, cl) {
     let minD = Infinity, bestIdx = 0;
@@ -766,7 +766,7 @@ class Physics {
     return { index: bestIdx, dist: minD, point: cl[bestIdx] };
   }
 
-  // Kiểm tra marble có trong track không + giữ marble ở giữa track
+  // Ki?m tra marble c� trong track kh�ng + gi? marble ? gi?a track
   static constrainToTrack(marble, track) {
     const { x, y, radius } = marble;
     const cp = Physics.closestPointOnPath(x, y, track.centerline);
@@ -777,17 +777,17 @@ class Physics {
     const side = dx * n.x + dy * n.y; // positive = outer side
     const absD = Math.abs(side);
     const maxD = track.halfWidth - radius;
-    const dangerZone = maxD * 0.6; // Vùng nguy hiểm (60% ra mép)
+    const dangerZone = maxD * 0.6; // V�ng nguy hi?m (60% ra m�p)
 
-    // === SOFT CENTERING — kéo nhẹ về tâm khi gần mép ===
+    // === SOFT CENTERING � k�o nh? v? t�m khi g?n m�p ===
     if (absD > dangerZone && absD <= maxD) {
       const force = (absD - dangerZone) / (maxD - dangerZone) * CFG.CENTERING_FORCE;
-      const dir = side > 0 ? -1 : 1; // Hướng về centerline
+      const dir = side > 0 ? -1 : 1; // Hu?ng v? centerline
       marble.vx += n.x * dir * force;
       marble.vy += n.y * dir * force;
     }
 
-    // === HARD WALL — chặn cứng khi chạm mép ===
+    // === HARD WALL � ch?n c?ng khi ch?m m�p ===
     if (absD > maxD) {
       // Push back
       const overlap = absD - maxD;
@@ -862,44 +862,44 @@ class Physics {
 
 
 // ============================================================
-//  MARBLE CLASS — Mỗi racer (player + AI)
-//  Quản lý: vị trí, vận tốc, vật lý, lap, coins, boost, trail
-//  Mỗi marble là 1 hình tròn tự do trong không gian 2D,
-//  bị ràng buộc bởi track walls và các marble khác
+//  MARBLE CLASS � M?i racer (player + AI)
+//  Qu?n l�: v? tr�, v?n t?c, v?t l�, lap, coins, boost, trail
+//  M?i marble l� 1 h�nh tr�n t? do trong kh�ng gian 2D,
+//  b? r�ng bu?c b?i track walls v� c�c marble kh�c
 // ============================================================
 class Marble {
   constructor(id, isPlayer = false) {
-    this.id = id;                       // ID duy nhất (0 = player, 1-7 = AI)
-    this.isPlayer = isPlayer;           // true nếu là người chơi
-    this.x = 0; this.y = 0;            // Vị trí trong không gian world
-    this.vx = 0; this.vy = 0;          // Vận tốc (pixels per frame)
-    this.radius = CFG.MARBLE_RADIUS;   // Bán kính hình tròn
-    this.mass = 1;                      // Khối lượng (dùng cho va chạm elastic)
-    this.color = '#fff';                // Màu sắc (từ skin)
-    this.trailColor = '#ffffff40';      // Màu vệt trail
-    this.trail = [];                   // Lưu N vị trí gần nhất để vẽ trail
-    this.maxTrail = 15;                // Số điểm trail tối đa
-    this.lap = 0;                      // Lap hiện tại (0-based)
-    this.finished = false;             // Đã hoàn thành race?
-    this.finishTime = 0;               // Thời gian hoàn thành
-    this.finishOrder = 0;              // Thứ tự về đích
-    this.checkpointsPassed = new Set();// Set các checkpoint đã đi qua
-    this.coins = 0;                    // Số coin thu thập (tạm thời)
-    this.speed = 0;                    // Tốc độ hiện tại (magnitude của velocity)
-    this.boostAmount = 100;            // Lượng boost còn lại (0-100)
-    this.boosting = false;             // Đang bật boost?
-    this.brake = false;                // Đang phanh?
-    this.steerInput = 0;               // Đầu vào lái (-1 trái, 1 phải)
-    this.forwardInput = false;         // Đầu vào tiến
-    this.trackIndex = 0;               // Index gần nhất trên centerline
-    this.trackDist = 0;                // Khoảng cách đã đi (0-1 normalized)
-    this.lastTrackIndex = 0;           // Track index ở frame trước (để phát hiện qua line)
-    this.crossedFinish = false;        // Đã qua finish line?
-    this.respawnTimer = 0;             // Timer hồi sinh (giây)
-    this.collisionCooldown = 0;        // Cooldown va chạm marble-marble
-    this.obstacleCooldown = 0;         // Cooldown va chạm obstacle (chống kẹt)
+    this.id = id;                       // ID duy nh?t (0 = player, 1-7 = AI)
+    this.isPlayer = isPlayer;           // true n?u l� ngu?i choi
+    this.x = 0; this.y = 0;            // V? tr� trong kh�ng gian world
+    this.vx = 0; this.vy = 0;          // V?n t?c (pixels per frame)
+    this.radius = CFG.MARBLE_RADIUS;   // B�n k�nh h�nh tr�n
+    this.mass = 1;                      // Kh?i lu?ng (d�ng cho va ch?m elastic)
+    this.color = '#fff';                // M�u s?c (t? skin)
+    this.trailColor = '#ffffff40';      // M�u v?t trail
+    this.trail = [];                   // Luu N v? tr� g?n nh?t d? v? trail
+    this.maxTrail = 15;                // S? di?m trail t?i da
+    this.lap = 0;                      // Lap hi?n t?i (0-based)
+    this.finished = false;             // �� ho�n th�nh race?
+    this.finishTime = 0;               // Th?i gian ho�n th�nh
+    this.finishOrder = 0;              // Th? t? v? d�ch
+    this.checkpointsPassed = new Set();// Set c�c checkpoint d� di qua
+    this.coins = 0;                    // S? coin thu th?p (t?m th?i)
+    this.speed = 0;                    // T?c d? hi?n t?i (magnitude c?a velocity)
+    this.boostAmount = 100;            // Lu?ng boost c�n l?i (0-100)
+    this.boosting = false;             // �ang b?t boost?
+    this.brake = false;                // �ang phanh?
+    this.steerInput = 0;               // �?u v�o l�i (-1 tr�i, 1 ph?i)
+    this.forwardInput = false;         // �?u v�o ti?n
+    this.trackIndex = 0;               // Index g?n nh?t tr�n centerline
+    this.trackDist = 0;                // Kho?ng c�ch d� di (0-1 normalized)
+    this.lastTrackIndex = 0;           // Track index ? frame tru?c (d? ph�t hi?n qua line)
+    this.crossedFinish = false;        // �� qua finish line?
+    this.respawnTimer = 0;             // Timer h?i sinh (gi�y)
+    this.collisionCooldown = 0;        // Cooldown va ch?m marble-marble
+    this.obstacleCooldown = 0;         // Cooldown va ch?m obstacle (ch?ng k?t)
     // Skins
-    this.applySkin(saveData.equippedSkin); // Áp dụng skin từ save data
+    this.applySkin(saveData.equippedSkin); // �p d?ng skin t? save data
   }
 
   applySkin(skinId) {
@@ -911,7 +911,7 @@ class Marble {
   }
 
   getProgress() {
-    // Chuẩn hóa 0-1 dựa trên lap + track position
+    // Chu?n h�a 0-1 d?a tr�n lap + track position
     return this.lap + this.trackDist;
   }
 
@@ -943,11 +943,11 @@ class Marble {
 
   update(dt, track, particles) {
     if (this.finished) {
-      // Slow down gradually + giữ trong track
+      // Slow down gradually + gi? trong track
       this.vx *= 0.95;
       this.vy *= 0.95;
       this.updatePosition(dt);
-      Physics.constrainToTrack(this, track); // Giữ marble trong track
+      Physics.constrainToTrack(this, track); // Gi? marble trong track
       this.updateTrail();
       this.updateTrackInfo(track);
       this.speed = Math.hypot(this.vx, this.vy);
@@ -971,10 +971,10 @@ class Marble {
     if (this.collisionCooldown > 0) this.collisionCooldown -= dt;
     if (this.obstacleCooldown > 0) this.obstacleCooldown -= dt;
 
-    // Player input → forces
+    // Player input ? forces
     let ax = 0, ay = 0;
 
-    // Forward acceleration — AI luôn chạy trừ khi brake
+    // Forward acceleration � AI lu�n ch?y tr? khi brake
     if (this.forwardInput && !this.brake) {
       const idx = this.trackIndex;
       if (track.centerline && track.centerline.length > 0) {
@@ -1090,11 +1090,11 @@ class Marble {
         this.lap++;
         this.crossedFinish = true;
         if (this.isPlayer) {
-          // Hiển thị thông báo lap cho người chơi
+          // Hi?n th? th�ng b�o lap cho ngu?i choi
           if (this.lap >= CFG.LAPS) {
-            game.showLapNotification('🏁 FINAL LAP!');
+            game.showLapNotification('🏁 VÒNG CUỐI!');
           } else {
-            game.showLapNotification('Lap ' + this.lap + ' Complete!');
+            game.showLapNotification('Vòng ' + this.lap + ' Hoàn Thành!');
           }
         }
         if (this.lap >= CFG.LAPS) {
@@ -1114,14 +1114,14 @@ class Marble {
     // If too far from track
     const d = dist(this.x, this.y, track.centerline[this.trackIndex].x, track.centerline[this.trackIndex].y);
     if (d > track.halfWidth + this.radius * 3) {
-      // Fell off — respawn
-      this.respawnTimer = 1.0; // 1 giây penalty
+      // Fell off � respawn
+      this.respawnTimer = 1.0; // 1 gi�y penalty
       this.vx = 0; this.vy = 0;
     }
   }
 
   respawnAtCheckpoint(track) {
-    // Tìm checkpoint gần nhất đã pass
+    // T�m checkpoint g?n nh?t d� pass
     let bestCp = null;
     let bestDist = Infinity;
     for (let i = 0; i < track.checkpoints.length; i++) {
@@ -1132,7 +1132,7 @@ class Marble {
       }
     }
     if (!bestCp) {
-      // Fallback: checkpoint đầu tiên
+      // Fallback: checkpoint d?u ti�n
       bestCp = track.checkpoints[0];
     }
     this.x = bestCp.cx;
@@ -1172,7 +1172,7 @@ class Marble {
     const sy = this.y;
     const sr = this.radius * camZoom;
 
-    // Off screen check — camera viewport + margin
+    // Off screen check � camera viewport + margin
     const margin = 50 / camZoom;
     const halfW = (CFG.canvasW / 2) / camZoom + margin;
     const halfH = (CFG.canvasH / 2) / camZoom + margin;
@@ -1269,7 +1269,7 @@ class Marble {
       ctx.arc(sx, sy, sr + 8 * camZoom, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Boost flame trail (vẽ phía sau marble theo hướng di chuyển)
+      // Boost flame trail (v? ph�a sau marble theo hu?ng di chuy?n)
       if (this.speed > 1) {
         const angle = Math.atan2(this.vy, this.vx);
         for (let f = 0; f < 3; f++) {
@@ -1297,29 +1297,28 @@ class Marble {
 
 
 // ============================================================
-//  AI CONTROLLER — Tự động lái cho AI racers
-//  Mỗi AI có 3 cấp độ: easy / medium / hard
-//  - easy: chậm, phản xạ kém, hay mắc lỗi
-//  - medium: trung bình, thi đấu công bằng
-//  - hard: nhanh, phản xạ tốt, ít sai sót
-//  AI lái bằng cách nhắm vào điểm phía trước trên centerline
-//  và tự động tránh tường + dùng boost hợp lý
+//  AI CONTROLLER � T? d?ng l�i cho AI racers
+//  M?i AI c� 3 c?p d?: easy / medium / hard
+//  - easy: ch?m, ph?n x? k�m, hay m?c l?i
+//  - medium: trung b�nh, thi d?u c�ng b?ng
+//  - hard: nhanh, ph?n x? t?t, �t sai s�t
+//  AI l�i b?ng c�ch nh?m v�o di?m ph�a tru?c tr�n centerline
+//  v� t? d?ng tr�nh tu?ng + d�ng boost h?p l�
 // ============================================================
 class AIController {
   constructor(marble, difficulty) {
-    this.marble = marble;                      // Marble cần điều khiển
+    this.marble = marble;
     this.difficulty = difficulty;               // 'easy', 'medium', 'hard'
-    // === THÔNG SỐ KỸ NĂNG ===
-    this.speedMult = difficulty === 'easy' ? 0.7 : difficulty === 'medium' ? 0.9 : 1.1; // Hệ số tốc độ
-    this.reactionTime = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.15 : 0.05; // Thời gian phản xạ
-    this.mistakeChance = difficulty === 'easy' ? 0.02 : difficulty === 'medium' ? 0.008 : 0.003; // Xác suất mắc lỗi
-    this.mistakeTimer = 0;                     // Timer giữ lỗi hiện tại
-    this.currentMistake = 0;                   // 0 = bình thường, -1 = lệch trái, 1 = lệch phải
-    this.lookAhead = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 20; // Số điểm nhìn trước trên track
-    this.boostTimer = 0;                       // Timer quản lý boost
-    this.aggression = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.6 : 0.9; // Mức độ quyết đoán
-    // Mỗi AI có thiên hướng chạy lệch khác nhau (tránh tụ tập một chỗ)
-    this.lineBias = rng(-0.2, 0.2);            // ±20% lệch khỏi centerline
+    // === TH�NG S? K? NANG ===
+    this.speedMult = difficulty === 'easy' ? 0.7 : difficulty === 'medium' ? 0.9 : 1.1;
+    this.reactionTime = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.15 : 0.05;
+    this.mistakeChance = difficulty === 'easy' ? 0.02 : difficulty === 'medium' ? 0.008 : 0.003;
+    this.mistakeTimer = 0;
+    this.currentMistake = 0;
+    this.lookAhead = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 20;
+    this.boostTimer = 0;
+    this.aggression = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.6 : 0.9;
+    this.lineBias = rng(-0.2, 0.2);
   }
 
   update(dt, track, allMarbles) {
@@ -1363,7 +1362,7 @@ class AIController {
 
     let steer = clamp(angleDiff * 2, -1, 1);
 
-    // Line bias — AI có xu hướng chạy lệch khỏi centerline riêng
+    // Line bias � AI c� xu hu?ng ch?y l?ch kh?i centerline ri�ng
     if (wallDist > 30 && this.currentMistake === 0) {
       const biasTarget = side - this.lineBias * track.halfWidth;
       steer += clamp(-biasTarget * 0.008, -0.3, 0.3);
@@ -1382,11 +1381,11 @@ class AIController {
 
     m.steerInput = clamp(steer, -1, 1);
 
-    // Forward movement — always on for AI
-    // Obstacle stun: giảm lái + tiến để marble bay ra khỏi obstacle
+    // Forward movement � always on for AI
+    // Obstacle stun: gi?m l�i + ti?n d? marble bay ra kh?i obstacle
     if (m.obstacleCooldown > 0) {
-      m.steerInput *= 0.3;     // Giảm lái để không quay đầu vào obstacle
-      m.forwardInput = true;   // Vẫn tiến để thoát
+      m.steerInput *= 0.3;     // Gi?m l�i d? kh�ng quay d?u v�o obstacle
+      m.forwardInput = true;   // V?n ti?n d? tho�t
       m.brake = false;
     } else {
       m.forwardInput = true;
@@ -1410,7 +1409,7 @@ class AIController {
 }
 
 // ============================================================
-//  CAMERA — Follow player with lerp + auto-zoom
+//  CAMERA � Follow player with lerp + auto-zoom
 // ============================================================
 class Camera {
   constructor() {
@@ -1424,7 +1423,7 @@ class Camera {
     this.x = lerp(this.x, target.x, 0.08);
     this.y = lerp(this.y, target.y, 0.08);
 
-    // Auto-zoom based on speed — zoom ra khi chạy nhanh (zoom < 1 = zoom out)
+    // Auto-zoom based on speed � zoom ra khi ch?y nhanh (zoom < 1 = zoom out)
     const speedFactor = clamp(speed / CFG.MAX_SPEED, 0, 1);
     this.targetZoom = 1 - speedFactor * 0.25; // Zoom out = 0.75x khi max speed
     if (this.targetZoom < 0.5) this.targetZoom = 0.5;
@@ -1560,7 +1559,7 @@ class MiniMap {
 
 
 // ============================================================
-//  GAME CLASS — Main game loop, state management, rendering
+//  GAME CLASS � Main game loop, state management, rendering
 // ============================================================
 class Game {
   constructor() {
@@ -1737,7 +1736,7 @@ class Game {
     this.state = 'menu';
     document.getElementById('menu-screen').style.display = 'flex';
     document.getElementById('shop-screen').style.display = 'none';
-    // Kích hoạt hiệu ứng nền menu
+    // K�ch ho?t hi?u ?ng n?n menu
     this.menuParticles();
     document.getElementById('options-screen').style.display = 'none';
     document.getElementById('result-overlay').style.display = 'none';
@@ -1760,14 +1759,14 @@ class Game {
     document.getElementById('menu-screen').style.display = 'none';
     document.getElementById('options-screen').style.display = 'flex';
     document.getElementById('opt-volume').value = saveData.volume;
-    document.getElementById('opt-difficulty').value = saveData.difficulty;
+    document.getElementById('opt-Độ Khó').value = saveData['Độ Khó'];
     document.getElementById('opt-volume').oninput = (e) => {
       saveData.volume = parseInt(e.target.value);
       audio.setVolume(saveData.volume / 100);
       writeSave();
     };
-    document.getElementById('opt-difficulty').onchange = (e) => {
-      saveData.difficulty = e.target.value;
+    document.getElementById('opt-Độ Khó').onchange = (e) => {
+      saveData['Độ Khó'] = e.target.value;
       writeSave();
     };
   }
@@ -1775,7 +1774,7 @@ class Game {
   renderShop() {
     const grid = document.getElementById('shop-grid');
     grid.innerHTML = '';
-    document.getElementById('shop-coins').textContent = 'Coins: ' + saveData.coins;
+    document.getElementById('shop-coins').textContent = 'Xu: ' + saveData.coins;
 
     for (const skin of SKINS) {
       const item = document.createElement('div');
@@ -1802,9 +1801,9 @@ class Game {
       const price = document.createElement('div');
       price.className = 'price';
       if (owned) {
-        price.innerHTML = equipped ? '<span class="badge equipped">EQUIPPED</span>' : '<span class="badge owned">OWNED</span>';
+        price.innerHTML = equipped ? '<span class="badge equipped">ĐANG DÙNG</span>' : '<span class="badge owned">ĐÃ MUA</span>';
       } else {
-        price.textContent = skin.price + ' coins';
+        price.textContent = skin.price + ' xu';
       }
       item.appendChild(price);
 
@@ -1824,22 +1823,22 @@ class Game {
           this.renderShop();
           audio.playCoin();
         } else {
-          alert('Not enough coins! Need ' + (skin.price - saveData.coins) + ' more.');
+          alert('Không đủ xu! Cần thêm ' + (skin.price - saveData.coins) + ' xu.');
         }
       };
 
       grid.appendChild(item);
     }
 
-    // Thêm coins từ save vào shop
-    document.getElementById('shop-coins').textContent = 'Coins: ' + saveData.coins;
+    // Th�m coins t? save v�o shop
+    document.getElementById('shop-coins').textContent = 'Xu: ' + saveData.coins;
   }
 
   togglePause() {
     if (this.state === 'racing') {
       this.state = 'paused';
       document.getElementById('overlay').classList.add('active');
-      document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ PAUSED</h2><button class="menu-btn primary" onclick="game.resume()">▶ Resume</button><button class="menu-btn" onclick="game.restart()">🔄 Restart</button><button class="menu-btn" onclick="game.showMenu()">🏠 Menu</button></div>';
+      document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ Tạm DừngD</h2><button class="menu-btn primary" onclick="game.resume()">▶ Tiếp Tục</button><button class="menu-btn" onclick="game.restart()">🔄 Chơi Lại</button><button class="menu-btn" onclick="game.showMenu()">🏠 Menu</button></div>';
     } else if (this.state === 'paused') {
       this.resume();
     }
@@ -1895,7 +1894,7 @@ class Game {
 
     // AI marbles
     const aiColors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899'];
-    const aiNames = ['AI-1', 'AI-2', 'AI-3', 'AI-4', 'AI-5', 'AI-6', 'AI-7'];
+    const aiNames = ['AI Số 1', 'AI Số 2', 'AI Số 3', 'AI Số 4', 'AI Số 5', 'AI Số 6', 'AI Số 7'];
     const difficulties = this.getAIDifficulties();
     const diffNames = ['easy', 'medium', 'hard'];
 
@@ -1949,7 +1948,7 @@ class Game {
 
   getAIDifficulties() {
     const diffSettings = [];
-    const diff = saveData.difficulty || 'medium';
+    const diff = saveData['Độ Khó'] || 'medium';
 
     if (diff === 'easy') {
       // Mostly easy, some medium
@@ -1961,7 +1960,7 @@ class Game {
         diffSettings.push(Math.random() < 0.3 ? 1 : 2); // 1=medium, 2=hard
       }
     } else {
-      // Medium — mix
+      // Medium � mix
       for (let i = 0; i < CFG.NUM_AI; i++) {
         const r = Math.random();
         diffSettings.push(r < 0.3 ? 0 : r < 0.7 ? 1 : 2);
@@ -1999,7 +1998,7 @@ class Game {
         this.countdownTimer = 1.0;
         audio.beep();
       } else if (this.countdownValue === 0) {
-        document.getElementById('countdown-text').textContent = 'GO!';
+        document.getElementById('countdown-text').textContent = 'XUẤT PHÁT!';
         this.countdownTimer = 0.5;
         audio.beepGo();
       } else {
@@ -2164,28 +2163,28 @@ class Game {
       if (!obs.active) continue;
       for (const m of this.marbles) {
         if (m.finished || m.respawnTimer > 0) continue;
-        // Skip if still in obstacle cooldown (tránh kẹt liên tục)
+        // Skip if still in obstacle cooldown (tr�nh k?t li�n t?c)
         if (m.obstacleCooldown > 0) continue;
         const overlap = Physics.circleCircleOverlap(m.x, m.y, m.radius, obs.x, obs.y, obs.radius);
         if (overlap) {
-          // overlap.nx, overlap.ny hướng từ marble → obstacle
-          // Đẩy marble ra xa obstacle gấp 3 lần overlap để đảm bảo không còn dính
+          // overlap.nx, overlap.ny hu?ng t? marble ? obstacle
+          // �?y marble ra xa obstacle g?p 3 l?n overlap d? d?m b?o kh�ng c�n d�nh
           const pushStr = 3;
           m.x -= overlap.nx * overlap.overlap * pushStr;
           m.y -= overlap.ny * overlap.overlap * pushStr;
 
           if (obs.type === 'bumper') {
-            // Bật marble ra xa với tốc độ mạnh hơn vận tốc hiện tại
+            // B?t marble ra xa v?i t?c d? m?nh hon v?n t?c hi?n t?i
             const spd = Math.max(Math.hypot(m.vx, m.vy), 5);
-            // overlap.nx, overlap.ny hướng từ marble → obstacle → đảo chiều
+            // overlap.nx, overlap.ny hu?ng t? marble ? obstacle ? d?o chi?u
             m.vx = -overlap.nx * spd * 1.5;
             m.vy = -overlap.ny * spd * 1.5;
-            // Cooldown 300ms tránh kẹt
+            // Cooldown 300ms tr�nh k?t
             m.obstacleCooldown = 0.3;
             audio.playCrash();
             this.particles.emitSpark(obs.x, obs.y, -overlap.nx, -overlap.ny);
           } else {
-            // Hazard — slow down + đẩy nhẹ ra
+            // Hazard � slow down + d?y nh? ra
             m.vx = -overlap.nx * 2;
             m.vy = -overlap.ny * 2;
             m.boostAmount = Math.max(0, m.boostAmount - 10);
@@ -2202,7 +2201,7 @@ class Game {
   updateMovingObstacles(dt) {
     for (const obs of this.track.obstacles) {
       if (!obs.moving) continue;
-      // Dao động ngang track (moveSpeed = số chu kỳ/giây)
+      // Dao d?ng ngang track (moveSpeed = s? chu k?/gi�y)
       const t = performance.now() / 1000 * Math.PI * 2 * obs.moveSpeed + obs.movePhase;
       const offset = Math.sin(t) * obs.moveRange * this.track.halfWidth;
       const n = obs.normal || { x: 0, y: 0 };
@@ -2251,7 +2250,7 @@ class Game {
     this.state = 'result';
     audio.stopEngine();
 
-    // Pháo hoa ăn mừng nếu người chơi về nhất
+    // Ph�o hoa an m?ng n?u ngu?i choi v? nh?t
     const playerPos = [...this.marbles].sort((a, b) => {
       if (a.finished && b.finished) return a.finishOrder - b.finishOrder;
       if (a.finished) return -1;
@@ -2275,20 +2274,20 @@ class Game {
     const list = document.getElementById('result-list');
     list.innerHTML = '';
     const medals = ['🥇', '🥈', '🥉'];
-    const trophy = ['🏆', '🥈', '🥉'];
+    const trophy = ['🏆', '🥇', '🥈'];
 
-    // Thống kê cho người chơi
+    // Th?ng k� cho ngu?i choi
     const player = this.marbles[0];
-    // playerPos đã được tính ở trên (dòng playerPos = ...findIndex)
+    // playerPos d� du?c t�nh ? tr�n (d�ng playerPos = ...findIndex)
     const avgSpeed = player.speed;
 
-    // Hiển thị kết quả
+    // Hi?n th? k?t qu?
     sorted.forEach((m, i) => {
       const div = document.createElement('div');
       const medal = i < 3 ? medals[i] : `${i+1}.`;
       const isPlayer = m.isPlayer ? 'result-player' : '';
       const extra = m.isPlayer ? ' ⭐' : '';
-      div.innerHTML = `<span class="result-pos">${medal}</span> <span class="${isPlayer}">${m.isPlayer ? 'YOU' : (m.aiName || 'AI Racer ' + m.id)}</span>${extra}`;
+      div.innerHTML = `<span class="result-pos">${medal}</span> <span class="${isPlayer}">${m.isPlayer ? 'BẠN' : (m.aiName || 'AI Số ' + m.id)}</span>${extra}`;
       list.appendChild(div);
     });
 
@@ -2297,11 +2296,11 @@ class Game {
     statsDiv.style.cssText = 'margin-top:15px;padding:10px;border-top:1px solid rgba(255,255,255,.2);font-size:14px;color:#aaa';
     const coinBonus = playerPos === 0 ? 50 : playerPos === 1 ? 30 : playerPos === 2 ? 20 : Math.max(0, 10 - playerPos);
     statsDiv.innerHTML = `
-      Position: <b>${playerPos + 1}</b> / ${CFG.TOTAL_RACERS}<br>
-      Coins earned: <b style="color:#ffd700">+${coinBonus}</b><br>
-      Total coins: <b style="color:#ffd700">${saveData.coins + coinBonus}</b><br>
-      Laps completed: ${player.lap + 1}<br>
-      Coins collected: ${player.coins}
+      Vị trí: <b>${playerPos + 1}</b> / ${CFG.TOTAL_RACERS}<br>
+      Xu nhận được: <b style="color:#ffd700">+${coinBonus}</b><br>
+      Tổng xu: <b style="color:#ffd700">${saveData.coins + coinBonus}</b><br>
+      Số vòng: ${player.lap + 1}<br>
+      Xu thu thập: ${player.coins}
     `;
     list.appendChild(statsDiv);
 
@@ -2407,8 +2406,8 @@ class Game {
   renderTrack(ctx) {
     const tr = this.track;
 
-    // === BACKGROUND (cỏ / ground) ===
-    // Gradient nền xanh đậm hơn, mượt hơn
+    // === BACKGROUND (c? / ground) ===
+    // Gradient n?n xanh d?m hon, mu?t hon
     const bgGrad = ctx.createRadialGradient(0, 0, 50, 0, 0, 2500);
     bgGrad.addColorStop(0, '#3a6b3a');
     bgGrad.addColorStop(0.4, '#2a5a2a');
@@ -2417,7 +2416,7 @@ class Game {
     ctx.fillRect(-3000, -3000, 6000, 6000);
 
     // === TRACK SURFACE ===
-    // Vẽ track surface (polygon giữa outerWall và innerWall)
+    // V? track surface (polygon gi?a outerWall v� innerWall)
     ctx.beginPath();
     for (let i = 0; i < tr.outerWall.length; i++) {
       if (i === 0) ctx.moveTo(tr.outerWall[i].x, tr.outerWall[i].y);
@@ -2429,7 +2428,7 @@ class Game {
     }
     ctx.closePath();
 
-    // Track surface gradient — màu asphalt tối
+    // Track surface gradient � m�u asphalt t?i
     const surfGrad = ctx.createLinearGradient(-600, -600, 600, 600);
     surfGrad.addColorStop(0, '#3a3a42');
     surfGrad.addColorStop(0.3, '#4a4a52');
@@ -2439,11 +2438,11 @@ class Game {
     ctx.fillStyle = surfGrad;
     ctx.fill();
 
-    // Viền track — đường curb đỏ-trắng bên trong và ngoài
+    // Vi?n track � du?ng curb d?-tr?ng b�n trong v� ngo�i
     const curbStep = Math.max(1, Math.floor(tr.innerWall.length / 40));
     for (let side = 0; side < 2; side++) {
       const wall = side === 0 ? tr.innerWall : tr.outerWall;
-      const dir = side === 0 ? 1 : -1; // hướng offset: inner → ra ngoài, outer → vào trong
+      const dir = side === 0 ? 1 : -1; // hu?ng offset: inner ? ra ngo�i, outer ? v�o trong
       for (let i = 0; i < wall.length - curbStep; i += curbStep) {
         const n = tr.normals[i];
         const x1 = wall[i].x + n.x * dir * 3;
@@ -2466,7 +2465,7 @@ class Game {
     }
 
     // === TRACK MARKINGS ===
-    // Vạch trắng mép trong và ngoài (nằm trên curb)
+    // V?ch tr?ng m�p trong v� ngo�i (n?m tr�n curb)
     ctx.strokeStyle = 'rgba(255,255,255,0.5)';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -2491,7 +2490,7 @@ class Game {
     ctx.closePath();
     ctx.stroke();
 
-    // Vạch centerline — màu vàng đứt nét
+    // V?ch centerline � m�u v�ng d?t n�t
     ctx.strokeStyle = 'rgba(255,220,50,0.35)';
     ctx.lineWidth = 2.5;
     ctx.setLineDash([8, 12]);
@@ -2504,14 +2503,14 @@ class Game {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Racing line — đường tối ưu mờ (để tham khảo)
+    // Racing line � du?ng t?i uu m? (d? tham kh?o)
     ctx.strokeStyle = 'rgba(100,200,255,0.08)';
     ctx.lineWidth = 3;
     ctx.setLineDash([15, 20]);
     ctx.beginPath();
     for (let i = 0; i < tr.centerline.length; i++) {
       const n = tr.normals[i];
-      // Hơi lệch vào trong ở khúc cua (mô phỏng racing line)
+      // Hoi l?ch v�o trong ? kh�c cua (m� ph?ng racing line)
       const offset = Math.sin(i * 0.3) * tr.halfWidth * 0.15;
       const rx = tr.centerline[i].x + n.x * offset;
       const ry = tr.centerline[i].y + n.y * offset;
@@ -2522,7 +2521,7 @@ class Game {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Đổ bóng nhẹ cho track (depth effect)
+    // �? b�ng nh? cho track (depth effect)
     ctx.shadowColor = 'rgba(0,0,0,0.3)';
     ctx.shadowBlur = 15;
     ctx.strokeStyle = 'rgba(50,50,60,0.3)';
@@ -2541,7 +2540,7 @@ class Game {
       const idx = seg.startIdx;
       const p = tr.centerline[idx];
       if (seg.type === 'boost') {
-        // Boost lane — màu vàng cam
+        // Boost lane � m�u v�ng cam
         ctx.fillStyle = 'rgba(255,200,0,0.12)';
         const nextIdx = Math.min(idx + 4, tr.numPoints - 1);
         const p2 = tr.centerline[nextIdx];
@@ -2550,7 +2549,7 @@ class Game {
         ctx.translate(p.x, p.y);
         ctx.rotate(angle);
         ctx.fillRect(-tr.halfWidth, -6, tr.halfWidth * 2, 12);
-        // Mũi tên boost
+        // Mui t�n boost
         ctx.fillStyle = 'rgba(255,200,0,0.2)';
         for (let t = -tr.halfWidth + 10; t < tr.halfWidth - 10; t += 20) {
           ctx.beginPath();
@@ -2560,7 +2559,7 @@ class Game {
         }
         ctx.restore();
       } else if (seg.type === 'hazard') {
-        // Hazard zone — màu đỏ
+        // Hazard zone � m�u d?
         ctx.fillStyle = 'rgba(255,0,0,0.08)';
         const w = tr.halfWidth;
         ctx.beginPath();
@@ -2592,7 +2591,7 @@ class Game {
       ctx.setLineDash([]);
 
       if (isFinish) {
-        // Start/Finish line — checkered pattern
+        // Start/Finish line � checkered pattern
         const dx = cp.x2 - cp.x1, dy = cp.y2 - cp.y1;
         const len = Math.hypot(dx, dy);
         const ux = dx / len, uy = dy / len;
@@ -2616,11 +2615,11 @@ class Game {
         ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('START / FINISH', cp.cx, cp.cy - tr.halfWidth - 8);
+        ctx.fillText('XUẤT PHÁT / VỀ ĐÍCH', cp.cx, cp.cy - tr.halfWidth - 8);
       }
     }
 
-    // === WALL BORDERS (đậm hơn, có bóng) ===
+    // === WALL BORDERS (d?m hon, c� b�ng) ===
     ctx.shadowColor = 'rgba(0,0,0,0.3)';
     ctx.shadowBlur = 8;
     ctx.strokeStyle = '#999';
@@ -2642,7 +2641,7 @@ class Game {
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // === OUTSIDE WALL SHADOWS (tạo depth) ===
+    // === OUTSIDE WALL SHADOWS (t?o depth) ===
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
     for (let i = 0; i < tr.outerWall.length; i++) {
       const n = tr.normals[i];
@@ -2652,7 +2651,7 @@ class Game {
     }
 
     // === AMBIENT DECORATIONS ===
-    // Đèn track nhấp nháy
+    // ��n track nh?p nh�y
     const time = performance.now() * 0.001;
     for (let i = 0; i < tr.checkpoints.length; i++) {
       const cp = tr.checkpoints[i];
@@ -2671,7 +2670,7 @@ class Game {
       if (!obs.active) continue;
 
       if (obs.moving) {
-        // Moving obstacle — hiệu ứng nhấp nháy + glow xanh để phân biệt
+        // Moving obstacle � hi?u ?ng nh?p nh�y + glow xanh d? ph�n bi?t
         const pulse = 0.6 + 0.4 * Math.sin(time * 3 + obs.centerIdx);
         ctx.globalAlpha = pulse;
         ctx.shadowColor = '#4488ff';
@@ -2692,7 +2691,7 @@ class Game {
         ctx.font = `bold ${obs.radius}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('⟳', obs.x + 0.5, obs.y + 0.5);
+        ctx.fillText('?', obs.x + 0.5, obs.y + 0.5);
         ctx.globalAlpha = 1;
         continue;
       }
@@ -2723,7 +2722,7 @@ class Game {
       ctx.font = `bold ${obs.radius}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(obs.type === 'bumper' ? '↯' : '☠', obs.x + 0.5, obs.y + 0.5);
+      ctx.fillText(obs.type === 'bumper' ? '?' : '?', obs.x + 0.5, obs.y + 0.5);
     }
   }
 
@@ -2742,7 +2741,7 @@ class Game {
       ctx.font = '12px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('⚡', b.x, b.y);
+      ctx.fillText('?', b.x, b.y);
       ctx.globalAlpha = 1;
     }
   }
@@ -2752,7 +2751,7 @@ class Game {
     for (let i = 0; i < this.track.coins.length; i++) {
       const c = this.track.coins[i];
       if (c.collected) continue;
-      // Coin animation: xoay (mô phỏng qua scale) + nhảy lên xuống
+      // Coin animation: xoay (m� ph?ng qua scale) + nh?y l�n xu?ng
       const bob = Math.sin(time * 3 + i * 1.2) * 3;
       const scaleX = Math.abs(Math.cos(time * 2 + i * 0.7));
       const coinR = 5 * (0.5 + scaleX * 0.5);
@@ -2788,9 +2787,9 @@ class Game {
     if (!this.marbles || this.marbles.length === 0) return;
     const player = this.marbles[0];
 
-    document.getElementById('hud-speed').textContent = `Speed: ${Math.round(player.speed * 15)} km/h`;
-    document.getElementById('hud-lap').textContent = `Lap: ${Math.min(player.lap + 1, CFG.LAPS)}/${CFG.LAPS}`;
-    document.getElementById('hud-coins').textContent = `Coins: ${saveData.coins}`;
+    document.getElementById('hud-speed').textContent = `Tốc: ${Math.round(player.speed * 15)} km/h`;
+    document.getElementById('hud-lap').textContent = `Vòng: ${Math.min(player.lap + 1, CFG.LAPS)}/${CFG.LAPS}`;
+    document.getElementById('hud-coins').textContent = `Xu: ${saveData.coins}`;
 
     // Boost bar
     const boostPct = player.boostAmount;
@@ -2813,7 +2812,7 @@ class Game {
       if (m.isPlayer) break;
       pos++;
     }
-    document.getElementById('hud-pos').textContent = `Position: ${pos}/${CFG.TOTAL_RACERS}`;
+    document.getElementById('hud-pos').textContent = `Vị trí: ${pos}/${CFG.TOTAL_RACERS}`;
 
     // Update position indicator bar + leaderboard
     this.updatePosIndicator();
@@ -2833,11 +2832,11 @@ class Game {
       return b.getProgress() - a.getProgress();
     });
 
-    // Chỉ hiển thị tối đa 8 dòng
-    let html = '<div class="lb-title">STANDINGS</div>';
+    // Ch? hi?n th? t?i da 8 d�ng
+    let html = '<div class="lb-title">BẢNG XẾP HẠNG</div>';
     sorted.forEach((m, i) => {
       const pos = i + 1;
-      const name = m.isPlayer ? 'YOU' : (m.aiName || 'R' + m.id);
+      const name = m.isPlayer ? 'BẠN' : (m.aiName || 'R' + m.id);
       const youClass = m.isPlayer ? 'lb-you' : '';
       const dnf = m.finished ? '' : '';
       const status = m.finished ? 'FIN' : (m.respawnTimer > 0 ? 'RES' : `L${Math.min(m.lap+1, CFG.LAPS)}`);
@@ -2849,7 +2848,7 @@ class Game {
   updatePosIndicator() {
     const container = document.getElementById('pos-indicator');
     if (!container) return;
-    // Sắp xếp marbles theo progress
+    // S?p x?p marbles theo progress
     const sorted = [...this.marbles].sort((a, b) => {
       if (a.finished && b.finished) return a.finishOrder - b.finishOrder;
       if (a.finished) return -1;
@@ -2882,7 +2881,7 @@ class Game {
 // ============================================================
 //  INITIALIZATION
 // ============================================================
-let game = null;
+var game = null;
 window.addEventListener('DOMContentLoaded', () => {
   game = new Game();
   // Show menu initially
@@ -2893,12 +2892,12 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('touchstart', () => audio.init(), { once: true });
 });
 
-// Handle page visibility change — pause when tab hidden
+// Handle page visibility change � pause when tab hidden
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && game && game.state === 'racing') {
     game.state = 'paused';
     document.getElementById('overlay').classList.add('active');
-    document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ PAUSED</h2><button class="menu-btn primary" onclick="game.resume()">▶ Resume</button></div>';
+    document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ Tạm DừngD</h2><button class="menu-btn primary" onclick="game.resume()">▶ Tiếp Tục</button></div>';
   }
 });
 
