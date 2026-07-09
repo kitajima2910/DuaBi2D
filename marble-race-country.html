@@ -803,6 +803,42 @@ class PhysicsEngine {
             b.vx *= (1 - b.friction * dt * 10);
             b.vy *= (1 - b.friction * dt * 10);
         }
+
+        // Gentle global friction to help damp micro-bouncing
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            // FRICTION_ROLLING = fraction of speed retained per second → frame-rate independent
+            const f = Math.pow(CONFIG.FRICTION_ROLLING, dt);
+            b.vx *= f;
+            b.vy *= f;
+        }
+
+        // Speed threshold: kill tiny velocities to prevent perpetual jitter
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            const spd = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+            if (spd < 3) { b.vx = 0; b.vy = 0; }
+        }
+
+        // Stuck detection: strong kick if same spot >2s
+        const now = performance.now();
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            if (!b._stuckData) b._stuckData = { lastX: b.x, lastY: b.y, timer: 0, lastTime: now };
+            const sd = b._stuckData;
+            const moved = Math.abs(b.x - sd.lastX) + Math.abs(b.y - sd.lastY);
+            if (moved < 2) {
+                sd.timer += (now - sd.lastTime) / 1000;
+                if (sd.timer > 2.0) {
+                    b.vx += (Math.random() - 0.5) * 400;
+                    b.vy -= 200 + Math.random() * 150; // strong upward burst
+                    sd.timer = 0;
+                }
+            } else {
+                sd.timer = 0;
+            }
+            sd.lastX = b.x; sd.lastY = b.y; sd.lastTime = now;
+        }
     }
 
     _resolveWallCollisions(body) {
@@ -824,11 +860,29 @@ class PhysicsEngine {
                 body.y += ny * overlap;
                 const relV = body.vx * nx + body.vy * ny;
                 if (relV < 0) {
-                    body.vx -= (1 + CONFIG.BOUNCE_DAMPING) * relV * nx;
-                    body.vy -= (1 + CONFIG.BOUNCE_DAMPING) * relV * ny;
-                    // Play bounce sound
-                    if (Math.abs(relV) > 50 && soundManager) {
-                        soundManager.playBounce(Math.min(Math.abs(relV) / 500, 0.5));
+                    if (Math.abs(relV) < 40) {
+                        // Redirect normal velocity into tangential slide → thoát khỏi bẫy nảy
+                        const tanX = -ny, tanY = nx;
+                        const tanV = body.vx * tanX + body.vy * tanY;
+                        const speed = Math.abs(relV);
+                        body.vx = tanV * tanX + speed * 0.7 * tanX;
+                        body.vy = tanV * tanY + speed * 0.7 * tanY;
+                        // Giữ lại 5% normal để không bị lún vào tường
+                        body.vx += relV * nx * 0.05;
+                        body.vy += relV * ny * 0.05;
+                    } else {
+                        // Random perturbation for organic bounces
+                        const luck = body.luck || 0.5;
+                        const angle = (Math.random() - 0.5) * 0.25 * (1.2 - luck * 0.4);
+                        const ca = Math.cos(angle), sa = Math.sin(angle);
+                        const rnx = nx * ca - ny * sa;
+                        const rny = nx * sa + ny * ca;
+                        body.vx -= (1 + CONFIG.BOUNCE_DAMPING) * relV * rnx;
+                        body.vy -= (1 + CONFIG.BOUNCE_DAMPING) * relV * rny;
+                        // Play bounce sound
+                        if (Math.abs(relV) > 50 && soundManager) {
+                            soundManager.playBounce(Math.min(Math.abs(relV) / 500, 0.5));
+                        }
                     }
                 }
             }
@@ -862,13 +916,31 @@ class PhysicsEngine {
 
         const bounce = isBumper ? 1.2 : Math.min(a.bounce || 0.5, b.bounce || 0.5);
         const j = (1 + bounce) * relVn / totalMass;
-        if (!a.isStatic) {
-            a.vx -= j * nx / a.mass;
-            a.vy -= j * ny / a.mass;
-        }
-        if (!b.isStatic) {
-            b.vx += j * nx / b.mass;
-            b.vy += j * ny / b.mass;
+
+        // Resting contact: if separating slowly, just stop instead of bouncing
+        const sepSpeed = relVn; // positive = separating
+        const isMarbleVsStatic = a.isStatic !== b.isStatic;
+        if (sepSpeed < 20 && isMarbleVsStatic) {
+            // Cancel normal velocity for the non-static body
+            if (!a.isStatic) { a.vx -= relVn * nx / a.mass; a.vy -= relVn * ny / a.mass; }
+            if (!b.isStatic) { b.vx += relVn * nx / b.mass; b.vy += relVn * ny / b.mass; }
+        } else {
+            // Random perturbation for organic obstacle bounces
+            const luck = (!a.isStatic ? (a.luck || 0.5) : (b.luck || 0.5));
+            const spread = isBumper ? 0.35 : 0.2;
+            const rAngle = (Math.random() - 0.5) * spread * (1.3 - luck * 0.6);
+            const ca = Math.cos(rAngle), sa = Math.sin(rAngle);
+            const rnx = nx * ca - ny * sa;
+            const rny = nx * sa + ny * ca;
+
+            if (!a.isStatic) {
+                a.vx -= j * rnx / a.mass;
+                a.vy -= j * rny / a.mass;
+            }
+            if (!b.isStatic) {
+                b.vx += j * rnx / b.mass;
+                b.vy += j * rny / b.mass;
+            }
         }
 
         // Play bounce
