@@ -1148,7 +1148,11 @@ function generateTrack(seed) {
     track.decorations.push({ type: 'finish-line', y: track.finishLine });
 
     // Add start zone
-    track.startZone = { yStart: 50, yEnd: 200 };
+    const cols = Math.min(10, CONFIG.MARBLE_RADIUS); // approximate
+    const rows = 6;
+    const gridH = rows * CONFIG.MARBLE_RADIUS * 3 + 40;
+    track.startZone = { yStart: 80, yEnd: 80 + gridH };
+    track.startGrid = { cols: 10, yBase: CONFIG.TRACK_LENGTH * 0.02, height: gridH };
 
     return track;
 }
@@ -1212,13 +1216,22 @@ function initMarbles(count, seed) {
         [selectedIndices[i], selectedIndices[j]] = [selectedIndices[j], selectedIndices[i]];
     }
 
+    // Starting grid: arrange marbles in neat rows, centered on track
     const trackWidth = CONFIG.TRACK_WIDTH;
-    const spacing = Math.min(trackWidth / count, 28);
-    const startY = CONFIG.TRACK_LENGTH * 0.02;
+    const marbleR = CONFIG.MARBLE_RADIUS;
+    const cols = Math.min(10, count);                   // max 10 per row
+    const rows = Math.ceil(count / cols);
+    const cellW = Math.min(trackWidth / cols, marbleR * 3.2);
+    const cellH = marbleR * 3;
+    const gridW = cols * cellW;
+    const startX = -gridW / 2 + cellW / 2;
+    const startY = CONFIG.TRACK_LENGTH * 0.02;          // top of track
 
     for (let i = 0; i < count; i++) {
-        const x = -trackWidth / 2 + spacing / 2 + i * spacing + rng.nextRange(-3, 3);
-        const y = startY + rng.nextRange(0, 20);
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        const x = startX + col * cellW + rng.nextRange(-2, 2);
+        const y = startY + row * cellH + (col % 2) * 6; // stagger alternate cols
         const marble = createMarble(selectedIndices[i], x, y, rng);
         marble.texture = renderFlagTexture(COUNTRIES[selectedIndices[i]], CONFIG.MARBLE_RADIUS * 2);
         marbles.push(marble);
@@ -1378,30 +1391,38 @@ class Camera {
     }
 
     update(dt, marbles, canvasW, canvasH) {
-        // Find leading marble (most progress = lowest y)
-        let leadY = Infinity;
-        let leadX = 0;
-        let found = false;
-        for (const m of marbles) {
-            if (m.finished || m.eliminated) continue;
-            if (m.y < leadY) {
-                leadY = m.y;
-                leadX = m.x;
-                found = true;
-            }
-        }
-        if (!found) {
-            // Pick finished marble with smallest y
+        // During countdown: lock camera on the starting grid
+        if (gameState === GameState.COUNTDOWN && marbles.length > 0) {
+            // Find the center of the starting grid
+            let sumY = 0, count = 0;
             for (const m of marbles) {
+                if (!m.eliminated) { sumY += m.y; count++; }
+            }
+            const avgY = count > 0 ? sumY / count : marbles[0].y;
+            this.targetX = 0;
+            this.targetY = avgY - canvasH * 0.45;
+            this.targetY = Math.max(this.targetY, -100);
+        } else {
+            // Find leading marble (most progress = lowest y)
+            let leadY = Infinity;
+            let leadX = 0;
+            let found = false;
+            for (const m of marbles) {
+                if (m.finished || m.eliminated) continue;
                 if (m.y < leadY) {
                     leadY = m.y;
                     leadX = m.x;
+                    found = true;
                 }
             }
+            if (!found) {
+                for (const m of marbles) {
+                    if (m.y < leadY) { leadY = m.y; leadX = m.x; }
+                }
+            }
+            this.targetX = 0;
+            this.targetY = leadY - canvasH * 0.4;
         }
-
-        this.targetX = 0; // Center on track
-        this.targetY = leadY - canvasH * 0.4;
 
         // Clamp
         this.targetY = Math.max(this.targetY, -200);
@@ -1615,6 +1636,18 @@ function startRace() {
     // Create marbles
     marbles = initMarbles(count, seed);
 
+    // Position camera on the starting grid immediately
+    if (marbles.length > 0) {
+        let sumY = 0, cnt = 0;
+        for (const m of marbles) { sumY += m.y; cnt++; }
+        const avgY = cnt > 0 ? sumY / cnt : marbles[0].y;
+        camera.targetY = avgY - (canvasH || 600) * 0.45;
+        camera.targetY = Math.max(camera.targetY, -100);
+        camera.y = camera.targetY; // snap immediately, no lerp delay
+        camera.x = 0;
+        camera.targetX = 0;
+    }
+
     // Add marbles to physics
     for (const m of marbles) {
         physicsEngine.addBody(m);
@@ -1672,7 +1705,7 @@ function showCountdown(value) {
 }
 
 function fixedUpdate(dt) {
-    if (gameState !== GameState.RACING && gameState !== GameState.COUNTDOWN) return;
+    if (gameState !== GameState.RACING) return;
 
     // Update moving obstacles
     const now = performance.now();
@@ -1955,6 +1988,56 @@ function drawTrack() {
         ctx2.beginPath();
         ctx2.arc(mx, my, 2, 0, Math.PI * 2);
         ctx2.fill();
+    }
+
+    // Draw starting grid (lane markings + start line)
+    if (track.startGrid) {
+        const sg = track.startGrid;
+        const gridTop = sg.yBase - 20;
+        const gridBot = sg.yBase + sg.height + 20;
+        const syTop = camera.screenY(gridTop);
+        const syBot = camera.screenY(gridBot);
+        if (syTop < canvasH + 50 && syBot > -50) {
+            const leftPts = track.walls.left;
+            const rightPts = track.walls.right;
+            // Find track width at start
+            let gridLW = -CONFIG.TRACK_WIDTH / 2, gridRW = CONFIG.TRACK_WIDTH / 2;
+            for (let i = 0; i < leftPts.length; i++) {
+                if (leftPts[i].y >= sg.yBase) {
+                    gridLW = leftPts[i].x; gridRW = rightPts[i].x;
+                    break;
+                }
+            }
+            const lx = camera.screenX(gridLW);
+            const rx = camera.screenX(gridRW);
+            // Lane dividers (vertical dashed spanning the grid)
+            const numLanes = sg.cols || 10;
+            ctx2.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx2.lineWidth = 1;
+            ctx2.setLineDash([3, 6]);
+            for (let c = 1; c < numLanes; c++) {
+                const lx2 = lx + (rx - lx) * (c / numLanes);
+                ctx2.beginPath();
+                ctx2.moveTo(lx2, syTop);
+                ctx2.lineTo(lx2, syBot);
+                ctx2.stroke();
+            }
+            ctx2.setLineDash([]);
+            // Start line at the BOTTOM of the grid (in front of marbles)
+            ctx2.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx2.lineWidth = 3;
+            ctx2.setLineDash([6, 6]);
+            ctx2.beginPath();
+            ctx2.moveTo(lx, syBot);
+            ctx2.lineTo(rx, syBot);
+            ctx2.stroke();
+            ctx2.setLineDash([]);
+            // "XUẤT PHÁT" label below the start line
+            ctx2.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx2.font = 'bold 14px sans-serif';
+            ctx2.textAlign = 'center';
+            ctx2.fillText('XUẤT PHÁT', (lx + rx) / 2, syBot + 16);
+        }
     }
 
     // Draw horizontal grid lines for depth
