@@ -1,0 +1,2725 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Marble Racing 2D</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='b' cx='35%25' cy='35%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23ff6b6b'/%3E%3Cstop offset='50%25' stop-color='%23ef4444'/%3E%3Cstop offset='100%25' stop-color='%23b91c1c'/%3E%3C/radialGradient%3E%3Cpattern id='c' width='4' height='4' patternUnits='userSpaceOnUse'%3E%3Crect width='2' height='2' fill='%23fff'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23fff'/%3E%3C/pattern%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23b)' stroke='%23800' stroke-width='.5'/%3E%3Cellipse cx='11' cy='10' rx='5' ry='3' fill='%23fff' opacity='.35' transform='rotate(-30 11 10)'/%3E%3Cpath d='M10 24h12v3H10z' fill='url(%23c)' opacity='.8'/%3E%3Ctext x='16' y='21' text-anchor='middle' fill='%23fff' font-family='Arial,monospace' font-size='13' font-weight='900'%3EM%3C/text%3E%3C/svg%3E"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;-webkit-user-select:none;user-select:none;font-family:'Segoe UI',Arial,sans-serif}
+canvas{display:block;touch-action:none;width:100%;height:100%}
+#game-container{position:relative;width:100%;height:100%;overflow:hidden}
+#ui-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+#hud{position:absolute;top:10px;left:10px;color:#fff;font-size:14px;pointer-events:none;text-shadow:0 0 5px rgba(0,0,0,.8);font-family:monospace}
+#hud div{margin:2px 0}
+#hud-boost-bar{width:120px;height:8px;background:rgba(255,255,255,.2);border-radius:4px;margin-top:4px;overflow:hidden}
+#hud-boost-fill{height:100%;width:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:4px;transition:width .1s}
+#lap-notification{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#ffd700;text-shadow:0 0 30px rgba(255,200,0,.6);font-weight:bold;opacity:0;transition:opacity .5s;pointer-events:none}
+#lap-notification.show{opacity:1;animation:lapPulse .8s ease-out}
+@keyframes lapPulse{0%{transform:translate(-50%,-50%) scale(1.5);opacity:0}30%{opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+#mini-map{position:absolute;top:10px;right:10px;width:160px;height:160px;border:2px solid rgba(255,255,255,.4);border-radius:4px;background:rgba(0,0,0,.6);pointer-events:none}
+#mobile-controls{position:absolute;bottom:20px;left:0;width:100%;display:none;pointer-events:none;justify-content:space-between;padding:0 20px;z-index:20}
+.mctrl-btn{pointer-events:auto;width:64px;height:64px;border-radius:50%;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.15);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
+.mctrl-btn:active{background:rgba(255,255,255,.35)}
+#mctrl-left{position:absolute;left:20px;bottom:0}
+#mctrl-right{position:absolute;left:100px;bottom:0}
+#mctrl-boost{position:absolute;right:20px;bottom:0;width:80px;height:80px;font-size:14px;border-color:rgba(255,200,0,.6);background:rgba(255,200,0,.15)}
+#mctrl-boost:active{background:rgba(255,200,0,.35)}
+#mctrl-brake{position:absolute;right:110px;bottom:0;width:64px;height:64px;border-color:rgba(255,50,50,.6);background:rgba(255,50,50,.15)}
+#mctrl-brake:active{background:rgba(255,50,50,.35)}
+#overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;pointer-events:none}
+#overlay.active{pointer-events:auto}
+#menu-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+#menu-screen h1{font-size:48px;margin-bottom:10px;text-shadow:0 0 20px rgba(255,200,0,.5);letter-spacing:4px}
+#menu-screen .subtitle{font-size:16px;color:#aaa;margin-bottom:40px}
+.menu-btn{pointer-events:auto;padding:14px 48px;margin:8px;font-size:18px;border:2px solid rgba(255,255,255,.4);border-radius:8px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer;transition:all .2s;min-width:220px;text-align:center;font-family:inherit}
+.menu-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.05)}
+.menu-btn.primary{background:#e94560;border-color:#e94560}
+.menu-btn.primary:hover{background:#ff6b81}
+#shop-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:40;display:none;flex-direction:column;align-items:center;color:#fff;overflow-y:auto}
+#shop-screen h2{margin:20px 0;font-size:32px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:20px;max-width:700px;width:100%}
+.shop-item{border:2px solid rgba(255,255,255,.2);border-radius:8px;padding:16px;text-align:center;background:rgba(255,255,255,.05);cursor:pointer;transition:all .2s}
+.shop-item:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1)}
+.shop-item.owned{border-color:#4ade80}
+.shop-item.equipped{border-color:#fbbf24;background:rgba(251,191,36,.15)}
+.shop-item .preview{width:48px;height:48px;border-radius:50%;margin:0 auto 8px;border:2px solid rgba(255,255,255,.2)}
+.shop-item .name{font-size:14px;margin-bottom:4px}
+.shop-item .price{font-size:12px;color:#fbbf24}
+.shop-item .badge{font-size:11px;padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px}
+.shop-item .badge.owned{background:#4ade80;color:#000}
+.shop-item .badge.equipped{background:#fbbf24;color:#000}
+#options-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+#options-screen h2{margin:20px 0;font-size:32px}
+.option-row{display:flex;align-items:center;margin:12px 0;width:300px;justify-content:space-between}
+.option-row label{font-size:16px}
+.option-row input[type="range"]{width:150px}
+#countdown-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;z-index:25;pointer-events:none}
+#countdown-text{font-size:120px;color:#fff;text-shadow:0 0 40px rgba(255,200,0,.8);font-weight:bold;animation:pulse .5s ease-out}
+@keyframes pulse{0%{transform:scale(2);opacity:0}50%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:.8}}
+#result-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:35;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+#result-overlay h2{font-size:36px;margin-bottom:20px}
+#result-list{font-size:18px;margin-bottom:30px;text-align:center}
+#result-list div{margin:4px 0}
+.result-pos{display:inline-block;width:30px;font-weight:bold}
+.result-player{color:#fbbf24}
+#pause-btn{position:absolute;top:10px;right:180px;padding:6px 14px;background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;font-size:13px;pointer-events:auto;z-index:15;font-family:inherit}
+#pause-btn:hover{background:rgba(0,0,0,.7)}
+#fullscreen-btn{position:absolute;top:10px;right:90px;padding:6px 12px;background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;font-size:13px;pointer-events:auto;z-index:15;font-family:inherit}
+#fullscreen-btn:hover{background:rgba(0,0,0,.7)}
+#pos-indicator{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);display:flex;gap:5px;align-items:center;padding:6px 14px;background:rgba(0,0,0,.6);border-radius:8px;border:1px solid rgba(255,255,255,.12);pointer-events:none;z-index:12}
+.pos-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);transition:all .3s;flex-shrink:0}
+.pos-dot.player{width:13px;height:13px;border-color:#ffd700;box-shadow:0 0 8px rgba(255,200,0,.5)}
+.pos-dot.finished{opacity:.3;transform:scale(.8)}
+#controls-help{position:absolute;bottom:132px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.35);font-size:11px;text-align:center;pointer-events:none;font-family:monospace;white-space:nowrap;z-index:12}
+#leaderboard{position:absolute;right:10px;top:180px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 12px;color:#fff;font-size:11px;font-family:monospace;pointer-events:none;z-index:12;min-width:80px;display:none}
+#leaderboard .lb-title{font-weight:bold;font-size:12px;margin-bottom:4px;color:#aaa;text-align:center;letter-spacing:1px}
+#leaderboard .lb-row{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+#leaderboard .lb-pos{color:#888;width:20px}
+#leaderboard .lb-name{flex:1;overflow:hidden;text-overflow:ellipsis}
+#leaderboard .lb-you{color:#ffd700;font-weight:bold}
+#leaderboard .lb-dnf{color:#ff4444}
+@media(max-width:600px){
+  #menu-screen h1{font-size:32px}
+  .menu-btn{padding:12px 32px;font-size:16px;min-width:180px}
+  #mini-map{width:100px;height:100px;top:8px;right:8px}
+  #hud{font-size:12px;top:8px;left:8px}
+  #countdown-text{font-size:80px}
+  #result-overlay h2{font-size:28px}
+  #shop-screen h2{font-size:24px}
+  .shop-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));padding:10px}
+}
+</style>
+</head>
+<body>
+<div id="game-container">
+<canvas id="game-canvas"></canvas>
+<div id="ui-overlay">
+  <div id="hud">
+    <div id="hud-speed">0 km/h</div>
+    <div id="hud-lap">Lap: 0/3</div>
+    <div id="hud-pos">Position: 0/8</div>
+    <div id="hud-coins">Coins: 0</div>
+    <div>Boost</div>
+    <div id="hud-boost-bar"><div id="hud-boost-fill" style="width:100%"></div></div>
+  </div>
+  <div id="pos-indicator"></div>
+  <div id="controls-help">WASD / Arrows — Steer | Space — Boost | P — Pause</div>
+  <div id="leaderboard"><div class="lb-title">STANDINGS</div></div>
+  </div>
+  <canvas id="mini-map" width="160" height="160"></canvas>
+  <button id="pause-btn">⏸ Pause</button>
+  <button id="fullscreen-btn">⛶ Full</button>
+  <div id="mobile-controls">
+    <div id="mctrl-left" class="mctrl-btn">◀</div>
+    <div id="mctrl-right" class="mctrl-btn">▶</div>
+    <div id="mctrl-boost" class="mctrl-btn">BOOST</div>
+    <div id="mctrl-brake" class="mctrl-btn">BRAKE</div>
+  </div>
+  <div id="overlay"></div>
+  <div id="lap-notification"></div>
+  <div id="countdown-overlay"><div id="countdown-text">3</div></div>
+  <div id="result-overlay">
+    <h2>🏁 Race Complete!</h2>
+    <div id="result-list"></div>
+    <button class="menu-btn primary" onclick="game.showMenu()">Back to Menu</button>
+  </div>
+</div>
+<div id="menu-screen">
+  <h1>⚫ MARBLE RACING</h1>
+  <div class="subtitle">2D - Pure Canvas Racing</div>
+  <button class="menu-btn primary" onclick="game.startRace()">▶ PLAY</button>
+  <button class="menu-btn" onclick="game.showShop()">🎨 SKINS</button>
+  <button class="menu-btn" onclick="game.showOptions()">⚙ OPTIONS</button>
+</div>
+<div id="shop-screen">
+  <h2>🎨 Skin Shop</h2>
+  <div class="shop-grid" id="shop-grid"></div>
+  <button class="menu-btn" onclick="game.showMenu()" style="margin:20px">← Back</button>
+  <div style="color:#fbbf24;font-size:16px;margin-bottom:20px" id="shop-coins">Coins: 0</div>
+</div>
+<div id="options-screen">
+  <h2>⚙ Options</h2>
+  <div class="option-row"><label>Sound Volume</label><input type="range" id="opt-volume" min="0" max="100" value="70"></div>
+  <div class="option-row"><label>Difficulty</label><select id="opt-difficulty" style="padding:4px 8px;font-size:14px">
+    <option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option>
+  </select></div>
+  <div class="option-row"><label>Reset All Data</label><button onclick="if(confirm('Reset all data?')){localStorage.removeItem('mr_save');game.loadSave();alert('Reset done!')}" style="padding:4px 12px;cursor:pointer">Reset</button></div>
+  <button class="menu-btn" onclick="game.showMenu()" style="margin:30px">← Back</button>
+</div>
+</div>
+<script>
+'use strict';
+
+// ============================================================
+//  CẤU HÌNH GAME (Configuration)
+//  Toàn bộ thông số game tập trung tại đây để dễ chỉnh sửa
+// ============================================================
+const CFG = {
+  canvasW: 0, canvasH: 0,          // Kích thước canvas (sẽ được set khi resize)
+  TRACK_MIN_RADIUS: 250,            // Bán kính tối thiểu của track (điều khiển độ cong)
+  TRACK_MAX_RADIUS: 450,            // Bán kính tối đa — track càng to càng ít cong
+  TRACK_WIDTH: 140,                 // Chiều rộng của đường đua (pixel)
+  TRACK_RESOLUTION: 8,             // Số điểm nội suy giữa 2 control point (càng cao càng mượt)
+  NUM_CONTROL_POINTS: 28,          // Số điểm điều khiển để sinh track (càng nhiều càng phức tạp)
+  MARBLE_RADIUS: 10,                // Bán kính viên bi
+  FRICTION: 0.985,                  // Hệ số ma sát (càng thấp càng trơn, 1 = không ma sát)
+  WALL_BOUNCE: 0.5,                 // Hệ số nảy khi va vào tường (0 = dính, 1 = nảy hoàn toàn)
+  GRAVITY: 0.0,                     // Trọng lực (chưa dùng trong top-down view)
+  ACCELERATION: 0.15,               // Gia tốc cơ bản của xe
+  BRAKE_FORCE: 0.08,                // Lực phanh (càng cao càng dừng nhanh)
+  MAX_SPEED: 8,                     // Tốc độ tối đa (pixel/frame)
+  BOOST_SPEED_MULT: 1.8,            // Hệ số nhân tốc độ khi boost
+  BOOST_DRAIN: 0.5,                 // Tốc độ tiêu hao boost mỗi frame
+  BOOST_REGEN: 0.15,               // Tốc độ hồi boost mỗi frame
+  STEER_SPEED: 0.12,               // Tốc độ đánh lái của người chơi
+  AI_STEER_SPEED: 0.10,            // Tốc độ đánh lái của AI (thấp hơn player 1 chút)
+  NUM_AI: 7,                        // Số lượng AI racers (tổng = 8 racers)
+  TOTAL_RACERS: 8,                  // Tổng số racers (1 player + 7 AI)
+  LAPS: 3,                          // Số lap mỗi race
+  NUM_CHECKPOINTS: 8,              // Số checkpoint trên track
+};
+
+// ============================================================
+//  SKIN DATA — Danh sách skins cho marble
+//  price: 0 = skin mặc định, free ai cũng có
+//  rainbow: hiệu ứng đổi màu liên tục
+// ============================================================
+const SKINS = [
+  { id:'red',     name:'Red Comet',         color:'#ef4444', trail:'#ef444480', price:0 },
+  { id:'blue',    name:'Blue Streak',       color:'#3b82f6', trail:'#3b82f680', price:0 },
+  { id:'green',   name:'Green Machine',     color:'#22c55e', trail:'#22c55e80', price:0 },
+  { id:'yellow',  name:'Golden Flash',      color:'#eab308', trail:'#eab30880', price:0 },
+  { id:'purple',  name:'Purple Haze',       color:'#a855f7', trail:'#a855f780', price:0 },
+  { id:'orange',  name:'Orange Crush',      color:'#f97316', trail:'#f9731680', price:0 },
+  { id:'pink',    name:'Pink Panther',      color:'#ec4899', trail:'#ec489980', price:100 },
+  { id:'cyan',    name:'Cyan Wave',         color:'#06b6d4', trail:'#06b6d480', price:100 },
+  { id:'white',   name:'White Lightning',   color:'#f8fafc', trail:'#f8fafc80', price:200 },
+  { id:'rainbow', name:'Rainbow Road',      color:'#ff0000', trail:'#ff000080', price:500, rainbow:true },
+  { id:'gold',    name:'Gold Emperor',      color:'#ffd700', trail:'#ffd70080', price:1000 },
+  { id:'neon',    name:'Neon Night',        color:'#00ff88', trail:'#00ff8880', price:300 },
+];
+
+// ============================================================
+//  SAVE SYSTEM
+// ============================================================
+function defaultSave() {
+  return {
+    coins: 0,
+    ownedSkins: ['red','blue','green','yellow','purple','orange'],
+    equippedSkin: 'red',
+    difficulty: 'medium',
+    volume: 70,
+    highScores: [],
+  };
+}
+function loadSave() {
+  try {
+    const d = JSON.parse(localStorage.getItem('mr_save'));
+    if (d && d.ownedSkins) return d;
+  } catch(e) {}
+  return defaultSave();
+}
+function writeSave() { localStorage.setItem('mr_save', JSON.stringify(saveData)); }
+
+let saveData = loadSave();
+
+// ============================================================
+//  HÀM TIỆN ÍCH (Utility functions)
+//  Các hàm toán học và xử lý cơ bản dùng trong game
+// ============================================================
+function lerp(a, b, t) { return a + (b - a) * t; }           // Nội suy tuyến tính
+function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); } // Giới hạn giá trị
+function dist(x1,y1,x2,y2) { return Math.hypot(x2-x1, y2-y1); }    // Khoảng cách Euclid
+function rng(mn, mx) { return mn + Math.random() * (mx - mn); }    // Số thực ngẫu nhiên
+function rngInt(mn, mx) { return Math.floor(rng(mn, mx + 1)); }    // Số nguyên ngẫu nhiên
+function vecNormalize(x, y) { const l = Math.hypot(x, y); return l > 0 ? { x: x/l, y: y/l } : { x: 0, y: 0 }; } // Chuẩn hóa vector
+
+// ============================================================
+//  AUDIO ENGINE (Web Audio API — async khởi tạo khi user click)
+// ============================================================
+class AudioEngine {
+  constructor() {
+    this.ctx = null;
+    this.masterGain = null;
+    this.volume = saveData.volume / 100;
+    this.initialized = false;
+    this.oscillators = {};
+  }
+  init() {
+    if (this.initialized) return;
+    try {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = this.volume;
+      this.masterGain.connect(this.ctx.destination);
+      this.initialized = true;
+    } catch(e) { console.warn('Audio not available', e); }
+  }
+  setVolume(v) {
+    this.volume = clamp(v, 0, 1);
+    if (this.masterGain) this.masterGain.gain.value = this.volume;
+  }
+  playTone(freq, dur, type, vol) {
+    if (!this.initialized || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime((vol||0.3) * this.volume, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start();
+      osc.stop(this.ctx.currentTime + dur);
+    } catch(e) {}
+  }
+  beep() { this.playTone(800, 0.15, 'square', 0.2); }
+  beepHigh() { this.playTone(1200, 0.15, 'sine', 0.25); }
+  beepGo() { this.playTone(600, 0.4, 'square', 0.3); }
+  playBoost() {
+    if (!this.initialized || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.15 * this.volume, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.5);
+    } catch(e) {}
+  }
+  playCrash() {
+    if (!this.initialized || !this.ctx) return;
+    try {
+      const bufSize = this.ctx.sampleRate * 0.15;
+      const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.15));
+      const src = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+      src.buffer = buf;
+      gain.gain.value = 0.2 * this.volume;
+      src.connect(gain);
+      gain.connect(this.masterGain);
+      src.start();
+    } catch(e) {}
+  }
+  playCoin() { this.playTone(1400, 0.1, 'sine', 0.2); setTimeout(() => this.playTone(1800, 0.1, 'sine', 0.2), 60); }
+  playFinish() {
+    [523, 659, 784, 1047].forEach((f, i) => {
+      setTimeout(() => this.playTone(f, 0.3, 'sine', 0.25), i * 150);
+    });
+  }
+  startEngine() {
+    // Engine hum — continuous low oscillator
+    if (!this.initialized || !this.ctx || this.oscillators.engine) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 80;
+      gain.gain.value = 0.04 * this.volume;
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start();
+      this.oscillators.engine = { osc, gain };
+    } catch(e) {}
+  }
+  stopEngine() {
+    if (this.oscillators.engine) {
+      try { this.oscillators.engine.osc.stop(); } catch(e) {}
+      this.oscillators.engine = null;
+    }
+  }
+  updateEnginePitch(speed) {
+    if (this.oscillators.engine) {
+      try {
+        const freq = 55 + Math.min(speed, CFG.MAX_SPEED) * 30;
+        this.oscillators.engine.osc.frequency.value = freq;
+        // Tăng âm lượng theo speed
+        const vol = 0.02 + (speed / CFG.MAX_SPEED) * 0.06;
+        if (this.oscillators.engine.gain) {
+          this.oscillators.engine.gain.gain.value = vol * this.volume;
+        }
+      } catch(e) {}
+    }
+  }
+
+  playSkid() {
+    if (!this.initialized || !this.ctx) return;
+    try {
+      const bufSize = this.ctx.sampleRate * 0.2;
+      const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.3)) * 0.5;
+      }
+      const src = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+      src.buffer = buf;
+      gain.gain.value = 0.08 * this.volume;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1000;
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      src.start();
+    } catch(e) {}
+  }
+
+  playBoostLoop(on) {
+    if (on && !this.oscillators.boostLoop) {
+      try {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 400;
+        gain.gain.value = 0.04 * this.volume;
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start();
+        this.oscillators.boostLoop = { osc, gain };
+      } catch(e) {}
+    } else if (!on && this.oscillators.boostLoop) {
+      try {
+        this.oscillators.boostLoop.gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+        setTimeout(() => {
+          try { this.oscillators.boostLoop.osc.stop(); } catch(e) {}
+          this.oscillators.boostLoop = null;
+        }, 150);
+      } catch(e) {}
+    }
+  }
+}
+
+const audio = new AudioEngine();
+
+
+// ============================================================
+//  PARTICLE SYSTEM
+// ============================================================
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = this.y = this.vx = this.vy = 0;
+    this.life = this.maxLife = 0;
+    this.size = 2;
+    this.color = '#fff';
+    this.active = false;
+    this.type = 'dust'; // dust, spark, boost, coin
+  }
+}
+
+class ParticleSystem {
+  constructor(maxParticles = 400) {
+    this.pool = [];
+    this.active = [];
+    for (let i = 0; i < maxParticles; i++) this.pool.push(new Particle());
+  }
+  acquire() {
+    if (this.pool.length > 0) {
+      const p = this.pool.pop();
+      p.active = true;
+      this.active.push(p);
+      return p;
+    }
+    return null;
+  }
+  release(p) {
+    p.active = false;
+    const idx = this.active.indexOf(p);
+    if (idx >= 0) this.active.splice(idx, 1);
+    this.pool.push(p);
+  }
+  emit(x, y, opts = {}) {
+    const count = opts.count || 3;
+    for (let i = 0; i < count; i++) {
+      const p = this.acquire();
+      if (!p) break;
+      p.x = x + rng(-2, 2);
+      p.y = y + rng(-2, 2);
+      p.type = opts.type || 'dust';
+      p.color = opts.color || '#aaa';
+      p.size = opts.size || rng(2, 5);
+      p.maxLife = p.life = opts.life || rng(0.2, 0.6);
+      const spd = opts.speed || rng(0.5, 2);
+      const ang = opts.angle !== undefined ? opts.angle : rng(0, Math.PI * 2);
+      p.vx = Math.cos(ang) * spd + (opts.driftX || 0);
+      p.vy = Math.sin(ang) * spd + (opts.driftY || 0);
+    }
+  }
+  emitDust(x, y, dx, dy, count = 2) {
+    this.emit(x, y, { count, type:'dust', color:'#c8a97e', speed:rng(0.3,1), life:rng(0.2,0.4), driftX:dx, driftY:dy, size:rng(1,3) });
+  }
+  emitSpark(x, y, nx, ny) {
+    this.emit(x, y, { count:5, type:'spark', color:'#ffdd44', speed:rng(1,3), life:rng(0.1,0.3), angle:Math.atan2(ny, nx), size:rng(1,2) });
+  }
+  emitBoost(x, y, dx, dy) {
+    this.emit(x, y, { count:3, type:'boost', color:'#ff8800', speed:rng(2,4), life:rng(0.2,0.5), driftX:-dx*2, driftY:-dy*2, size:rng(3,6) });
+  }
+  emitCoin(x, y) {
+    this.emit(x, y, { count:8, type:'coin', color:'#ffd700', speed:rng(1,3), life:rng(0.3,0.6), size:rng(2,4) });
+  }
+  update(dt) {
+    for (let i = this.active.length - 1; i >= 0; i--) {
+      const p = this.active[i];
+      p.life -= dt;
+      if (p.life <= 0) { this.release(p); continue; }
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.97;
+      p.vy *= 0.97;
+    }
+  }
+  render(ctx, camX, camY, camZoom) {
+    for (const p of this.active) {
+      const alpha = clamp(p.life / p.maxLife, 0, 1);
+      const sx = (p.x - camX) * camZoom + CFG.canvasW / 2;
+      const sy = (p.y - camY) * camZoom + CFG.canvasH / 2;
+      if (sx < -50 || sx > CFG.canvasW + 50 || sy < -50 || sy > CFG.canvasH + 50) continue;
+      ctx.globalAlpha = alpha * 0.8;
+      ctx.fillStyle = p.color;
+      const sz = p.size * camZoom;
+      ctx.beginPath();
+      ctx.arc(sx, sy, Math.max(sz, 0.5), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  clear() {
+    while (this.active.length > 0) this.release(this.active[0]);
+  }
+}
+
+// ============================================================
+//  TRACK GENERATOR — Procedural closed circuit
+// ============================================================
+class TrackGenerator {
+  generate(seed) {
+    // Sinh control points ngẫu nhiên tạo circuit kín
+    const cx = 0, cy = 0;
+    const n = CFG.NUM_CONTROL_POINTS;
+    const pts = [];
+    const baseR = rng(CFG.TRACK_MIN_RADIUS, CFG.TRACK_MAX_RADIUS);
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const r = baseR + rng(-120, 120);
+      const rx = r + rng(-40, 40) * Math.sin(a * 3);
+      const ry = r + rng(-40, 40) * Math.cos(a * 2);
+      pts.push({ x: cx + rx * Math.cos(a) - ry * Math.sin(a) * 0.3, y: cy + rx * Math.sin(a) + ry * Math.cos(a) * 0.3 });
+    }
+
+    // Catmull-Rom → centerline
+    const cl = [];
+    const segs = CFG.TRACK_RESOLUTION;
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[(i - 1 + n) % n];
+      const p1 = pts[i];
+      const p2 = pts[(i + 1) % n];
+      const p3 = pts[(i + 2) % n];
+      for (let s = 0; s < segs; s++) {
+        const t = s / segs;
+        const t2 = t * t, t3 = t2 * t;
+        const x = 0.5 * ((2*p1.x) + (-p0.x + p2.x)*t + (2*p0.x - 5*p1.x + 4*p2.x - p3.x)*t2 + (-p0.x + 3*p1.x - 3*p2.x + p3.x)*t3);
+        const y = 0.5 * ((2*p1.y) + (-p0.y + p2.y)*t + (2*p0.y - 5*p1.y + 4*p2.y - p3.y)*t2 + (-p0.y + 3*p1.y - 3*p2.y + p3.y)*t3);
+        cl.push({ x, y });
+      }
+    }
+
+    // Tính normals + wall points
+    const m = cl.length;
+    const norms = [];
+    const iw = [], ow = [];
+    let totalLen = 0;
+    const segLen = [];
+    for (let i = 0; i < m; i++) {
+      const j = (i + 1) % m;
+      const dx = cl[j].x - cl[i].x;
+      const dy = cl[j].y - cl[i].y;
+      const len = Math.hypot(dx, dy);
+      totalLen += len;
+      segLen.push(len);
+      const nx = len > 0 ? -dy / len : 0;
+      const ny = len > 0 ? dx / len : 0;
+      norms.push({ x: nx, y: ny });
+    }
+
+    // Smooth normals (moving average)
+    const smoothNorms = [];
+    for (let i = 0; i < m; i++) {
+      const p = norms[(i - 1 + m) % m];
+      const c = norms[i];
+      const n = norms[(i + 1) % m];
+      smoothNorms.push({ x: (p.x + c.x + n.x) / 3, y: (p.y + c.y + n.y) / 3 });
+    }
+    for (let i = 0; i < m; i++) {
+      const n = smoothNorms[i];
+      const hl = Math.hypot(n.x, n.y);
+      if (hl > 0) { n.x /= hl; n.y /= hl; }
+    }
+
+    const hw = CFG.TRACK_WIDTH / 2;
+    for (let i = 0; i < m; i++) {
+      const n = smoothNorms[i];
+      iw.push({ x: cl[i].x - n.x * hw, y: cl[i].y - n.y * hw });
+      ow.push({ x: cl[i].x + n.x * hw, y: cl[i].y + n.y * hw });
+    }
+
+    // Track segments with types
+    const trackSegs = [];
+    const types = ['straight', 'straight', 'turn', 'straight', 'turn', 'straight', 'straight', 'hazard', 'straight', 'boost'];
+    const typeTags = ['', '', '', '', '', '', '', '', '', ''];
+    for (let i = 0; i < m; i += 4) {
+      const ti = Math.floor(i / 4) % types.length;
+      trackSegs.push({
+        startIdx: i,
+        endIdx: Math.min(i + 4, m - 1),
+        type: types[ti],
+      });
+    }
+
+    // Checkpoints — lines across track
+    const cps = [];
+    const cpStep = Math.floor(m / CFG.NUM_CHECKPOINTS);
+    for (let i = 0; i < CFG.NUM_CHECKPOINTS; i++) {
+      const idx = (i * cpStep) % m;
+      const n = smoothNorms[idx];
+      cps.push({
+        idx,
+        x1: cl[idx].x - n.x * hw,
+        y1: cl[idx].y - n.y * hw,
+        x2: cl[idx].x + n.x * hw,
+        y2: cl[idx].y + n.y * hw,
+        cx: cl[idx].x,
+        cy: cl[idx].y,
+        passed: false,
+      });
+    }
+
+    // Obstacles — trên track
+    const obs = [];
+    for (let i = 0; i < 15; i++) {
+      const idx = rngInt(0, m - 1);
+      const n = smoothNorms[idx];
+      const side = rng(-0.3, 0.3);
+      const ox = cl[idx].x + n.x * side * hw;
+      const oy = cl[idx].y + n.y * side * hw;
+      obs.push({
+        x: ox, y: oy, radius: rng(6, 12),
+        type: Math.random() < 0.5 ? 'bumper' : 'hazard',
+        active: true,
+      });
+    }
+
+    // Boosters
+    const boosters = [];
+    for (let i = 0; i < 12; i++) {
+      const idx = rngInt(0, m - 1);
+      if (idx % 3 === 0) continue; // tránh trùng
+      const n = smoothNorms[idx];
+      const side = rng(-0.3, 0.3);
+      boosters.push({
+        x: cl[idx].x + n.x * side * hw,
+        y: cl[idx].y + n.y * side * hw,
+        active: true,
+        respawnTime: 0,
+      });
+    }
+
+    // Coins
+    const coins = [];
+    for (let i = 0; i < 40; i++) {
+      const idx = rngInt(0, m - 1);
+      const n = smoothNorms[idx];
+      const side = rng(-0.35, 0.35);
+      coins.push({
+        x: cl[idx].x + n.x * side * hw,
+        y: cl[idx].y + n.y * side * hw,
+        collected: false,
+      });
+    }
+
+    return {
+      centerline: cl,
+      innerWall: iw,
+      outerWall: ow,
+      normals: smoothNorms,
+      numPoints: m,
+      totalLength: totalLen,
+      segLengths: segLen,
+      segments: trackSegs,
+      checkpoints: cps,
+      obstacles: obs,
+      boosters,
+      coins,
+      width: CFG.TRACK_WIDTH,
+      halfWidth: hw,
+      centerX: 0,
+      centerY: 0,
+    };
+  }
+}
+
+// ============================================================
+//  PHYSICS ENGINE — Circle collision, wall collision
+//  Toàn bộ vật lý tự code (custom), không dùng thư viện
+//  Gồm: phát hiện va chạm circle-circle, circle-line,
+//  phản hồi va chạm (elastic), ràng buộc track
+// ============================================================
+class Physics {
+  /**
+   * Tìm điểm gần nhất trên centerline của track so với vị trí (px, py)
+   * Dùng 2-pass: coarse scan (step = 1/200 chiều dài) → refine local
+   * Trả về { index, dist, point }
+   */
+  static closestPointOnPath(px, py, cl) {
+    let minD = Infinity, bestIdx = 0;
+    const step = Math.max(1, Math.floor(cl.length / 200));
+    for (let i = 0; i < cl.length; i += step) {
+      const d = dist(px, py, cl[i].x, cl[i].y);
+      if (d < minD) { minD = d; bestIdx = i; }
+    }
+    // Refine local
+    const searchR = Math.max(10, Math.floor(cl.length / 50));
+    const start = Math.max(0, bestIdx - searchR);
+    const end = Math.min(cl.length - 1, bestIdx + searchR);
+    for (let i = start; i <= end; i++) {
+      const d = dist(px, py, cl[i].x, cl[i].y);
+      if (d < minD) { minD = d; bestIdx = i; }
+    }
+    return { index: bestIdx, dist: minD, point: cl[bestIdx] };
+  }
+
+  // Kiểm tra marble có trong track không, trả về normal + overlap
+  static constrainToTrack(marble, track) {
+    const { x, y, radius } = marble;
+    const cp = Physics.closestPointOnPath(x, y, track.centerline);
+    const n = track.normals[cp.index];
+    // Direction from centerline to marble
+    const dx = x - cp.point.x;
+    const dy = y - cp.point.y;
+    const side = dx * n.x + dy * n.y; // positive = outer side
+    const absD = Math.abs(side);
+    const maxD = track.halfWidth - radius;
+    if (absD > maxD) {
+      // Push back
+      const overlap = absD - maxD;
+      if (side > 0) {
+        marble.x -= n.x * overlap;
+        marble.y -= n.y * overlap;
+      } else {
+        marble.x += n.x * overlap;
+        marble.y += n.y * overlap;
+      }
+      // Reflect velocity
+      const vDotN = marble.vx * n.x + marble.vy * n.y;
+      if (vDotN * side > 0) {
+        marble.vx -= 2 * vDotN * n.x * CFG.WALL_BOUNCE;
+        marble.vy -= 2 * vDotN * n.y * CFG.WALL_BOUNCE;
+      }
+      return true; // collision occurred
+    }
+    return false;
+  }
+
+  // Circle vs Circle collision
+  static circlesCollide(a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const d = Math.hypot(dx, dy);
+    const minD = a.radius + b.radius;
+    if (d >= minD || d < 0.001) return false;
+    const overlap = minD - d;
+    const nx = dx / d, ny = dy / d;
+    // Separate
+    const totalM = a.mass + b.mass;
+    a.x -= nx * overlap * (b.mass / totalM);
+    a.y -= ny * overlap * (b.mass / totalM);
+    b.x += nx * overlap * (a.mass / totalM);
+    b.y += ny * overlap * (a.mass / totalM);
+    // Elastic collision response
+    const dvx = a.vx - b.vx;
+    const dvy = a.vy - b.vy;
+    const vDotN = dvx * nx + dvy * ny;
+    if (vDotN > 0) {
+      const imp = (2 * vDotN) / totalM;
+      a.vx -= imp * b.mass * nx;
+      a.vy -= imp * b.mass * ny;
+      b.vx += imp * a.mass * nx;
+      b.vy += imp * a.mass * ny;
+    }
+    return true;
+  }
+
+  // Circle vs Rect (obstacle)
+  static circleRectCollide(cx, cy, cr, rx, ry, rw, rh) {
+    const nearX = clamp(cx, rx - rw/2, rx + rw/2);
+    const nearY = clamp(cy, ry - rh/2, ry + rh/2);
+    const dx = cx - nearX, dy = cy - nearY;
+    const d2 = dx*dx + dy*dy;
+    if (d2 >= cr*cr) return false;
+    const d = Math.sqrt(d2);
+    if (d < 0.001) return { nx: 0, ny: -1, overlap: cr };
+    const overlap = cr - d;
+    return { nx: dx/d, ny: dy/d, overlap };
+  }
+
+  static circleCircleOverlap(cx, cy, cr, ox, oy, or) {
+    const dx = ox - cx, dy = oy - cy;
+    const d = Math.hypot(dx, dy);
+    const minD = cr + or;
+    if (d >= minD || d < 0.001) return null;
+    return { nx: dx/d, ny: dy/d, overlap: minD - d };
+  }
+}
+
+
+// ============================================================
+//  MARBLE CLASS — Mỗi racer (player + AI)
+//  Quản lý: vị trí, vận tốc, vật lý, lap, coins, boost, trail
+//  Mỗi marble là 1 hình tròn tự do trong không gian 2D,
+//  bị ràng buộc bởi track walls và các marble khác
+// ============================================================
+class Marble {
+  constructor(id, isPlayer = false) {
+    this.id = id;                       // ID duy nhất (0 = player, 1-7 = AI)
+    this.isPlayer = isPlayer;           // true nếu là người chơi
+    this.x = 0; this.y = 0;            // Vị trí trong không gian world
+    this.vx = 0; this.vy = 0;          // Vận tốc (pixels per frame)
+    this.radius = CFG.MARBLE_RADIUS;   // Bán kính hình tròn
+    this.mass = 1;                      // Khối lượng (dùng cho va chạm elastic)
+    this.color = '#fff';                // Màu sắc (từ skin)
+    this.trailColor = '#ffffff40';      // Màu vệt trail
+    this.trail = [];                   // Lưu N vị trí gần nhất để vẽ trail
+    this.maxTrail = 15;                // Số điểm trail tối đa
+    this.lap = 0;                      // Lap hiện tại (0-based)
+    this.finished = false;             // Đã hoàn thành race?
+    this.finishTime = 0;               // Thời gian hoàn thành
+    this.finishOrder = 0;              // Thứ tự về đích
+    this.checkpointsPassed = new Set();// Set các checkpoint đã đi qua
+    this.coins = 0;                    // Số coin thu thập (tạm thời)
+    this.speed = 0;                    // Tốc độ hiện tại (magnitude của velocity)
+    this.boostAmount = 100;            // Lượng boost còn lại (0-100)
+    this.boosting = false;             // Đang bật boost?
+    this.brake = false;                // Đang phanh?
+    this.steerInput = 0;               // Đầu vào lái (-1 trái, 1 phải)
+    this.forwardInput = false;         // Đầu vào tiến
+    this.trackIndex = 0;               // Index gần nhất trên centerline
+    this.trackDist = 0;                // Khoảng cách đã đi (0-1 normalized)
+    this.lastTrackIndex = 0;           // Track index ở frame trước (để phát hiện qua line)
+    this.crossedFinish = false;        // Đã qua finish line?
+    this.respawnTimer = 0;             // Timer hồi sinh (giây)
+    this.collisionCooldown = 0;        // Cooldown va chạm (chống double-hit)
+    // Skins
+    this.applySkin(saveData.equippedSkin); // Áp dụng skin từ save data
+  }
+
+  applySkin(skinId) {
+    const skin = SKINS.find(s => s.id === skinId) || SKINS[0];
+    this.color = skin.color;
+    this.trailColor = skin.trail || skin.color + '80';
+    this.skinId = skinId;
+    this.rainbow = skin.rainbow || false;
+  }
+
+  getProgress() {
+    // Chuẩn hóa 0-1 dựa trên lap + track position
+    return this.lap + this.trackDist;
+  }
+
+  reset(x, y) {
+    this.x = x; this.y = y;
+    this.vx = 0; this.vy = 0;
+    this.trail = [];
+    this.lap = 0;
+    this.finished = false;
+    this.finishTime = 0;
+    this.finishOrder = 0;
+    this.checkpointsPassed = new Set();
+    this.coins = 0;
+    this.speed = 0;
+    this.boostAmount = 100;
+    this.boosting = false;
+    this.brake = false;
+    this.steerInput = 0;
+    this.forwardInput = false;
+    this.trackIndex = 0;
+    this.trackDist = 0;
+    this.lastTrackIndex = 0;
+    this.crossedFinish = false;
+    this.alive = true;
+    this.respawnTimer = 0;
+    this.collisionCooldown = 0;
+  }
+
+  update(dt, track, particles) {
+    if (this.finished) {
+      // Slow down gradually after finish
+      this.vx *= 0.95;
+      this.vy *= 0.95;
+      this.updatePosition(dt);
+      this.updateTrail();
+      this.updateTrackInfo(track);
+      this.speed = Math.hypot(this.vx, this.vy);
+      return;
+    }
+
+    // Respawn timer
+    if (this.respawnTimer > 0) {
+      this.respawnTimer -= dt;
+      this.vx *= 0.9;
+      this.vy *= 0.9;
+      if (this.respawnTimer <= 0) {
+        this.respawnAtCheckpoint(track);
+      }
+      this.updatePosition(dt);
+      this.speed = Math.hypot(this.vx, this.vy);
+      return;
+    }
+
+    // Collision cooldown
+    if (this.collisionCooldown > 0) this.collisionCooldown -= dt;
+
+    // Player input → forces
+    let ax = 0, ay = 0;
+
+    // Forward acceleration — AI luôn chạy trừ khi brake
+    if (this.forwardInput && !this.brake) {
+      const idx = this.trackIndex;
+      if (track.centerline && track.centerline.length > 0) {
+        const nextIdx = (idx + 1) % track.numPoints;
+        const dirX = track.centerline[nextIdx].x - track.centerline[idx].x;
+        const dirY = track.centerline[nextIdx].y - track.centerline[idx].y;
+        const dirLen = Math.hypot(dirX, dirY);
+        if (dirLen > 0) {
+          const fwdX = dirX / dirLen, fwdY = dirY / dirLen;
+          let accel = CFG.ACCELERATION;
+          if (this.boosting && this.boostAmount > 0) {
+            accel *= CFG.BOOST_SPEED_MULT;
+            this.boostAmount -= CFG.BOOST_DRAIN * dt * 60;
+            if (this.boostAmount < 0) this.boostAmount = 0;
+          }
+          ax += fwdX * accel;
+          ay += fwdY * accel;
+        }
+      }
+    }
+
+    // Brake
+    if (this.brake) {
+      ax -= this.vx * CFG.BRAKE_FORCE;
+      ay -= this.vy * CFG.BRAKE_FORCE;
+    }
+
+    // Steering (lateral movement)
+    if (this.steerInput !== 0) {
+      const idx = this.trackIndex;
+      const n = track.normals[idx];
+      const steerStr = (this.isPlayer ? CFG.STEER_SPEED : CFG.AI_STEER_SPEED) * this.steerInput;
+      ax += n.x * steerStr;
+      ay += n.y * steerStr;
+    }
+
+    // Apply acceleration
+    this.vx += ax;
+    this.vy += ay;
+
+    // Friction
+    this.vx *= CFG.FRICTION;
+    this.vy *= CFG.FRICTION;
+
+    // Speed cap
+    let maxSpd = CFG.MAX_SPEED;
+    if (this.boosting && this.boostAmount > 0) maxSpd *= CFG.BOOST_SPEED_MULT;
+    const spd = Math.hypot(this.vx, this.vy);
+    if (spd > maxSpd) {
+      this.vx = (this.vx / spd) * maxSpd;
+      this.vy = (this.vy / spd) * maxSpd;
+    }
+
+    // Boost regen
+    if (!this.boosting) {
+      this.boostAmount = Math.min(100, this.boostAmount + CFG.BOOST_REGEN * dt * 60);
+    }
+
+    this.speed = Math.hypot(this.vx, this.vy);
+
+    // Update position
+    this.updatePosition(dt);
+
+    // Constrain to track
+    const hitWall = Physics.constrainToTrack(this, track);
+    if (hitWall) {
+      particles.emitDust(this.x, this.y, -this.vx*0.5, -this.vy*0.5, 3);
+      if (this.speed > 3) {
+        particles.emitSpark(this.x, this.y, -this.vx, -this.vy);
+        audio.playCrash();
+      }
+    }
+
+    // Update track info
+    this.updateTrackInfo(track);
+
+    // Check out-of-bounds (fell off track)
+    this.checkOutOfBounds(track);
+
+    // Check checkpoint crossing
+    this.checkCheckpoints(track);
+
+    // Trail
+    this.updateTrail();
+
+    // Particles from movement
+    if (this.speed > 1 && Math.random() < this.speed * 0.02) {
+      particles.emitDust(this.x, this.y, -this.vx*0.3, -this.vy*0.3, 1);
+    }
+    if (this.boosting && this.speed > 2) {
+      particles.emitBoost(this.x, this.y, this.vx / this.speed, this.vy / this.speed);
+    }
+  }
+
+  updatePosition(dt) {
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+
+  updateTrail() {
+    this.trail.push({ x: this.x, y: this.y });
+    if (this.trail.length > this.maxTrail) this.trail.shift();
+  }
+
+  updateTrackInfo(track) {
+    const cp = Physics.closestPointOnPath(this.x, this.y, track.centerline);
+    this.trackIndex = cp.index;
+    this.trackDist = cp.index / track.numPoints;
+
+    // Track progress (handling wrap-around)
+    if (this.lastTrackIndex > track.numPoints * 0.8 && cp.index < track.numPoints * 0.2) {
+    if (!this.crossedFinish) {
+        this.lap++;
+        this.crossedFinish = true;
+        if (this.isPlayer) {
+          // Hiển thị thông báo lap cho người chơi
+          if (this.lap >= CFG.LAPS) {
+            game.showLapNotification('🏁 FINAL LAP!');
+          } else {
+            game.showLapNotification('Lap ' + this.lap + ' Complete!');
+          }
+        }
+        if (this.lap >= CFG.LAPS) {
+          this.finished = true;
+          this.finishTime = performance.now();
+          audio.playFinish();
+        }
+      }
+    }
+    if (cp.index > track.numPoints * 0.2 && this.lastTrackIndex < track.numPoints * 0.2) {
+      this.crossedFinish = false;
+    }
+    this.lastTrackIndex = cp.index;
+  }
+
+  checkOutOfBounds(track) {
+    // If too far from track
+    const d = dist(this.x, this.y, track.centerline[this.trackIndex].x, track.centerline[this.trackIndex].y);
+    if (d > track.halfWidth + this.radius * 3) {
+      // Fell off — respawn
+      this.respawnTimer = 1.0; // 1 giây penalty
+      this.vx = 0; this.vy = 0;
+    }
+  }
+
+  respawnAtCheckpoint(track) {
+    // Tìm checkpoint gần nhất đã pass
+    let bestCp = null;
+    let bestDist = Infinity;
+    for (let i = 0; i < track.checkpoints.length; i++) {
+      const cp = track.checkpoints[i];
+      if (this.checkpointsPassed.has(i)) {
+        const d = dist(this.x, this.y, cp.cx, cp.cy);
+        if (d < bestDist) { bestDist = d; bestCp = cp; }
+      }
+    }
+    if (!bestCp) {
+      // Fallback: checkpoint đầu tiên
+      bestCp = track.checkpoints[0];
+    }
+    this.x = bestCp.cx;
+    this.y = bestCp.cy;
+    this.vx = 0; this.vy = 0;
+    this.respawnTimer = 0;
+  }
+
+  checkCheckpoints(track) {
+    for (let i = 0; i < track.checkpoints.length; i++) {
+      const cp = track.checkpoints[i];
+      if (this.checkpointsPassed.has(i)) continue;
+      // Check if marble crossed this checkpoint line
+      const d = dist(this.x, this.y, cp.cx, cp.cy);
+      if (d < track.halfWidth * 0.5) {
+        this.checkpointsPassed.add(i);
+        // If this is last checkpoint before finish, allow crossing
+        if (i === 0 && this.checkpointsPassed.size >= CFG.NUM_CHECKPOINTS * 0.7) {
+          // Passed enough checkpoints
+        }
+        break;
+      }
+    }
+  }
+
+  collectCoin(coinIdx, coins) {
+    if (!coins[coinIdx].collected) {
+      coins[coinIdx].collected = true;
+      this.coins++;
+      return true;
+    }
+    return false;
+  }
+
+  render(ctx, camX, camY, camZoom, showTrail = true) {
+    const sx = (this.x - camX) * camZoom + CFG.canvasW / 2;
+    const sy = (this.y - camY) * camZoom + CFG.canvasH / 2;
+    const sr = this.radius * camZoom;
+
+    // Off screen check
+    if (sx < -50 || sx > CFG.canvasW + 50 || sy < -50 || sy > CFG.canvasH + 50) return;
+
+    // Trail
+    if (showTrail && this.trail.length > 2) {
+      for (let i = 1; i < this.trail.length; i++) {
+        const t = this.trail[i];
+        const prev = this.trail[i - 1];
+        const alpha = (i / this.trail.length) * 0.4;
+        const tsx = (t.x - camX) * camZoom + CFG.canvasW / 2;
+        const tsy = (t.y - camY) * camZoom + CFG.canvasH / 2;
+        const psx = (prev.x - camX) * camZoom + CFG.canvasW / 2;
+        const psy = (prev.y - camY) * camZoom + CFG.canvasH / 2;
+        ctx.strokeStyle = this.trailColor;
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = sr * 0.6;
+        ctx.beginPath();
+        ctx.moveTo(psx, psy);
+        ctx.lineTo(tsx, tsy);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Speed lines
+    if (this.speed > 4) {
+      const intensity = (this.speed - 4) / 4;
+      ctx.globalAlpha = intensity * 0.3;
+      for (let i = 0; i < 3; i++) {
+        const ang = Math.atan2(this.vy, this.vx) + Math.PI + rng(-0.5, 0.5);
+        const len = rng(15, 30) * camZoom * intensity;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1 * camZoom;
+        ctx.beginPath();
+        ctx.moveTo(sx + Math.cos(ang) * sr, sy + Math.sin(ang) * sr);
+        ctx.lineTo(sx + Math.cos(ang) * (sr + len), sy + Math.sin(ang) * (sr + len));
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Marble body
+    ctx.save();
+    // Gradient for 3D effect
+    const grad = ctx.createRadialGradient(
+      sx - sr * 0.3, sy - sr * 0.3, sr * 0.1,
+      sx, sy, sr
+    );
+    if (this.rainbow) {
+      const hue = (performance.now() * 0.005 + this.id * 50) % 360;
+      grad.addColorStop(0, `hsl(${hue}, 100%, 70%)`);
+      grad.addColorStop(0.7, `hsl(${hue}, 100%, 50%)`);
+      grad.addColorStop(1, `hsl(${hue}, 100%, 30%)`);
+    } else {
+      grad.addColorStop(0, '#fff');
+      grad.addColorStop(0.3, this.color);
+      grad.addColorStop(1, this.darkenColor(this.color, 0.5));
+    }
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Shine highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(sx - sr * 0.25, sy - sr * 0.25, sr * 0.35, sr * 0.2, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // Boost effect: outer glow ring + flame particles
+    if (this.boosting && this.boostAmount > 0) {
+      // Outer pulsing ring
+      const pulse = 0.4 + 0.4 * Math.sin(performance.now() * 0.015);
+      ctx.strokeStyle = `rgba(255,200,0,${pulse})`;
+      ctx.lineWidth = 2.5 * camZoom;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr + 5 * camZoom, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Secondary glow
+      ctx.strokeStyle = `rgba(255,100,0,${pulse * 0.4})`;
+      ctx.lineWidth = 5 * camZoom;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr + 8 * camZoom, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Boost flame trail (vẽ phía sau marble theo hướng di chuyển)
+      if (this.speed > 1) {
+        const angle = Math.atan2(this.vy, this.vx);
+        for (let f = 0; f < 3; f++) {
+          const dist = sr * (0.5 + f * 0.4);
+          const spread = rng(-0.3, 0.3);
+          const fx = sx - Math.cos(angle + spread) * dist;
+          const fy = sy - Math.sin(angle + spread) * dist;
+          const size = rng(2, 5) * camZoom * (1 - f * 0.2);
+          ctx.fillStyle = `rgba(255,${150 - f * 50},0,${0.5 - f * 0.15})`;
+          ctx.beginPath();
+          ctx.arc(fx, fy, size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  darkenColor(hex, factor) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return `rgb(${Math.floor(r*factor)},${Math.floor(g*factor)},${Math.floor(b*factor)})`;
+  }
+}
+
+
+// ============================================================
+//  AI CONTROLLER — Tự động lái cho AI racers
+//  Mỗi AI có 3 cấp độ: easy / medium / hard
+//  - easy: chậm, phản xạ kém, hay mắc lỗi
+//  - medium: trung bình, thi đấu công bằng
+//  - hard: nhanh, phản xạ tốt, ít sai sót
+//  AI lái bằng cách nhắm vào điểm phía trước trên centerline
+//  và tự động tránh tường + dùng boost hợp lý
+// ============================================================
+class AIController {
+  constructor(marble, difficulty) {
+    this.marble = marble;                      // Marble cần điều khiển
+    this.difficulty = difficulty;               // 'easy', 'medium', 'hard'
+    // === THÔNG SỐ KỸ NĂNG ===
+    this.speedMult = difficulty === 'easy' ? 0.7 : difficulty === 'medium' ? 0.9 : 1.1; // Hệ số tốc độ
+    this.reactionTime = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.15 : 0.05; // Thời gian phản xạ
+    this.mistakeChance = difficulty === 'easy' ? 0.02 : difficulty === 'medium' ? 0.008 : 0.003; // Xác suất mắc lỗi
+    this.mistakeTimer = 0;                     // Timer giữ lỗi hiện tại
+    this.currentMistake = 0;                   // 0 = bình thường, -1 = lệch trái, 1 = lệch phải
+    this.lookAhead = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 20; // Số điểm nhìn trước trên track
+    this.boostTimer = 0;                       // Timer quản lý boost
+    this.aggression = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.6 : 0.9; // Mức độ quyết đoán
+  }
+
+  update(dt, track, allMarbles) {
+    const m = this.marble;
+    if (m.finished || m.respawnTimer > 0) return;
+
+    const idx = m.trackIndex;
+
+    // Check for mistakes
+    this.mistakeTimer -= dt;
+    if (this.mistakeTimer <= 0 && Math.random() < this.mistakeChance) {
+      this.currentMistake = Math.random() < 0.5 ? -1 : 1;
+      this.mistakeTimer = rng(0.3, 1.0) * (this.difficulty === 'easy' ? 2 : 1);
+    }
+    if (this.mistakeTimer < -0.5) {
+      this.currentMistake = 0;
+    }
+
+    // Look ahead on track
+    const lookIdx = Math.min(idx + this.lookAhead, track.numPoints - 1);
+    const target = track.centerline[lookIdx];
+
+    // Calculate desired direction
+    const dx = target.x - m.x;
+    const dy = target.y - m.y;
+    const d = Math.hypot(dx, dy);
+    if (d < 0.1) { m.steerInput = 0; return; }
+
+    // Check if we're near walls
+    const cp = Physics.closestPointOnPath(m.x, m.y, track.centerline);
+    const n = track.normals[cp.index];
+    const side = (m.x - cp.point.x) * n.x + (m.y - cp.point.y) * n.y;
+    const wallDist = track.halfWidth - Math.abs(side);
+
+    // Steer toward target + avoid walls
+    const tgtAngle = Math.atan2(dy, dx);
+    const currentAngle = Math.atan2(m.vy, m.vx);
+    let angleDiff = tgtAngle - currentAngle;
+    if (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+    if (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+    let steer = clamp(angleDiff * 2, -1, 1);
+
+    // Wall avoidance
+    if (wallDist < 20) {
+      const wallAvoid = side > 0 ? -0.5 : 0.5;
+      steer = steer * 0.5 + wallAvoid * 0.5;
+    }
+
+    // Mistake
+    if (this.currentMistake !== 0) {
+      steer += this.currentMistake * 0.5;
+    }
+
+    m.steerInput = clamp(steer, -1, 1);
+
+    // Forward movement — always on for AI
+    m.forwardInput = true;
+    m.brake = false;
+
+    // Boost usage
+    this.boostTimer -= dt;
+    if (this.boostTimer <= 0 && m.boostAmount > 50 && wallDist > 30) {
+      m.boosting = true;
+      this.boostTimer = rng(0.5, 1.5);
+    } else if (m.boostAmount < 20 || wallDist < 15) {
+      m.boosting = false;
+    }
+
+    // Speed modulation based on track ahead
+    if (this.difficulty === 'hard' && wallDist < 15) {
+      m.brake = true; // Brake in tight spots (hard AI is more cautious)
+    }
+  }
+}
+
+// ============================================================
+//  CAMERA — Follow player with lerp + auto-zoom
+// ============================================================
+class Camera {
+  constructor() {
+    this.x = 0; this.y = 0;
+    this.zoom = 1;
+    this.targetZoom = 1;
+  }
+
+  follow(target, speed) {
+    // Lerp position
+    this.x = lerp(this.x, target.x, 0.08);
+    this.y = lerp(this.y, target.y, 0.08);
+
+    // Auto-zoom based on speed — zoom ra khi chạy nhanh (zoom < 1 = zoom out)
+    const speedFactor = clamp(speed / CFG.MAX_SPEED, 0, 1);
+    this.targetZoom = 1 - speedFactor * 0.25; // Zoom out = 0.75x khi max speed
+    if (this.targetZoom < 0.5) this.targetZoom = 0.5;
+    this.zoom = lerp(this.zoom, this.targetZoom, 0.03);
+  }
+
+  reset(x, y) {
+    this.x = x; this.y = y;
+    this.zoom = 1;
+    this.targetZoom = 1;
+  }
+}
+
+// ============================================================
+//  MINI MAP
+// ============================================================
+class MiniMap {
+  constructor(canvasId) {
+    this.canvas = document.getElementById(canvasId);
+    this.ctx = this.canvas.getContext('2d');
+    this.size = 160;
+  }
+
+  render(track, marbles, camX, camY) {
+    const ctx = this.ctx;
+    const w = this.size, h = this.size;
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Calculate bounding box of track
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const p of track.innerWall) {
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+    for (const p of track.outerWall) {
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+
+    const pad = 10;
+    const mapW = maxX - minX + pad * 2;
+    const mapH = maxY - minY + pad * 2;
+    const scale = Math.min((w - 8) / mapW, (h - 8) / mapH);
+    const ox = -(minX - pad) * scale + 4;
+    const oy = -(minY - pad) * scale + 4;
+
+    function mx(x) { return x * scale + ox; }
+    function my(y) { return y * scale + oy; }
+
+    // Draw track outline
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < track.innerWall.length; i++) {
+      const p = track.innerWall[i];
+      i === 0 ? ctx.moveTo(mx(p.x), my(p.y)) : ctx.lineTo(mx(p.x), my(p.y));
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    for (let i = 0; i < track.outerWall.length; i++) {
+      const p = track.outerWall[i];
+      i === 0 ? ctx.moveTo(mx(p.x), my(p.y)) : ctx.lineTo(mx(p.x), my(p.y));
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    // Track centerline (dashed)
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    for (let i = 0; i < track.centerline.length; i++) {
+      const p = track.centerline[i];
+      i === 0 ? ctx.moveTo(mx(p.x), my(p.y)) : ctx.lineTo(mx(p.x), my(p.y));
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Camera viewport
+    const hw = CFG.canvasW / 2 / scale;
+    const hh = CFG.canvasH / 2 / scale;
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mx(camX - hw), my(camY - hh), hw * 2 * scale, hh * 2 * scale);
+
+    // Marbles
+    for (const m of marbles) {
+      const r = Math.max(2, m.radius * scale * 1.5);
+      ctx.fillStyle = m.color;
+      ctx.beginPath();
+      ctx.arc(mx(m.x), my(m.y), r, 0, Math.PI * 2);
+      ctx.fill();
+      if (m.isPlayer) {
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(mx(m.x), my(m.y), r + 1.5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    // Checkpoints
+    ctx.fillStyle = 'rgba(255,255,100,0.3)';
+    for (const cp of track.checkpoints) {
+      ctx.beginPath();
+      ctx.arc(mx(cp.cx), my(cp.cy), 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Finish line highlight
+    if (track.checkpoints.length > 0) {
+      const cp = track.checkpoints[0];
+      ctx.strokeStyle = '#ff4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(mx(cp.x1), my(cp.y1));
+      ctx.lineTo(mx(cp.x2), my(cp.y2));
+      ctx.stroke();
+    }
+  }
+}
+
+
+// ============================================================
+//  GAME CLASS — Main game loop, state management, rendering
+// ============================================================
+class Game {
+  constructor() {
+    this.canvas = document.getElementById('game-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.miniMap = new MiniMap('mini-map');
+
+    this.state = 'menu'; // menu, countdown, racing, paused, result
+    this.track = null;
+    this.marbles = [];
+    this.aiControllers = [];
+    this.camera = new Camera();
+    this.particles = new ParticleSystem(400);
+    this.raceTime = 0;
+    this.finishOrder = 0;
+    this.countdownValue = 3;
+    this.countdownTimer = 0;
+    this.animationId = null;
+    this.lastTime = 0;
+
+    // Track generator
+    this.trackGen = new TrackGenerator();
+
+    // Input state
+    this.keys = {};
+    this.touchInput = { left: false, right: false, boost: false, brake: false };
+    this.setupInput();
+    this.setupResponsive();
+
+    // Bind
+    this.loop = this.loop.bind(this);
+  }
+
+  setupInput() {
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+      this.keys[e.key] = true;
+      if (e.key === 'p' || e.key === 'P') this.togglePause();
+    });
+    document.addEventListener('keyup', (e) => {
+      this.keys[e.key] = false;
+    });
+
+    // Touch controls
+    const setupTouch = (id, key) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('touchstart', (e) => { e.preventDefault(); this.touchInput[key] = true; }, { passive: false });
+      el.addEventListener('touchend', (e) => { e.preventDefault(); this.touchInput[key] = false; }, { passive: false });
+      el.addEventListener('touchcancel', (e) => { this.touchInput[key] = false; });
+      el.addEventListener('mousedown', () => { this.touchInput[key] = true; });
+      el.addEventListener('mouseup', () => { this.touchInput[key] = false; });
+      el.addEventListener('mouseleave', () => { this.touchInput[key] = false; });
+    };
+    setupTouch('mctrl-left', 'left');
+    setupTouch('mctrl-right', 'right');
+    setupTouch('mctrl-boost', 'boost');
+    setupTouch('mctrl-brake', 'brake');
+
+    // Pause button
+    document.getElementById('pause-btn').addEventListener('click', () => this.togglePause());
+    // Fullscreen button
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        document.body.requestFullscreen().catch(() => {});
+      }
+    });
+
+    // Detect mobile
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      document.getElementById('mobile-controls').style.display = 'flex';
+    }
+
+    // Anti-scroll
+    document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+  }
+
+  setupResponsive() {
+    const resize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      this.canvas.width = w * dpr;
+      this.canvas.height = h * dpr;
+      this.canvas.style.width = w + 'px';
+      this.canvas.style.height = h + 'px';
+      CFG.canvasW = w;
+      CFG.canvasH = h;
+      this.ctx.scale(dpr, dpr);
+      // Adjust mini-map size
+      const mm = document.getElementById('mini-map');
+      if (w < 600) {
+        mm.style.width = '100px';
+        mm.style.height = '100px';
+        this.miniMap.size = 100;
+        mm.width = 100; mm.height = 100;
+      } else {
+        mm.style.width = '160px';
+        mm.style.height = '160px';
+        this.miniMap.size = 160;
+        mm.width = 160; mm.height = 160;
+      }
+    };
+    window.addEventListener('resize', resize);
+    resize();
+    // Handle orientation change
+    window.addEventListener('orientationchange', () => setTimeout(resize, 300));
+  }
+
+  // ===================== MENU BACKGROUND ANIMATION =====================
+  menuParticles() {
+    const canvas = this.canvas;
+    const ctx = this.ctx;
+    const animParticles = [];
+    for (let i = 0; i < 30; i++) {
+      animParticles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: 3 + Math.random() * 6,
+        vx: rng(-0.5, 0.5),
+        vy: rng(-0.3, 0.3),
+        color: `hsl(${Math.random() * 60 + 200}, 50%, ${40 + Math.random() * 30}%)`,
+        alpha: 0.1 + Math.random() * 0.3,
+      });
+    }
+    const animate = () => {
+      if (this.state !== 'menu') return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Background
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, '#1a1a2e');
+      grad.addColorStop(0.5, '#16213e');
+      grad.addColorStop(1, '#0f3460');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Track-like path
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 2;
+      for (let t = 0; t < Math.PI * 2; t += 0.05) {
+        const px = canvas.width/2 + 200 * Math.cos(t) + 50 * Math.sin(t * 3);
+        const py = canvas.height/2 + 150 * Math.sin(t) + 30 * Math.cos(t * 2);
+        ctx.fillStyle = 'rgba(255,200,100,0.03)';
+        ctx.beginPath();
+        ctx.arc(px, py, 40, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Particles
+      for (const p of animParticles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      requestAnimationFrame(animate);
+    };
+    animate();
+  }
+
+  // ===================== STATE MANAGEMENT =====================
+
+  showMenu() {
+    this.state = 'menu';
+    document.getElementById('menu-screen').style.display = 'flex';
+    document.getElementById('shop-screen').style.display = 'none';
+    // Kích hoạt hiệu ứng nền menu
+    this.menuParticles();
+    document.getElementById('options-screen').style.display = 'none';
+    document.getElementById('result-overlay').style.display = 'none';
+    document.getElementById('countdown-overlay').style.display = 'none';
+    document.getElementById('pause-btn').style.display = 'none';
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('mobile-controls').style.display = 'none';
+    audio.stopEngine();
+    if (this.animationId) { cancelAnimationFrame(this.animationId); this.animationId = null; }
+  }
+
+  showShop() {
+    document.getElementById('menu-screen').style.display = 'none';
+    const shop = document.getElementById('shop-screen');
+    shop.style.display = 'flex';
+    this.renderShop();
+  }
+
+  showOptions() {
+    document.getElementById('menu-screen').style.display = 'none';
+    document.getElementById('options-screen').style.display = 'flex';
+    document.getElementById('opt-volume').value = saveData.volume;
+    document.getElementById('opt-difficulty').value = saveData.difficulty;
+    document.getElementById('opt-volume').oninput = (e) => {
+      saveData.volume = parseInt(e.target.value);
+      audio.setVolume(saveData.volume / 100);
+      writeSave();
+    };
+    document.getElementById('opt-difficulty').onchange = (e) => {
+      saveData.difficulty = e.target.value;
+      writeSave();
+    };
+  }
+
+  renderShop() {
+    const grid = document.getElementById('shop-grid');
+    grid.innerHTML = '';
+    document.getElementById('shop-coins').textContent = 'Coins: ' + saveData.coins;
+
+    for (const skin of SKINS) {
+      const item = document.createElement('div');
+      item.className = 'shop-item';
+      const owned = saveData.ownedSkins.includes(skin.id);
+      const equipped = saveData.equippedSkin === skin.id;
+
+      if (owned) item.classList.add('owned');
+      if (equipped) item.classList.add('equipped');
+
+      const preview = document.createElement('div');
+      preview.className = 'preview';
+      preview.style.background = skin.color;
+      if (skin.rainbow) {
+        preview.style.background = 'linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff)';
+      }
+      item.appendChild(preview);
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = skin.name;
+      item.appendChild(name);
+
+      const price = document.createElement('div');
+      price.className = 'price';
+      if (owned) {
+        price.innerHTML = equipped ? '<span class="badge equipped">EQUIPPED</span>' : '<span class="badge owned">OWNED</span>';
+      } else {
+        price.textContent = skin.price + ' coins';
+      }
+      item.appendChild(price);
+
+      item.onclick = () => {
+        if (equipped) return;
+        if (owned) {
+          saveData.equippedSkin = skin.id;
+          writeSave();
+          this.renderShop();
+          return;
+        }
+        if (saveData.coins >= skin.price) {
+          saveData.coins -= skin.price;
+          saveData.ownedSkins.push(skin.id);
+          saveData.equippedSkin = skin.id;
+          writeSave();
+          this.renderShop();
+          audio.playCoin();
+        } else {
+          alert('Not enough coins! Need ' + (skin.price - saveData.coins) + ' more.');
+        }
+      };
+
+      grid.appendChild(item);
+    }
+
+    // Thêm coins từ save vào shop
+    document.getElementById('shop-coins').textContent = 'Coins: ' + saveData.coins;
+  }
+
+  togglePause() {
+    if (this.state === 'racing') {
+      this.state = 'paused';
+      document.getElementById('overlay').classList.add('active');
+      document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ PAUSED</h2><button class="menu-btn primary" onclick="game.resume()">▶ Resume</button><button class="menu-btn" onclick="game.restart()">🔄 Restart</button><button class="menu-btn" onclick="game.showMenu()">🏠 Menu</button></div>';
+    } else if (this.state === 'paused') {
+      this.resume();
+    }
+  }
+
+  resume() {
+    this.state = 'racing';
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('overlay').innerHTML = '';
+  }
+
+  restart() {
+    cancelAnimationFrame(this.animationId);
+    document.getElementById('overlay').classList.remove('active');
+    this.startRace();
+  }
+
+  // ===================== RACE START =====================
+
+  startRace() {
+    audio.init();
+
+    document.getElementById('menu-screen').style.display = 'none';
+    document.getElementById('shop-screen').style.display = 'none';
+    document.getElementById('options-screen').style.display = 'none';
+    document.getElementById('result-overlay').style.display = 'none';
+    document.getElementById('pause-btn').style.display = 'block';
+
+    // Show mobile controls if touch device
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      document.getElementById('mobile-controls').style.display = 'flex';
+    }
+
+    // Generate track
+    this.track = this.trackGen.generate();
+
+    // Create marbles
+    this.marbles = [];
+    this.aiControllers = [];
+    const playerMarble = new Marble(0, true);
+    playerMarble.color = SKINS.find(s => s.id === saveData.equippedSkin)?.color || '#ef4444';
+    playerMarble.trailColor = (SKINS.find(s => s.id === saveData.equippedSkin)?.trail) || '#ef444480';
+    playerMarble.skinId = saveData.equippedSkin;
+    playerMarble.rainbow = SKINS.find(s => s.id === saveData.equippedSkin)?.rainbow || false;
+
+    // Position marbles at start (checkpoint 0)
+    const startCp = this.track.checkpoints[0];
+    const startX = startCp.cx;
+    const startY = startCp.cy;
+
+    playerMarble.reset(startX, startY);
+    this.marbles.push(playerMarble);
+
+    // AI marbles
+    const aiColors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899'];
+    const aiNames = ['AI-1', 'AI-2', 'AI-3', 'AI-4', 'AI-5', 'AI-6', 'AI-7'];
+    const difficulties = this.getAIDifficulties();
+    const diffNames = ['easy', 'medium', 'hard'];
+
+    for (let i = 0; i < CFG.NUM_AI; i++) {
+      const m = new Marble(i + 1, false);
+      m.color = aiColors[i];
+      m.trailColor = aiColors[i] + '80';
+      const offset = (i + 1) * 20;
+      // Spread AI along start line
+      const frac = (i + 1) / (CFG.NUM_AI + 1);
+      const sx = startCp.x1 + (startCp.x2 - startCp.x1) * frac;
+      const sy = startCp.y1 + (startCp.y2 - startCp.y1) * frac;
+      m.reset(sx, sy);
+      m.aiName = aiNames[i];
+      this.marbles.push(m);
+
+      const diff = diffNames[difficulties[i]];
+      const ai = new AIController(m, diff);
+      this.aiControllers.push(ai);
+    }
+
+    // Camera
+    this.camera.reset(startX, startY);
+
+    // Particles
+    this.particles.clear();
+
+    // Race state
+    this.raceTime = 0;
+    this.finishOrder = 0;
+    this.state = 'countdown';
+    this.countdownValue = 3;
+    this.countdownTimer = 1.0;
+
+    // HUD
+    this.updateHUD();
+
+    // Show countdown overlay
+    const cdOverlay = document.getElementById('countdown-overlay');
+    cdOverlay.style.display = 'flex';
+    document.getElementById('countdown-text').textContent = '3';
+
+    // Start engine audio
+    audio.startEngine();
+
+    // Start loop
+    this.lastTime = performance.now();
+    if (this.animationId) cancelAnimationFrame(this.animationId);
+    this.animationId = requestAnimationFrame(this.loop);
+  }
+
+  getAIDifficulties() {
+    const diffSettings = [];
+    const diff = saveData.difficulty || 'medium';
+
+    if (diff === 'easy') {
+      // Mostly easy, some medium
+      for (let i = 0; i < CFG.NUM_AI; i++) {
+        diffSettings.push(Math.random() < 0.3 ? 1 : 0); // 0=easy, 1=medium
+      }
+    } else if (diff === 'hard') {
+      for (let i = 0; i < CFG.NUM_AI; i++) {
+        diffSettings.push(Math.random() < 0.3 ? 1 : 2); // 1=medium, 2=hard
+      }
+    } else {
+      // Medium — mix
+      for (let i = 0; i < CFG.NUM_AI; i++) {
+        const r = Math.random();
+        diffSettings.push(r < 0.3 ? 0 : r < 0.7 ? 1 : 2);
+      }
+    }
+    return diffSettings;
+  }
+
+  // ===================== MAIN LOOP =====================
+
+  loop(timestamp) {
+    const dt = Math.min((timestamp - this.lastTime) / 1000, 0.05); // Cap at 50ms
+    this.lastTime = timestamp;
+
+    if (this.state === 'countdown') {
+      this.updateCountdown(dt);
+    } else if (this.state === 'racing' || this.state === 'paused') {
+      if (this.state === 'racing') {
+        this.updateRace(dt);
+      }
+    }
+
+    this.render();
+    this.updateHUD();
+
+    this.animationId = requestAnimationFrame(this.loop);
+  }
+
+  updateCountdown(dt) {
+    this.countdownTimer -= dt;
+    if (this.countdownTimer <= 0) {
+      this.countdownValue--;
+      if (this.countdownValue > 0) {
+        document.getElementById('countdown-text').textContent = String(this.countdownValue);
+        this.countdownTimer = 1.0;
+        audio.beep();
+      } else if (this.countdownValue === 0) {
+        document.getElementById('countdown-text').textContent = 'GO!';
+        this.countdownTimer = 0.5;
+        audio.beepGo();
+      } else {
+        // GO done
+        document.getElementById('countdown-overlay').style.display = 'none';
+        this.state = 'racing';
+        // Apply player skin to marble 0
+        this.marbles[0].applySkin(saveData.equippedSkin);
+      }
+    }
+  }
+
+  updateRace(dt) {
+    this.raceTime += dt;
+
+    // Get player input
+    const player = this.marbles[0];
+    this.processInput(player);
+
+    // Update AI
+    for (const ai of this.aiControllers) {
+      ai.update(dt, this.track, this.marbles);
+    }
+
+    // Update all marbles
+    for (const m of this.marbles) {
+      m.update(dt, this.track, this.particles);
+    }
+
+    // Marble-marble collisions
+    this.checkMarbleCollisions();
+
+    // Coins
+    this.checkCoinCollection();
+
+    // Boosters
+    this.checkBoosters();
+
+    // Obstacles
+    this.checkObstacles();
+
+    // Check finish
+    this.checkFinish();
+
+    // Update particles
+    this.particles.update(dt);
+
+    // Update camera
+    this.camera.follow(player, player.speed);
+
+    // Audio
+    audio.updateEnginePitch(player.speed);
+    if (player.boosting && player.boostAmount > 0) {
+      audio.playBoostLoop(true);
+    } else {
+      audio.playBoostLoop(false);
+    }
+  }
+
+  processInput(m) {
+    // Keyboard
+    const left = this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A'];
+    const right = this.keys['ArrowRight'] || this.keys['d'] || this.keys['D'];
+    const up = this.keys['ArrowUp'] || this.keys['w'] || this.keys['W'];
+    const down = this.keys['ArrowDown'] || this.keys['s'] || this.keys['S'];
+    const space = this.keys[' '];
+
+    // Touch
+    const tLeft = this.touchInput.left;
+    const tRight = this.touchInput.right;
+    const tBoost = this.touchInput.boost;
+    const tBrake = this.touchInput.brake;
+
+    m.steerInput = 0;
+    if (left || tLeft) m.steerInput = -1;
+    if (right || tRight) m.steerInput = 1;
+
+    m.forwardInput = (up || space || !down) && !tBrake;
+    m.brake = down || tBrake;
+    m.boosting = (space || tBoost) && m.boostAmount > 0;
+
+    // Auto-forward if no input
+    if (!up && !down && !space && !tBoost) {
+      m.forwardInput = true;
+    }
+  }
+
+  checkMarbleCollisions() {
+    for (let i = 0; i < this.marbles.length; i++) {
+      for (let j = i + 1; j < this.marbles.length; j++) {
+        const a = this.marbles[i];
+        const b = this.marbles[j];
+        if (a.finished && b.finished) continue;
+        if (a.collisionCooldown > 0 || b.collisionCooldown > 0) continue;
+        if (Physics.circlesCollide(a, b)) {
+          a.collisionCooldown = 0.1;
+          b.collisionCooldown = 0.1;
+          // Sound + particles
+          const mx = (a.x + b.x) / 2;
+          const my = (a.y + b.y) / 2;
+          this.particles.emitSpark(mx, my, 0, 0);
+          if (Math.hypot(a.vx - b.vx, a.vy - b.vy) > 2) {
+            audio.playCrash();
+          }
+        }
+      }
+    }
+  }
+
+  checkCoinCollection() {
+    const player = this.marbles[0];
+    for (let i = 0; i < this.track.coins.length; i++) {
+      const coin = this.track.coins[i];
+      if (coin.collected) continue;
+      // Check all marbles (but only player gets coins added to save)
+      for (const m of this.marbles) {
+        if (m.finished) continue;
+        const d = dist(m.x, m.y, coin.x, coin.y);
+        if (d < m.radius + 8) {
+          if (!coin.collected) {
+            coin.collected = true;
+            if (m.isPlayer) {
+              saveData.coins++;
+              writeSave();
+              audio.playCoin();
+              this.particles.emitCoin(coin.x, coin.y);
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  checkBoosters() {
+    for (const b of this.track.boosters) {
+      if (!b.active) {
+        b.respawnTime -= 0.016;
+        if (b.respawnTime <= 0) { b.active = true; }
+        continue;
+      }
+      for (const m of this.marbles) {
+        if (m.finished) continue;
+        const d = dist(m.x, m.y, b.x, b.y);
+        if (d < m.radius + 12) {
+          m.boostAmount = Math.min(100, m.boostAmount + 30);
+          m.boosting = true;
+          b.active = false;
+          b.respawnTime = 3.0; // Respawn sau 3s
+          this.particles.emitBoost(b.x, b.y, 0, 0);
+          audio.playBoost();
+          break;
+        }
+      }
+    }
+  }
+
+  checkObstacles() {
+    for (const obs of this.track.obstacles) {
+      if (!obs.active) continue;
+      for (const m of this.marbles) {
+        if (m.finished || m.respawnTimer > 0) continue;
+        const overlap = Physics.circleCircleOverlap(m.x, m.y, m.radius, obs.x, obs.y, obs.radius);
+        if (overlap) {
+          // Push marble away
+          m.x -= overlap.nx * overlap.overlap;
+          m.y -= overlap.ny * overlap.overlap;
+          if (obs.type === 'bumper') {
+            const spd = Math.hypot(m.vx, m.vy);
+            m.vx = overlap.nx * Math.max(spd, 3);
+            m.vy = overlap.ny * Math.max(spd, 3);
+            audio.playCrash();
+            this.particles.emitSpark(obs.x, obs.y, overlap.nx, overlap.ny);
+          } else {
+            // Hazard — slow down
+            m.vx *= 0.3;
+            m.vy *= 0.3;
+            m.boostAmount = Math.max(0, m.boostAmount - 10);
+            audio.playCrash();
+            this.particles.emitSpark(obs.x, obs.y, -overlap.nx, -overlap.ny);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  checkFinish() {
+    const allFinished = this.marbles.every(m => m.finished);
+    if (allFinished && this.state === 'racing') {
+      this.showResults();
+    }
+
+    // Assign finish order
+    for (const m of this.marbles) {
+      if (m.finished && m.finishOrder === 0) {
+        this.finishOrder++;
+        m.finishOrder = this.finishOrder;
+      }
+    }
+  }
+
+  // === CELEBRATION FIREWORKS ===
+  celebrationParticles() {
+    const colors = ['#ff0','#f0f','#0ff','#f00','#0f0','#ff8800','#ff0088'];
+    for (let i = 0; i < 5; i++) {
+      const x = rng(-300, 300);
+      const y = rng(-300, -100);
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      for (let j = 0; j < 12; j++) {
+        this.particles.emit(x, y, {
+          count: 1,
+          type: 'spark',
+          color: color,
+          speed: rng(2, 6),
+          life: rng(0.5, 1.2),
+          angle: rng(0, Math.PI * 2),
+          size: rng(2, 4),
+        });
+      }
+    }
+  }
+
+  showResults() {
+    this.state = 'result';
+    audio.stopEngine();
+
+    // Pháo hoa ăn mừng nếu người chơi về nhất
+    const playerPos = [...this.marbles].sort((a, b) => {
+      if (a.finished && b.finished) return a.finishOrder - b.finishOrder;
+      if (a.finished) return -1;
+      if (b.finished) return 1;
+      return b.getProgress() - a.getProgress();
+    }).findIndex(m => m.isPlayer);
+    if (playerPos === 0) {
+      for (let f = 0; f < 3; f++) {
+        setTimeout(() => this.celebrationParticles(), f * 400);
+      }
+    }
+
+    // Sort by finish order
+    const sorted = [...this.marbles].sort((a, b) => {
+      if (a.finished && b.finished) return a.finishOrder - b.finishOrder;
+      if (a.finished) return -1;
+      if (b.finished) return 1;
+      return b.getProgress() - a.getProgress();
+    });
+
+    const list = document.getElementById('result-list');
+    list.innerHTML = '';
+    const medals = ['🥇', '🥈', '🥉'];
+    const trophy = ['🏆', '🥈', '🥉'];
+
+    // Thống kê cho người chơi
+    const player = this.marbles[0];
+    // playerPos đã được tính ở trên (dòng playerPos = ...findIndex)
+    const avgSpeed = player.speed;
+
+    // Hiển thị kết quả
+    sorted.forEach((m, i) => {
+      const div = document.createElement('div');
+      const medal = i < 3 ? medals[i] : `${i+1}.`;
+      const isPlayer = m.isPlayer ? 'result-player' : '';
+      const extra = m.isPlayer ? ' ⭐' : '';
+      div.innerHTML = `<span class="result-pos">${medal}</span> <span class="${isPlayer}">${m.isPlayer ? 'YOU' : (m.aiName || 'AI Racer ' + m.id)}</span>${extra}`;
+      list.appendChild(div);
+    });
+
+    // Player stats
+    const statsDiv = document.createElement('div');
+    statsDiv.style.cssText = 'margin-top:15px;padding:10px;border-top:1px solid rgba(255,255,255,.2);font-size:14px;color:#aaa';
+    const coinBonus = playerPos === 0 ? 50 : playerPos === 1 ? 30 : playerPos === 2 ? 20 : Math.max(0, 10 - playerPos);
+    statsDiv.innerHTML = `
+      Position: <b>${playerPos + 1}</b> / ${CFG.TOTAL_RACERS}<br>
+      Coins earned: <b style="color:#ffd700">+${coinBonus}</b><br>
+      Total coins: <b style="color:#ffd700">${saveData.coins + coinBonus}</b><br>
+      Laps completed: ${player.lap + 1}<br>
+      Coins collected: ${player.coins}
+    `;
+    list.appendChild(statsDiv);
+
+    // Award bonus coins for position
+    if (playerPos === 0) { saveData.coins += 50; writeSave(); }
+    else if (playerPos === 1) { saveData.coins += 30; writeSave(); }
+    else if (playerPos === 2) { saveData.coins += 20; writeSave(); }
+    else { saveData.coins += Math.max(0, 10 - playerPos); writeSave(); }
+
+    document.getElementById('result-overlay').style.display = 'flex';
+    audio.playFinish();
+  }
+
+  // ===================== RENDERING =====================
+
+  render() {
+    const ctx = this.ctx;
+    const w = CFG.canvasW, h = CFG.canvasH;
+    const cam = this.camera;
+
+    // Clear
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, w, h);
+
+    // Background gradient
+    const bgGrad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h) * 0.7);
+    bgGrad.addColorStop(0, '#2a2a4e');
+    bgGrad.addColorStop(1, '#0a0a1e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Save context for camera transform
+    ctx.save();
+
+    // Apply camera
+    const zoom = cam.zoom;
+    const cx = w / 2 - cam.x * zoom;
+    const cy = h / 2 - cam.y * zoom;
+    ctx.translate(cx, cy);
+    ctx.scale(zoom, zoom);
+
+    // Draw track
+    if (this.track) {
+      this.renderTrack(ctx);
+    }
+
+    // Draw obstacles
+    if (this.track) {
+      this.renderObstacles(ctx);
+      this.renderBoosters(ctx);
+      this.renderCoins(ctx);
+    }
+
+    // Draw marble shadows
+    for (const m of this.marbles) {
+      const sx = (m.x - cam.x) * zoom + w / 2;
+      const sy = (m.y - cam.y) * zoom + h / 2;
+      const sr = m.radius * zoom;
+      if (sx < -50 || sx > w + 50 || sy < -50 || sy > h + 50) continue;
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.ellipse(sx + 2, sy + 3, sr * 0.9, sr * 0.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Draw marbles
+    for (const m of this.marbles) {
+      m.render(ctx, cam.x, cam.y, zoom);
+    }
+
+    // Draw particles (in world space)
+    this.particles.render(ctx, cam.x, cam.y, zoom);
+
+    // Restore context
+    ctx.restore();
+
+    // Draw mini-map (screen space)
+    if (this.track && this.state !== 'menu' && this.state !== 'result') {
+      this.miniMap.render(this.track, this.marbles, cam.x, cam.y);
+    }
+
+    // Speed lines (screen space overlay effect)
+    if (this.marbles.length > 0) {
+      const player = this.marbles[0];
+      if (player && player.speed > 4 && (this.state === 'racing' || this.state === 'countdown')) {
+        ctx.globalAlpha = (player.speed - 4) / 8 * 0.15;
+        ctx.fillStyle = '#fff';
+        for (let i = 0; i < 5; i++) {
+          const x = Math.random() * w;
+          const y = Math.random() * h;
+          const len = 20 + Math.random() * 60;
+          const ang = Math.atan2(player.vy, player.vx) + Math.PI + rng(-0.3, 0.3);
+          ctx.fillRect(x, y, Math.cos(ang) * len, 1);
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+
+  renderTrack(ctx) {
+    const tr = this.track;
+
+    // === BACKGROUND (cỏ / ground) ===
+    // Vẽ nền xanh đậm với hiệu ứng gradient radial
+    const bgGrad = ctx.createRadialGradient(0, 0, 100, 0, 0, 2000);
+    bgGrad.addColorStop(0, '#2d5a2d');
+    bgGrad.addColorStop(0.5, '#1e3a1e');
+    bgGrad.addColorStop(1, '#0d1a0d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(-3000, -3000, 6000, 6000);
+
+    // Grass detail — các chấm cỏ ngẫu nhiên
+    ctx.fillStyle = 'rgba(50,120,50,0.3)';
+    const grassSeed = 12345;
+    for (let i = 0; i < 200; i++) {
+      const gx = ((i * 137 + grassSeed) % 4000) - 2000;
+      const gy = ((i * 269 + grassSeed * 2) % 4000) - 2000;
+      // Chỉ vẽ cỏ ở ngoài track
+      let onTrack = false;
+      for (let j = 0; j < 8; j++) {
+        const idx = Math.floor(j * tr.centerline.length / 8);
+        if (dist(gx, gy, tr.centerline[idx].x, tr.centerline[idx].y) < tr.halfWidth + 30) {
+          onTrack = true; break;
+        }
+      }
+      if (!onTrack) {
+        ctx.beginPath();
+        ctx.arc(gx, gy, 1 + Math.random() * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // === TRACK SURFACE ===
+    // Vẽ track surface như filled polygon giữa outerWall và innerWall
+    ctx.beginPath();
+    // Trace outer wall
+    for (let i = 0; i < tr.outerWall.length; i++) {
+      if (i === 0) ctx.moveTo(tr.outerWall[i].x, tr.outerWall[i].y);
+      else ctx.lineTo(tr.outerWall[i].x, tr.outerWall[i].y);
+    }
+    ctx.closePath();
+    // Trace inner wall ngược chiều để tạo hole
+    for (let i = tr.innerWall.length - 1; i >= 0; i--) {
+      ctx.lineTo(tr.innerWall[i].x, tr.innerWall[i].y);
+    }
+    ctx.closePath();
+
+    // Track surface gradient
+    const surfGrad = ctx.createLinearGradient(-500, -500, 500, 500);
+    surfGrad.addColorStop(0, '#4a4a5a');
+    surfGrad.addColorStop(0.5, '#5a5a6a');
+    surfGrad.addColorStop(1, '#3a3a4a');
+    ctx.fillStyle = surfGrad;
+    ctx.fill();
+
+    // Track border glow
+    ctx.shadowColor = 'rgba(100,100,255,0.1)';
+    ctx.shadowBlur = 20;
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // === TRACK MARKINGS ===
+    // Centerline dashed
+    ctx.strokeStyle = 'rgba(255,255,200,0.12)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 10]);
+    ctx.beginPath();
+    for (let i = 0; i < tr.centerline.length; i++) {
+      if (i === 0) ctx.moveTo(tr.centerline[i].x, tr.centerline[i].y);
+      else ctx.lineTo(tr.centerline[i].x, tr.centerline[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Edge lines — vạch trắng mép trong và ngoài
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < tr.innerWall.length; i++) {
+      // Offset vào trong một chút
+      const n = tr.normals[i];
+      const ix = tr.innerWall[i].x + n.x * 4;
+      const iy = tr.innerWall[i].y + n.y * 4;
+      if (i === 0) ctx.moveTo(ix, iy);
+      else ctx.lineTo(ix, iy);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    for (let i = 0; i < tr.outerWall.length; i++) {
+      const n = tr.normals[i];
+      const ox = tr.outerWall[i].x - n.x * 4;
+      const oy = tr.outerWall[i].y - n.y * 4;
+      if (i === 0) ctx.moveTo(ox, oy);
+      else ctx.lineTo(ox, oy);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    // === SEGMENT TYPE INDICATORS ===
+    for (const seg of tr.segments) {
+      const idx = seg.startIdx;
+      const p = tr.centerline[idx];
+      if (seg.type === 'boost') {
+        // Boost lane — màu vàng cam
+        ctx.fillStyle = 'rgba(255,200,0,0.12)';
+        const nextIdx = Math.min(idx + 4, tr.numPoints - 1);
+        const p2 = tr.centerline[nextIdx];
+        const angle = Math.atan2(p2.y - p.y, p2.x - p.x);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(angle);
+        ctx.fillRect(-tr.halfWidth, -6, tr.halfWidth * 2, 12);
+        // Mũi tên boost
+        ctx.fillStyle = 'rgba(255,200,0,0.2)';
+        for (let t = -tr.halfWidth + 10; t < tr.halfWidth - 10; t += 20) {
+          ctx.beginPath();
+          ctx.moveTo(t - 5, 0); ctx.lineTo(t + 5, -4);
+          ctx.lineTo(t + 5, 4); ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      } else if (seg.type === 'hazard') {
+        // Hazard zone — màu đỏ
+        ctx.fillStyle = 'rgba(255,0,0,0.08)';
+        const w = tr.halfWidth;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, w * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+        // Warning stripes
+        ctx.strokeStyle = 'rgba(255,0,0,0.15)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, w * 0.5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    // === CHECKPOINTS ===
+    for (let i = 0; i < tr.checkpoints.length; i++) {
+      const cp = tr.checkpoints[i];
+      const isFinish = (i === 0);
+      // Checkpoint line
+      ctx.strokeStyle = isFinish ? '#ff4444' : `rgba(255,255,100,${0.15 + 0.1 * Math.sin(performance.now() * 0.003 + i)})`;
+      ctx.lineWidth = isFinish ? 4 : 2;
+      ctx.setLineDash(isFinish ? [] : [4, 6]);
+      ctx.beginPath();
+      ctx.moveTo(cp.x1, cp.y1);
+      ctx.lineTo(cp.x2, cp.y2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (isFinish) {
+        // Start/Finish line — checkered pattern
+        const dx = cp.x2 - cp.x1, dy = cp.y2 - cp.y1;
+        const len = Math.hypot(dx, dy);
+        const ux = dx / len, uy = dy / len;
+        const step = 10;
+        for (let s = 0; s < len; s += step) {
+          for (let t = -1; t <= 1; t += 2) {
+            const checkX = cp.x1 + ux * s;
+            const checkY = cp.y1 + uy * s;
+            const nX = -uy, nY = ux;
+            const parity = (Math.floor(s / step) + (t + 1) / 2) % 2;
+            ctx.fillStyle = parity === 0 ? '#fff' : '#222';
+            ctx.fillRect(
+              checkX + nX * t * 5 - 4,
+              checkY + nY * t * 5 - 4,
+              8, 8
+            );
+          }
+        }
+        // Label
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('START / FINISH', cp.cx, cp.cy - tr.halfWidth - 8);
+      }
+    }
+
+    // === WALL BORDERS (đậm hơn, có bóng) ===
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let i = 0; i < tr.innerWall.length; i++) {
+      if (i === 0) ctx.moveTo(tr.innerWall[i].x, tr.innerWall[i].y);
+      else ctx.lineTo(tr.innerWall[i].x, tr.innerWall[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    for (let i = 0; i < tr.outerWall.length; i++) {
+      if (i === 0) ctx.moveTo(tr.outerWall[i].x, tr.outerWall[i].y);
+      else ctx.lineTo(tr.outerWall[i].x, tr.outerWall[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // === OUTSIDE WALL SHADOWS (tạo depth) ===
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    for (let i = 0; i < tr.outerWall.length; i++) {
+      const n = tr.normals[i];
+      ctx.beginPath();
+      ctx.arc(tr.outerWall[i].x + n.x * 3, tr.outerWall[i].y + n.y * 3, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // === AMBIENT DECORATIONS ===
+    // Đèn track nhấp nháy
+    const time = performance.now() * 0.001;
+    for (let i = 0; i < tr.checkpoints.length; i++) {
+      const cp = tr.checkpoints[i];
+      if (i === 0) continue; // Skip finish line
+      const blink = Math.sin(time * 2 + i * 1.5) > 0 ? 1 : 0.3;
+      ctx.fillStyle = `rgba(255,200,0,${blink * 0.4})`;
+      ctx.beginPath();
+      ctx.arc(cp.cx, cp.cy, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  renderObstacles(ctx) {
+    for (const obs of this.track.obstacles) {
+      if (!obs.active) continue;
+      // Glow effect
+      ctx.shadowColor = obs.type === 'bumper' ? '#ff8844' : '#ff4444';
+      ctx.shadowBlur = 15;
+
+      // Outer ring
+      ctx.fillStyle = obs.type === 'bumper' ? 'rgba(255,136,68,0.2)' : 'rgba(255,68,68,0.2)';
+      ctx.beginPath();
+      ctx.arc(obs.x, obs.y, obs.radius + 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Main body
+      ctx.fillStyle = obs.type === 'bumper' ? '#ff8844' : '#ff4444';
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+
+      // Icon
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${obs.radius}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(obs.type === 'bumper' ? '↯' : '☠', obs.x + 0.5, obs.y + 0.5);
+    }
+  }
+
+  renderBoosters(ctx) {
+    for (const b of this.track.boosters) {
+      if (!b.active) {
+        // Respawn indicator
+        ctx.globalAlpha = 0.3;
+      }
+      const pulse = 0.7 + 0.3 * Math.sin(performance.now() * 0.005 + b.x);
+      ctx.fillStyle = `rgba(255,200,0,${pulse * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffcc00';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚡', b.x, b.y);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  renderCoins(ctx) {
+    const time = performance.now() * 0.001;
+    for (let i = 0; i < this.track.coins.length; i++) {
+      const c = this.track.coins[i];
+      if (c.collected) continue;
+      // Coin animation: xoay (mô phỏng qua scale) + nhảy lên xuống
+      const bob = Math.sin(time * 3 + i * 1.2) * 3;
+      const scaleX = Math.abs(Math.cos(time * 2 + i * 0.7));
+      const coinR = 5 * (0.5 + scaleX * 0.5);
+
+      // Outer glow
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath();
+      ctx.arc(c.x, c.y + bob, coinR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inner highlight
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff8dc';
+      ctx.beginPath();
+      ctx.arc(c.x - coinR * 0.25, c.y + bob - coinR * 0.25, coinR * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dollar sign
+      ctx.fillStyle = '#b8860b';
+      ctx.font = `bold ${coinR * 1.2}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('$', c.x, c.y + bob + 0.5);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  // ===================== HUD =====================
+
+  updateHUD() {
+    if (!this.marbles || this.marbles.length === 0) return;
+    const player = this.marbles[0];
+
+    document.getElementById('hud-speed').textContent = `Speed: ${Math.round(player.speed * 15)} km/h`;
+    document.getElementById('hud-lap').textContent = `Lap: ${Math.min(player.lap + 1, CFG.LAPS)}/${CFG.LAPS}`;
+    document.getElementById('hud-coins').textContent = `Coins: ${saveData.coins}`;
+
+    // Boost bar
+    const boostPct = player.boostAmount;
+    document.getElementById('hud-boost-fill').style.width = boostPct + '%';
+    if (boostPct > 50) {
+      document.getElementById('hud-boost-fill').style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
+    } else if (boostPct > 20) {
+      document.getElementById('hud-boost-fill').style.background = 'linear-gradient(90deg,#f59e0b,#d97706)';
+    } else {
+      document.getElementById('hud-boost-fill').style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
+    }
+
+    // Position ranking
+    const finished = this.marbles.filter(m => m.finished);
+    const racing = [...this.marbles].filter(m => !m.finished).sort((a, b) => {
+      return b.getProgress() - a.getProgress();
+    });
+    let pos = finished.length + 1;
+    for (const m of racing) {
+      if (m.isPlayer) break;
+      pos++;
+    }
+    document.getElementById('hud-pos').textContent = `Position: ${pos}/${CFG.TOTAL_RACERS}`;
+
+    // Update position indicator bar + leaderboard
+    this.updatePosIndicator();
+    this.updateLeaderboard();
+  }
+
+  updateLeaderboard() {
+    const el = document.getElementById('leaderboard');
+    if (!el) return;
+    if (this.state !== 'racing' && this.state !== 'countdown') { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+
+    const sorted = [...this.marbles].sort((a, b) => {
+      if (a.finished && b.finished) return a.finishOrder - b.finishOrder;
+      if (a.finished) return -1;
+      if (b.finished) return 1;
+      return b.getProgress() - a.getProgress();
+    });
+
+    // Chỉ hiển thị tối đa 8 dòng
+    let html = '<div class="lb-title">STANDINGS</div>';
+    sorted.forEach((m, i) => {
+      const pos = i + 1;
+      const name = m.isPlayer ? 'YOU' : (m.aiName || 'R' + m.id);
+      const youClass = m.isPlayer ? 'lb-you' : '';
+      const dnf = m.finished ? '' : '';
+      const status = m.finished ? 'FIN' : (m.respawnTimer > 0 ? 'RES' : `L${Math.min(m.lap+1, CFG.LAPS)}`);
+      html += `<div class="lb-row"><span class="lb-pos">${pos}.</span><span class="lb-name ${youClass}">${name}</span><span style="color:#888">${status}</span></div>`;
+    });
+    el.innerHTML = html;
+  }
+
+  updatePosIndicator() {
+    const container = document.getElementById('pos-indicator');
+    if (!container) return;
+    // Sắp xếp marbles theo progress
+    const sorted = [...this.marbles].sort((a, b) => {
+      if (a.finished && b.finished) return a.finishOrder - b.finishOrder;
+      if (a.finished) return -1;
+      if (b.finished) return 1;
+      return b.getProgress() - a.getProgress();
+    });
+    container.innerHTML = '';
+    for (const m of sorted) {
+      const dot = document.createElement('div');
+      dot.className = 'pos-dot';
+      if (m.isPlayer) dot.classList.add('player');
+      if (m.finished) dot.classList.add('finished');
+      dot.style.background = m.color;
+      container.appendChild(dot);
+    }
+  }
+
+  showLapNotification(text) {
+    const el = document.getElementById('lap-notification');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('show');
+    // Force reflow
+    void el.offsetWidth;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1200);
+  }
+}
+
+// ============================================================
+//  INITIALIZATION
+// ============================================================
+let game = null;
+window.addEventListener('DOMContentLoaded', () => {
+  game = new Game();
+  // Show menu initially
+  game.showMenu();
+
+  // Init audio on first interaction
+  document.addEventListener('click', () => audio.init(), { once: true });
+  document.addEventListener('touchstart', () => audio.init(), { once: true });
+});
+
+// Handle page visibility change — pause when tab hidden
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && game && game.state === 'racing') {
+    game.state = 'paused';
+    document.getElementById('overlay').classList.add('active');
+    document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ PAUSED</h2><button class="menu-btn primary" onclick="game.resume()">▶ Resume</button></div>';
+  }
+});
+
+console.log('🏁 Marble Racing 2D loaded!');
+
+</script>
+</body>
+</html>
