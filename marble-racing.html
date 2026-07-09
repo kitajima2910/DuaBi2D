@@ -272,6 +272,20 @@ const SKINS = [
 ];
 
 // ============================================================
+//  QUỐC GIA — cờ trên mỗi viên bi
+// ============================================================
+const COUNTRIES = [
+  { id: 'vn',     name: 'Việt Nam',   colors: ['#da251d', '#ffcc00'], style: 'vietnam'  },
+  { id: 'fr',     name: 'Pháp',       colors: ['#002395', '#fff', '#ed2939'], style: 'tricol-v' },
+  { id: 'de',     name: 'Đức',        colors: ['#000', '#dd0000', '#ffce00'], style: 'tricol-h' },
+  { id: 'it',     name: 'Ý',          colors: ['#009246', '#fff', '#ce2b37'], style: 'tricol-v' },
+  { id: 'jp',     name: 'Nhật Bản',   colors: ['#fff', '#bc002d'], style: 'japan'   },
+  { id: 'nl',     name: 'Hà Lan',     colors: ['#ae1c28', '#fff', '#21468b'], style: 'tricol-h' },
+  { id: 'br',     name: 'Brazil',     colors: ['#009c3b', '#ffdf00', '#002776'], style: 'brazil'  },
+  { id: 'gb',     name: 'Anh',        colors: ['#fff', '#cf142b'], style: 'england' },
+];
+
+// ============================================================
 //  SAVE SYSTEM
 // ============================================================
 function defaultSave() {
@@ -1291,6 +1305,7 @@ class Marble {
     const sx = this.x;
     const sy = this.y;
     const sr = this.radius * camZoom;
+    const left = sx - sr, top = sy - sr, w = sr * 2, h = sr * 2;
 
     // Off screen check � camera viewport + margin
     const margin = 50 / camZoom;
@@ -1338,31 +1353,47 @@ class Marble {
 
     // Marble body
     ctx.save();
-    // Gradient for 3D effect
-    const grad = ctx.createRadialGradient(
-      sx - sr * 0.3, sy - sr * 0.3, sr * 0.1,
-      sx, sy, sr
-    );
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.clip();
+
     if (this.rainbow) {
+      // Rainbow skin: gradient cầu vồng động
       const hue = (performance.now() * 0.005 + this.id * 50) % 360;
+      const grad = ctx.createRadialGradient(sx - sr * 0.3, sy - sr * 0.3, sr * 0.1, sx, sy, sr);
       grad.addColorStop(0, `hsl(${hue}, 100%, 70%)`);
       grad.addColorStop(0.7, `hsl(${hue}, 100%, 50%)`);
       grad.addColorStop(1, `hsl(${hue}, 100%, 30%)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(left, top, w, h);
+    } else if (this.country) {
+      // Vẽ lá cờ
+      this.drawFlagPattern(ctx, sx, sy, sr);
     } else {
-      grad.addColorStop(0, '#fff');
-      grad.addColorStop(0.3, this.color);
-      grad.addColorStop(1, this.darkenColor(this.color, 0.5));
+      // Fallback: màu đặc
+      ctx.fillStyle = this.color;
+      ctx.fillRect(left, top, w, h);
     }
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-    ctx.fill();
+
+    // Lớp phủ 3D (bóng mờ + sáng) — tạo hiệu ứng hình cầu
+    const overlay = ctx.createRadialGradient(
+      sx - sr * 0.35, sy - sr * 0.35, sr * 0.05,
+      sx, sy, sr
+    );
+    overlay.addColorStop(0, 'rgba(255,255,255,0.45)');
+    overlay.addColorStop(0.4, 'rgba(255,255,255,0.05)');
+    overlay.addColorStop(0.7, 'rgba(0,0,0,0.05)');
+    overlay.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = overlay;
+    ctx.fillRect(left, top, w, h);
 
     // Shine highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
     ctx.beginPath();
     ctx.ellipse(sx - sr * 0.25, sy - sr * 0.25, sr * 0.35, sr * 0.2, -0.5, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.restore();
 
     // Border
     ctx.strokeStyle = 'rgba(0,0,0,0.3)';
@@ -1370,7 +1401,6 @@ class Marble {
     ctx.beginPath();
     ctx.arc(sx, sy, sr, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.restore();
 
     // Boost effect: outer glow ring + flame particles
     if (this.boosting && this.boostAmount > 0) {
@@ -1413,8 +1443,104 @@ class Marble {
     const b = parseInt(hex.slice(5,7), 16);
     return `rgb(${Math.floor(r*factor)},${Math.floor(g*factor)},${Math.floor(b*factor)})`;
   }
-}
 
+  // Vẽ lá cờ lên bề mặt bi (gọi bên trong ctx.save/restore, đã clip hình tròn)
+  drawFlagPattern(ctx, sx, sy, sr) {
+    if (!this.country) return;
+    const c = this.country;
+    const colors = c.colors;
+    const w = sr * 2, h = sr * 2;
+    const left = sx - sr, top = sy - sr;
+
+    switch (c.style) {
+      case 'vietnam': {
+        // Nền đỏ
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(left, top, w, h);
+        // Ngôi sao vàng (5 cánh)
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.fillStyle = colors[1];
+        ctx.beginPath();
+        const starR = sr * 0.45;
+        for (let i = 0; i < 5; i++) {
+          const angle = -Math.PI / 2 + (i * 2 * Math.PI / 5);
+          const x = starR * Math.cos(angle);
+          const y = starR * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+          const innerAngle = -Math.PI / 2 + ((i * 2 + 1) * Math.PI / 5);
+          const innerR = starR * 0.4;
+          ctx.lineTo(innerR * Math.cos(innerAngle), innerR * Math.sin(innerAngle));
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        break;
+      }
+      case 'tricol-v': {
+        const third = w / 3;
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(left, top, third, h);
+        ctx.fillStyle = colors[1];
+        ctx.fillRect(left + third, top, third, h);
+        ctx.fillStyle = colors[2];
+        ctx.fillRect(left + third * 2, top, third, h);
+        break;
+      }
+      case 'tricol-h': {
+        const third = h / 3;
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(left, top, w, third);
+        ctx.fillStyle = colors[1];
+        ctx.fillRect(left, top + third, w, third);
+        ctx.fillStyle = colors[2];
+        ctx.fillRect(left, top + third * 2, w, third);
+        break;
+      }
+      case 'japan': {
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(left, top, w, h);
+        ctx.fillStyle = colors[1];
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+      case 'brazil': {
+        // Nền xanh lá
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(left, top, w, h);
+        // Hình thoi vàng
+        ctx.fillStyle = colors[1];
+        ctx.beginPath();
+        ctx.moveTo(sx, top);
+        ctx.lineTo(sx + sr * 0.7, sy);
+        ctx.lineTo(sx, top + h);
+        ctx.lineTo(sx - sr * 0.7, sy);
+        ctx.closePath();
+        ctx.fill();
+        // Hình tròn xanh dương
+        ctx.fillStyle = colors[2];
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+      case 'england': {
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(left, top, w, h);
+        ctx.fillStyle = colors[1];
+        const cw = sr * 0.2, cw2 = sr * 0.1;
+        // Gạch ngang
+        ctx.fillRect(left, sy - cw2, w, cw);
+        // Gạch dọc
+        ctx.fillRect(sx - cw2, top, cw, h);
+        break;
+      }
+    }
+  }
+}
 
 // ============================================================
 //  AI CONTROLLER � T? d?ng l�i cho AI racers
@@ -2248,10 +2374,12 @@ class Game {
     this.marbles = [];
     this.aiControllers = [];
     const playerMarble = new Marble(0, true);
-    playerMarble.color = SKINS.find(s => s.id === saveData.equippedSkin)?.color || '#ef4444';
-    playerMarble.trailColor = (SKINS.find(s => s.id === saveData.equippedSkin)?.trail) || '#ef444480';
+    playerMarble.country = COUNTRIES[0];  // Việt Nam
+    // Skin vẫn ảnh hưởng trail + rainbow
+    const playerSkin = SKINS.find(s => s.id === saveData.equippedSkin);
+    playerMarble.trailColor = playerSkin?.trail || '#da251d80';
     playerMarble.skinId = saveData.equippedSkin;
-    playerMarble.rainbow = SKINS.find(s => s.id === saveData.equippedSkin)?.rainbow || false;
+    playerMarble.rainbow = playerSkin?.rainbow || false;
 
     // Position marbles at start (checkpoint 0)
     const startCp = this.track.checkpoints[0];
@@ -2261,23 +2389,21 @@ class Game {
     playerMarble.reset(startX, startY);
     this.marbles.push(playerMarble);
 
-    // AI marbles
-    const aiColors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899'];
-    const aiNames = ['AI Số 1', 'AI Số 2', 'AI Số 3', 'AI Số 4', 'AI Số 5', 'AI Số 6', 'AI Số 7'];
+    // AI marbles — mỗi AI mang cờ một nước
     const difficulties = this.isCareerRace ? saveData.career.cups[this.careerCupIndex].races[this.careerRaceIndex].aiDiff : this.getAIDifficulties();
     const diffNames = ['easy', 'medium', 'hard'];
 
     for (let i = 0; i < CFG.NUM_AI; i++) {
       const m = new Marble(i + 1, false);
-      m.color = aiColors[i];
-      m.trailColor = aiColors[i] + '80';
-      const offset = (i + 1) * 20;
+      const country = COUNTRIES[i + 1];  // 1→Pháp, 2→Đức, …
+      m.country = country;
+      m.trailColor = country.colors[0] + '80';
       // Spread AI along start line
       const frac = (i + 1) / (CFG.NUM_AI + 1);
       const sx = startCp.x1 + (startCp.x2 - startCp.x1) * frac;
       const sy = startCp.y1 + (startCp.y2 - startCp.y1) * frac;
       m.reset(sx, sy);
-      m.aiName = aiNames[i];
+      m.aiName = country.name;
       this.marbles.push(m);
 
       const diff = diffNames[difficulties[i]];
@@ -2656,7 +2782,9 @@ class Game {
       const medal = i < 3 ? medals[i] : `${i+1}.`;
       const isPlayer = m.isPlayer ? 'result-player' : '';
       const extra = m.isPlayer ? ' ⭐' : '';
-      div.innerHTML = `<span class="result-pos">${medal}</span> <span class="${isPlayer}">${m.isPlayer ? 'BẠN' : (m.aiName || 'AI Số ' + m.id)}</span>${extra}`;
+      const cname = m.country ? m.country.name : '';
+      const pname = m.isPlayer ? 'Việt Nam' : cname;
+      div.innerHTML = `<span class="result-pos">${medal}</span> <span class="${isPlayer}">${pname}</span>${extra}`;
       list.appendChild(div);
     });
 
@@ -3229,7 +3357,7 @@ class Game {
     let html = '<div class="lb-title">BẢNG XẾP HẠNG</div>';
     sorted.forEach((m, i) => {
       const pos = i + 1;
-      const name = m.isPlayer ? 'BẠN' : (m.aiName || 'R' + m.id);
+      const name = m.country ? m.country.name : (m.isPlayer ? 'Việt Nam' : 'R' + m.id);
       const youClass = m.isPlayer ? 'lb-you' : '';
       const dnf = m.finished ? '' : '';
       const status = m.finished ? 'FIN' : (m.respawnTimer > 0 ? 'RES' : `L${Math.min(m.lap+1, CFG.LAPS)}`);
