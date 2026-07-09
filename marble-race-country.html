@@ -1314,8 +1314,8 @@ class ParticleSystem {
     render(ctx, camera) {
         for (const p of this.particles) {
             if (!p.active) continue;
-            const sx = p.x - camera.x;
-            const sy = p.y - camera.y;
+            const sx = camera.screenX(p.x);
+            const sy = camera.screenY(p.y);
             ctx.globalAlpha = p.alpha;
             ctx.fillStyle = p.color;
             if (p.type === 'circle') {
@@ -1915,9 +1915,8 @@ function render() {
     }
 
     ctx.save();
-    // Apply camera transform: world (cam.x, cam.y) → screen (canvasW/2, 0)
-    ctx.translate(canvasW / 2 + camera.shakeX, camera.shakeY);
-    ctx.translate(-camera.x, -camera.y);
+    // screenX/screenY handle camera offset + shake; only shift origin to canvas centre
+    ctx.translate(canvasW / 2, 0);
 
     // Draw track background (world coordinates)
     drawTrack();
