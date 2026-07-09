@@ -1874,10 +1874,27 @@ function fixedUpdate(dt) {
         for (const obs of track.obstacles) {
             if (obs.type === 'jump-pad') {
                 const dx = m.x - obs.x, dy = m.y - obs.y;
-                if (Math.abs(dx) < obs.width / 2 + m.radius && Math.abs(dy) < 20) {
-                    if (m.vy > -100) { // Only boost if not already boosted
-                        m.vy = obs.boost;
-                        particleSystem.emit(m.x, obs.y, 8, { color: '#00ff88', speed: 80, life: 0.4, size: 3 });
+                if (Math.abs(dx) < obs.width / 2 + m.radius && Math.abs(dy) < 25 && m.vy > 0) {
+                    if (!m._jumpPadData) m._jumpPadData = {};
+                    const key = obs.x.toFixed(0) + '_' + obs.y.toFixed(0);
+                    if (!m._jumpPadData[key]) m._jumpPadData[key] = { count: 0, lastTime: 0 };
+                    const d = m._jumpPadData[key];
+                    const now = performance.now();
+                    if (now - d.lastTime > 400) {
+                        d.count++;
+                        d.lastTime = now;
+                        if (d.count >= 3) {
+                            // Lần thứ 3: bật mạnh ngang để thoát
+                            const dir = obs.x > 0 ? -1 : 1;
+                            m.vx = dir * (200 + Math.random() * 150);
+                            m.vy = -250;
+                            d.count = 0;
+                            particleSystem.emit(m.x, obs.y, 15, { color: '#ffd93d', speed: 150, life: 0.6, size: 5 });
+                        } else {
+                            m.vy = obs.boost;
+                            m.vx += (Math.random() - 0.5) * 40;
+                            particleSystem.emit(m.x, obs.y, 8, { color: '#00ff88', speed: 80, life: 0.4, size: 3 });
+                        }
                     }
                 }
             }
