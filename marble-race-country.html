@@ -1879,7 +1879,6 @@ function pauseRace() {
 }
 
 function restartRace() {
-    if (animationId) cancelAnimationFrame(animationId);
     document.getElementById('overlay').classList.remove('active');
     document.getElementById('countdown').classList.remove('active');
     document.getElementById('pauseBtn').textContent = 'TẠM DỪNG';
