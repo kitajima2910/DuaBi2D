@@ -483,12 +483,15 @@ class ParticleSystem {
   render(ctx, camX, camY, camZoom) {
     for (const p of this.active) {
       const alpha = clamp(p.life / p.maxLife, 0, 1);
-      const sx = (p.x - camX) * camZoom + CFG.canvasW / 2;
-      const sy = (p.y - camY) * camZoom + CFG.canvasH / 2;
-      if (sx < -50 || sx > CFG.canvasW + 50 || sy < -50 || sy > CFG.canvasH + 50) continue;
+      const sx = p.x;
+      const sy = p.y;
+      const margin2 = 50 / camZoom;
+      const halfW2 = (CFG.canvasW / 2) / camZoom + margin2;
+      const halfH2 = (CFG.canvasH / 2) / camZoom + margin2;
+      if (p.x < camX - halfW2 || p.x > camX + halfW2 || p.y < camY - halfH2 || p.y > camY + halfH2) continue;
       ctx.globalAlpha = alpha * 0.8;
       ctx.fillStyle = p.color;
-      const sz = p.size * camZoom;
+      const sz = p.size;
       ctx.beginPath();
       ctx.arc(sx, sy, Math.max(sz, 0.5), 0, Math.PI * 2);
       ctx.fill();
@@ -1086,12 +1089,15 @@ class Marble {
   }
 
   render(ctx, camX, camY, camZoom, showTrail = true) {
-    const sx = (this.x - camX) * camZoom + CFG.canvasW / 2;
-    const sy = (this.y - camY) * camZoom + CFG.canvasH / 2;
+    const sx = this.x;
+    const sy = this.y;
     const sr = this.radius * camZoom;
 
-    // Off screen check
-    if (sx < -50 || sx > CFG.canvasW + 50 || sy < -50 || sy > CFG.canvasH + 50) return;
+    // Off screen check — camera viewport + margin
+    const margin = 50 / camZoom;
+    const halfW = (CFG.canvasW / 2) / camZoom + margin;
+    const halfH = (CFG.canvasH / 2) / camZoom + margin;
+    if (sx < camX - halfW || sx > camX + halfW || sy < camY - halfH || sy > camY + halfH) return;
 
     // Trail
     if (showTrail && this.trail.length > 2) {
@@ -1099,10 +1105,10 @@ class Marble {
         const t = this.trail[i];
         const prev = this.trail[i - 1];
         const alpha = (i / this.trail.length) * 0.4;
-        const tsx = (t.x - camX) * camZoom + CFG.canvasW / 2;
-        const tsy = (t.y - camY) * camZoom + CFG.canvasH / 2;
-        const psx = (prev.x - camX) * camZoom + CFG.canvasW / 2;
-        const psy = (prev.y - camY) * camZoom + CFG.canvasH / 2;
+        const tsx = t.x;
+        const tsy = t.y;
+        const psx = prev.x;
+        const psy = prev.y;
         ctx.strokeStyle = this.trailColor;
         ctx.globalAlpha = alpha;
         ctx.lineWidth = sr * 0.6;
@@ -1120,9 +1126,9 @@ class Marble {
       ctx.globalAlpha = intensity * 0.3;
       for (let i = 0; i < 3; i++) {
         const ang = Math.atan2(this.vy, this.vx) + Math.PI + rng(-0.5, 0.5);
-        const len = rng(15, 30) * camZoom * intensity;
+        const len = rng(15, 30) * intensity;
         ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1 * camZoom;
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(sx + Math.cos(ang) * sr, sy + Math.sin(ang) * sr);
         ctx.lineTo(sx + Math.cos(ang) * (sr + len), sy + Math.sin(ang) * (sr + len));
@@ -2233,10 +2239,13 @@ class Game {
 
     // Draw marble shadows
     for (const m of this.marbles) {
-      const sx = (m.x - cam.x) * zoom + w / 2;
-      const sy = (m.y - cam.y) * zoom + h / 2;
+      const sx = m.x;
+      const sy = m.y;
       const sr = m.radius * zoom;
-      if (sx < -50 || sx > w + 50 || sy < -50 || sy > h + 50) continue;
+      const margin3 = 50 / zoom;
+      const halfW3 = (CFG.canvasW / 2) / zoom + margin3;
+      const halfH3 = (CFG.canvasH / 2) / zoom + margin3;
+      if (m.x < cam.x - halfW3 || m.x > cam.x + halfW3 || m.y < cam.y - halfH3 || m.y > cam.y + halfH3) continue;
       ctx.fillStyle = 'rgba(0,0,0,0.3)';
       ctx.beginPath();
       ctx.ellipse(sx + 2, sy + 3, sr * 0.9, sr * 0.5, 0, 0, Math.PI * 2);
