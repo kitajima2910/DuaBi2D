@@ -614,92 +614,103 @@ class TrackGenerator {
       });
     }
 
-    // Obstacles — trên track
+    // Obstacles — bố trí theo pattern logic, không random lộn xộn
     const obs = [];
-    // Obstacle cố định — rải đều từ mép trong → mép ngoài
-    for (let i = 0; i < 30; i++) {
-      const idx = rngInt(0, m - 1);
-      const n = smoothNorms[idx];
-      // Rải obstacle ở mọi vị trí: sát trong (−0.48), giữa, sát ngoài (0.48)
-      const side = rng(-0.48, 0.48);
-      const ox = cl[idx].x + n.x * side * hw;
-      const oy = cl[idx].y + n.y * side * hw;
-      obs.push({
-        x: ox, y: oy, radius: rng(8, 16),
-        type: Math.random() < 0.5 ? 'bumper' : 'hazard',
-        active: true, moving: false,
-      });
+    // Helper: thêm obstacle tại vị trí trên track
+    function addObs(trackIdx, sideFrac, radius, type, moving) {
+      if (trackIdx < 0 || trackIdx >= m) trackIdx = ((trackIdx % m) + m) % m;
+      const n = smoothNorms[trackIdx];
+      const ox = cl[trackIdx].x + n.x * sideFrac * hw;
+      const oy = cl[trackIdx].y + n.y * sideFrac * hw;
+      obs.push({ x: ox, y: oy, radius, type, active: true, moving });
     }
-    // Obstacle sát tường — riêng 8 cái ép sát mép trong & ngoài
-    for (let i = 0; i < 8; i++) {
-      const idx = rngInt(0, m - 1);
-      const n = smoothNorms[idx];
-      const side = i < 4 ? rng(-0.48, -0.42) : rng(0.42, 0.48);
-      const ox = cl[idx].x + n.x * side * hw;
-      const oy = cl[idx].y + n.y * side * hw;
-      obs.push({
-        x: ox, y: oy, radius: rng(7, 11),
-        type: i < 4 ? 'hazard' : 'bumper',
-        active: true, moving: false,
-      });
+    const NUM_SECTIONS = 8;
+    const secStep = Math.floor(m / NUM_SECTIONS);
+    function idxInSection(section, offset) {
+      return ((section * secStep + offset) % m + m) % m;
     }
-    // Obstacle di động — chạy chậm qua lại ngang track
-    for (let i = 0; i < 6; i++) {
-      const idx = rngInt(Math.floor(m * 0.1), Math.floor(m * 0.9));
+
+    // Section 0: START/FINISH — không obstacle (đường thoáng)
+    // Section 1: SLALOM — obstacle trái-phải xen kẽ
+    for (let i = 0; i < 5; i++) {
+      const side = i % 2 === 0 ? -0.4 : 0.4;
+      addObs(idxInSection(1, 5 + i * 8), side, 10, 'bumper', false);
+    }
+
+    // Section 2: GAUNTLET — 2 hàng obstacle tạo hành lang hẹp
+    for (let i = 0; i < 3; i++) {
+      const base = 10 + i * 12;
+      addObs(idxInSection(2, base), -0.42, 9, 'hazard', false);
+      addObs(idxInSection(2, base), 0.42, 9, 'hazard', false);
+    }
+
+    // Section 3: MOVING OBSTACLES — obstacle di động
+    for (let i = 0; i < 4; i++) {
+      const idx = idxInSection(3, 8 + i * 15);
       const n = smoothNorms[idx];
       obs.push({
         x: cl[idx].x, y: cl[idx].y,
-        radius: rng(12, 16),
+        radius: rng(12, 15),
         type: 'bumper',
         active: true, moving: true,
-        moveSpeed: rng(0.8, 2.2),     // Số lần dao động/giây (chậm, dễ thấy)
-        moveRange: rng(0.35, 0.6),    // Phạm vi di chuyển (% track width)
+        moveSpeed: rng(0.8, 2.0),
+        moveRange: rng(0.35, 0.55),
         movePhase: rng(0, Math.PI * 2),
         centerIdx: idx,
         normal: n,
       });
     }
 
-    // Obstacle clusters — chùm obstacle tạo chướng ngại khó
+    // Section 4: WALL HAZARDS — obstacle sát tường
+    for (let i = 0; i < 4; i++) {
+      addObs(idxInSection(4, 5 + i * 18), -0.46, 9, 'hazard', false);
+      addObs(idxInSection(4, 10 + i * 18), 0.46, 9, 'hazard', false);
+    }
+
+    // Section 5: CLUSTER — chùm obstacle 3 cái ở giữa track
     for (let c = 0; c < 3; c++) {
-      const idx = rngInt(Math.floor(m * 0.1), Math.floor(m * 0.9));
-      const n = smoothNorms[idx];
-      for (let j = 0; j < 3; j++) {
-        const side = rng(-0.25, 0.25);
-        const dist = rng(10, 25);
-        obs.push({
-          x: cl[idx].x + n.x * side * hw + Math.cos(j * 2.1) * dist,
-          y: cl[idx].y + n.y * side * hw + Math.sin(j * 2.1) * dist,
-          radius: rng(7, 11),
-          type: j === 1 ? 'hazard' : 'bumper',
-          active: true, moving: false,
+      const base = idxInSection(5, 8 + c * 20);
+      const n = smoothNorms[base];
+      addObs(base, -0.1, 10, 'bumper', false);
+      addObs(base + 5, 0.12, 10, 'bumper', false);
+      addObs(base + 10, -0.05, 12, 'hazard', false);
+    }
+
+    // Section 6: BOOST LANE — booster + obstacle nhẹ
+    for (let i = 0; i < 4; i++) {
+      addObs(idxInSection(6, 3 + i * 16), rng(-0.15, 0.15), 8, 'bumper', false);
+    }
+
+    // Section 7: MIXED — obstacle rải đều, có khoảng cách
+    for (let i = 0; i < 4; i++) {
+      const idx = idxInSection(7, 5 + i * 18);
+      const side = (i % 2 === 0 ? -1 : 1) * rng(0.2, 0.4);
+      addObs(idx, side, rng(8, 12), i % 2 === 0 ? 'bumper' : 'hazard', false);
+    }
+
+    // Boosters — ưu tiên các section thẳng + sau obstacle
+    const boosters = [];
+    const boosterSections = [1, 3, 6, 7];
+    for (const s of boosterSections) {
+      for (let i = 0; i < 4; i++) {
+        const idx = idxInSection(s, 8 + i * 14);
+        const side = rng(-0.2, 0.2);
+        boosters.push({
+          x: cl[idx].x + smoothNorms[idx].x * side * hw,
+          y: cl[idx].y + smoothNorms[idx].y * side * hw,
+          active: true, respawnTime: 0,
         });
       }
     }
 
-    // Boosters
-    const boosters = [];
-    for (let i = 0; i < 20; i++) {
-      const idx = rngInt(0, m - 1);
-      const n = smoothNorms[idx];
-      const side = rng(-0.35, 0.35);
-      boosters.push({
-        x: cl[idx].x + n.x * side * hw,
-        y: cl[idx].y + n.y * side * hw,
-        active: true,
-        respawnTime: 0,
-      });
-    }
-
-    // Coins
+    // Coins — rải đều quanh track, hơi lệch tâm
     const coins = [];
-    for (let i = 0; i < 60; i++) {
-      const idx = rngInt(0, m - 1);
-      const n = smoothNorms[idx];
-      const side = rng(-0.4, 0.4);
+    for (let i = 0; i < 50; i++) {
+      const idx = Math.floor((i / 50) * m + rng(0, 20));
+      const side = rng(-0.3, 0.3);
       coins.push({
-        x: cl[idx].x + n.x * side * hw,
-        y: cl[idx].y + n.y * side * hw,
+        x: cl[idx % m].x + smoothNorms[idx % m].x * side * hw,
+        y: cl[idx % m].y + smoothNorms[idx % m].y * side * hw,
         collected: false,
       });
     }
@@ -932,10 +943,11 @@ class Marble {
 
   update(dt, track, particles) {
     if (this.finished) {
-      // Slow down gradually after finish
+      // Slow down gradually + giữ trong track
       this.vx *= 0.95;
       this.vy *= 0.95;
       this.updatePosition(dt);
+      Physics.constrainToTrack(this, track); // Giữ marble trong track
       this.updateTrail();
       this.updateTrackInfo(track);
       this.speed = Math.hypot(this.vx, this.vy);
@@ -2082,7 +2094,7 @@ class Game {
       for (let j = i + 1; j < this.marbles.length; j++) {
         const a = this.marbles[i];
         const b = this.marbles[j];
-        if (a.finished && b.finished) continue;
+        if (a.finished || b.finished) continue;
         if (a.collisionCooldown > 0 || b.collisionCooldown > 0) continue;
         if (Physics.circlesCollide(a, b)) {
           a.collisionCooldown = 0.1;
