@@ -1424,9 +1424,9 @@ class Camera {
             this.targetY = leadY - canvasH * 0.4;
         }
 
-        // Clamp
+        // Clamp (cho phép camera xuống sát cuối track)
         this.targetY = Math.max(this.targetY, -200);
-        this.targetY = Math.min(this.targetY, CONFIG.TRACK_LENGTH - canvasH * 0.8);
+        this.targetY = Math.min(this.targetY, CONFIG.TRACK_LENGTH + 50);
 
         // Smooth lerp
         const smooth = CONFIG.CAMERA_SMOOTH;
@@ -1756,11 +1756,11 @@ function fixedUpdate(dt) {
     // Physics step
     physicsEngine.fixedUpdate(dt);
 
-    // Update trails
+    // Update trails (max 8 points for performance)
     for (const m of marbles) {
         if (m.finished || m.eliminated) continue;
         m.trail.push({ x: m.x, y: m.y });
-        if (m.trail.length > 15) m.trail.shift();
+        if (m.trail.length > 8) m.trail.shift();
         const speed = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
         if (speed > m.maxSpeedReached) m.maxSpeedReached = speed;
 
@@ -1938,121 +1938,119 @@ function render() {
 }
 
 function drawTrack() {
-    const walls = track.walls;
+    const w = track.walls;
+    const L = w.left, R = w.right;
     const ctx2 = ctx;
-    const leftPts = walls.left, rightPts = walls.right;
 
-    // Only draw visible portion
-    let startIdx = 0, endIdx = leftPts.length;
-    for (let i = 0; i < leftPts.length; i++) {
-        const sy = leftPts[i].y - camera.y;
-        if (sy > -200 && startIdx === 0) startIdx = Math.max(0, i - 1);
-        if (sy > canvasH + 200) { endIdx = i + 1; break; }
+    // Find visible wall range
+    let i0 = 0, i1 = L.length;
+    for (let i = 0; i < L.length; i++) {
+        const sy = L[i].y - camera.y;
+        if (sy > -100 && i0 === 0) i0 = Math.max(0, i - 1);
+        if (sy > canvasH + 100) { i1 = i + 1; break; }
     }
 
-    // Draw track floor
+    // === Track floor (single fill) ===
     ctx2.fillStyle = '#1a1a2e';
     ctx2.beginPath();
-    ctx2.moveTo(camera.screenX(leftPts[startIdx].x), camera.screenY(leftPts[startIdx].y));
-    for (let i = startIdx + 1; i < endIdx; i++) {
-        ctx2.lineTo(camera.screenX(leftPts[i].x), camera.screenY(leftPts[i].y));
-    }
-    for (let i = endIdx - 1; i >= startIdx; i--) {
-        ctx2.lineTo(camera.screenX(rightPts[i].x), camera.screenY(rightPts[i].y));
-    }
+    ctx2.moveTo(camera.screenX(L[i0].x), camera.screenY(L[i0].y));
+    for (let i = i0 + 1; i < i1; i++) ctx2.lineTo(camera.screenX(L[i].x), camera.screenY(L[i].y));
+    for (let i = i1 - 1; i >= i0; i--) ctx2.lineTo(camera.screenX(R[i].x), camera.screenY(R[i].y));
     ctx2.closePath();
     ctx2.fill();
 
-    // Draw left wall
+    // === Left wall (single stroke) ===
     ctx2.strokeStyle = '#4a4a7a';
     ctx2.lineWidth = CONFIG.WALL_THICKNESS;
     ctx2.beginPath();
-    for (let i = startIdx; i < endIdx; i++) {
-        const x = camera.screenX(leftPts[i].x), y = camera.screenY(leftPts[i].y);
-        if (i === startIdx) ctx2.moveTo(x, y); else ctx2.lineTo(x, y);
+    for (let i = i0; i < i1; i++) {
+        const sx = camera.screenX(L[i].x), sy = camera.screenY(L[i].y);
+        i === i0 ? ctx2.moveTo(sx, sy) : ctx2.lineTo(sx, sy);
     }
     ctx2.stroke();
 
-    // Draw right wall
+    // === Right wall (single stroke) ===
     ctx2.beginPath();
-    for (let i = startIdx; i < endIdx; i++) {
-        const x = camera.screenX(rightPts[i].x), y = camera.screenY(rightPts[i].y);
-        if (i === startIdx) ctx2.moveTo(x, y); else ctx2.lineTo(x, y);
+    for (let i = i0; i < i1; i++) {
+        const sx = camera.screenX(R[i].x), sy = camera.screenY(R[i].y);
+        i === i0 ? ctx2.moveTo(sx, sy) : ctx2.lineTo(sx, sy);
     }
     ctx2.stroke();
 
-    // Draw center line dots
-    ctx2.fillStyle = 'rgba(255,255,255,0.1)';
-    for (let i = startIdx; i < endIdx; i += 3) {
-        if (i >= leftPts.length) break;
-        const mx = (camera.screenX(leftPts[i].x) + camera.screenX(rightPts[i].x)) / 2;
-        const my = (camera.screenY(leftPts[i].y) + camera.screenY(rightPts[i].y)) / 2;
-        ctx2.beginPath();
-        ctx2.arc(mx, my, 2, 0, Math.PI * 2);
-        ctx2.fill();
+    // === Horizontal grid lines (batch — 1 stroke) ===
+    ctx2.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx2.lineWidth = 1;
+    ctx2.beginPath();
+    const vy0 = camera.y - 20, vy1 = camera.y + canvasH + 20;
+    for (let y = Math.max(0, Math.floor(vy0 / 100) * 100); y < Math.min(CONFIG.TRACK_LENGTH, vy1); y += 100) {
+        const sy = camera.screenY(y);
+        ctx2.moveTo(0, sy);
+        ctx2.lineTo(canvasW, sy);
     }
+    ctx2.stroke();
 
-    // Draw starting grid (lane markings + start line)
+    // === Start grid (only if visible) ===
     if (track.startGrid) {
         const sg = track.startGrid;
-        const gridTop = sg.yBase - 20;
-        const gridBot = sg.yBase + sg.height + 20;
-        const syTop = camera.screenY(gridTop);
-        const syBot = camera.screenY(gridBot);
-        if (syTop < canvasH + 50 && syBot > -50) {
-            const leftPts = track.walls.left;
-            const rightPts = track.walls.right;
-            // Find track width at start
-            let gridLW = -CONFIG.TRACK_WIDTH / 2, gridRW = CONFIG.TRACK_WIDTH / 2;
-            for (let i = 0; i < leftPts.length; i++) {
-                if (leftPts[i].y >= sg.yBase) {
-                    gridLW = leftPts[i].x; gridRW = rightPts[i].x;
-                    break;
-                }
+        const gTop = sg.yBase - 20, gBot = sg.yBase + sg.height + 20;
+        const syt = camera.screenY(gTop), syb = camera.screenY(gBot);
+        if (syb > -50 && syt < canvasH + 50) {
+            // Track width at start
+            let lw = -CONFIG.TRACK_WIDTH / 2, rw = CONFIG.TRACK_WIDTH / 2;
+            for (let i = 0; i < L.length; i++) {
+                if (L[i].y >= sg.yBase) { lw = L[i].x; rw = R[i].x; break; }
             }
-            const lx = camera.screenX(gridLW);
-            const rx = camera.screenX(gridRW);
-            // Lane dividers (vertical dashed spanning the grid)
-            const numLanes = sg.cols || 10;
+            const sl = camera.screenX(lw), sr = camera.screenX(rw);
+            // Lane dividers (batch)
+            const nLane = sg.cols || 10;
             ctx2.strokeStyle = 'rgba(255,255,255,0.08)';
             ctx2.lineWidth = 1;
             ctx2.setLineDash([3, 6]);
-            for (let c = 1; c < numLanes; c++) {
-                const lx2 = lx + (rx - lx) * (c / numLanes);
-                ctx2.beginPath();
-                ctx2.moveTo(lx2, syTop);
-                ctx2.lineTo(lx2, syBot);
-                ctx2.stroke();
+            ctx2.beginPath();
+            for (let c = 1; c < nLane; c++) {
+                const cx = sl + (sr - sl) * (c / nLane);
+                ctx2.moveTo(cx, syt);
+                ctx2.lineTo(cx, syb);
             }
+            ctx2.stroke();
             ctx2.setLineDash([]);
-            // Start line at the BOTTOM of the grid (in front of marbles)
+            // Start line
             ctx2.strokeStyle = 'rgba(255,255,255,0.35)';
             ctx2.lineWidth = 3;
             ctx2.setLineDash([6, 6]);
             ctx2.beginPath();
-            ctx2.moveTo(lx, syBot);
-            ctx2.lineTo(rx, syBot);
+            ctx2.moveTo(sl, syb);
+            ctx2.lineTo(sr, syb);
             ctx2.stroke();
             ctx2.setLineDash([]);
-            // "XUẤT PHÁT" label below the start line
+            // Label
             ctx2.fillStyle = 'rgba(255,255,255,0.15)';
             ctx2.font = 'bold 14px sans-serif';
             ctx2.textAlign = 'center';
-            ctx2.fillText('XUẤT PHÁT', (lx + rx) / 2, syBot + 16);
+            ctx2.fillText('XUẤT PHÁT', (sl + sr) / 2, syb + 16);
         }
     }
 
-    // Draw horizontal grid lines for depth
-    ctx2.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx2.lineWidth = 1;
-    for (let y = -1000; y < CONFIG.TRACK_LENGTH + 1000; y += 100) {
-        const sy = camera.screenY(y);
-        if (sy > -10 && sy < canvasH + 10) {
-            ctx2.beginPath();
-            ctx2.moveTo(0, sy);
-            ctx2.lineTo(canvasW, sy);
-            ctx2.stroke();
-        }
+    // === Bottom extension (nếu camera show dưới track) ===
+    const lastY = Math.max(L[L.length - 1].y, R[R.length - 1].y);
+    if (camera.y + canvasH > lastY) {
+        const botY = lastY;
+        const syBot = camera.screenY(botY);
+        ctx2.fillStyle = '#1a1a2e';
+        ctx2.fillRect(camera.screenX(L[L.length - 1].x), syBot,
+                       camera.screenX(R[R.length - 1].x) - camera.screenX(L[L.length - 1].x),
+                       canvasH + 50 - syBot);
+        // Extended walls
+        ctx2.strokeStyle = '#4a4a7a';
+        ctx2.lineWidth = CONFIG.WALL_THICKNESS;
+        ctx2.beginPath();
+        ctx2.moveTo(camera.screenX(L[L.length - 1].x), syBot);
+        ctx2.lineTo(camera.screenX(L[L.length - 1].x), canvasH + 50);
+        ctx2.stroke();
+        ctx2.beginPath();
+        ctx2.moveTo(camera.screenX(R[R.length - 1].x), syBot);
+        ctx2.lineTo(camera.screenX(R[R.length - 1].x), canvasH + 50);
+        ctx2.stroke();
     }
 }
 
@@ -2317,21 +2315,27 @@ function drawMarbles() {
     const ctx2 = ctx;
     const dpr = window.devicePixelRatio || 1;
 
-    // Draw trails first
+    // Draw trails (batch circles per marble)
     for (const m of marbles) {
         if (m.eliminated) continue;
         const trail = m.trail;
-        for (let i = 0; i < trail.length; i++) {
-            const alpha = (i / trail.length) * 0.3;
+        const col = COUNTRIES[m.countryIndex].colors[0];
+        const len = trail.length;
+        if (len < 2) continue;
+        // Quick visibility check: only draw if marble itself is on screen
+        const msx = camera.screenX(m.x);
+        const msy = camera.screenY(m.y);
+        if (msx < -canvasW / 2 - 100 || msx > canvasW / 2 + 100 || msy < -100 || msy > canvasH + 100) continue;
+        ctx2.fillStyle = col;
+        for (let i = 0; i < len; i++) {
             const sx = camera.screenX(trail[i].x);
             const sy = camera.screenY(trail[i].y);
-            if (sx > -canvasW / 2 - 50 && sx < canvasW / 2 + 50 && sy > -50 && sy < canvasH + 50) {
-                ctx2.globalAlpha = alpha;
-                ctx2.fillStyle = COUNTRIES[m.countryIndex].colors[0];
-                ctx2.beginPath();
-                ctx2.arc(sx, sy, m.radius * (0.3 + 0.7 * i / trail.length), 0, Math.PI * 2);
-                ctx2.fill();
-            }
+            const alpha = ((i / len) * 0.3);
+            const r = m.radius * (0.3 + 0.7 * i / len);
+            ctx2.globalAlpha = alpha;
+            ctx2.beginPath();
+            ctx2.arc(sx, sy, r, 0, Math.PI * 2);
+            ctx2.fill();
         }
     }
     ctx2.globalAlpha = 1;
