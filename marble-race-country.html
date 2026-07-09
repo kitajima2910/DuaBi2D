@@ -776,11 +776,7 @@ class PhysicsEngine {
             for (const other of nearby) {
                 if (other === b) continue;
                 if (!other.isStatic) continue;
-                if (other.type === 'peg') {
-                    this._resolveCircleCircle(b, other);
-                } else if (other.type === 'bumper') {
-                    this._resolveCircleCircle(b, other, true);
-                }
+                this._resolveCircleCircle(b, other, other.type === 'bumper');
             }
         }
 
@@ -1739,23 +1735,71 @@ function startRace() {
     // Add obstacles to physics
     for (const obs of track.obstacles) {
         if (obs.type === 'peg') {
-            const staticBody = {
+            physicsEngine.addStaticBody({
                 x: obs.x, y: obs.y, radius: obs.radius,
                 isStatic: true, type: 'peg', mass: 9999,
                 bounce: 0.6, finished: false, eliminated: false,
                 vx: 0, vy: 0, rotation: 0,
-            };
-            physicsEngine.addStaticBody(staticBody);
-            obs._body = staticBody;
+            });
         } else if (obs.type === 'bumper') {
-            const bumperBody = {
+            physicsEngine.addStaticBody({
                 x: obs.x, y: obs.y, radius: obs.radius,
                 isStatic: true, type: 'bumper', mass: 9999,
                 bounce: obs.bounce || 1.2, finished: false, eliminated: false,
                 vx: 0, vy: 0, rotation: 0,
+            });
+        } else if (obs.type === 'spinner') {
+            obs._bodies = [];
+            for (let i = 0; i < obs.arms; i++) {
+                const a = obs.angle + (i * Math.PI * 2 / obs.arms);
+                const body = {
+                    x: obs.x + Math.cos(a) * obs.radius,
+                    y: obs.y + Math.sin(a) * obs.radius,
+                    radius: 8, isStatic: true, type: 'spinner', mass: 9999,
+                    bounce: 0.6, finished: false, eliminated: false,
+                    vx: 0, vy: 0, rotation: 0,
+                };
+                physicsEngine.addStaticBody(body);
+                obs._bodies.push(body);
+            }
+        } else if (obs.type === 'pendulum') {
+            obs._body = {
+                x: obs.x + Math.sin(obs.angle) * obs.length,
+                y: obs.y + Math.cos(obs.angle) * obs.length,
+                radius: obs.ballRadius, isStatic: true, type: 'pendulum', mass: 9999,
+                bounce: 0.4, finished: false, eliminated: false,
+                vx: 0, vy: 0, rotation: 0,
             };
-            physicsEngine.addStaticBody(bumperBody);
-            obs._body = bumperBody;
+            physicsEngine.addStaticBody(obs._body);
+        } else if (obs.type === 'moving-platform') {
+            obs._bodies = [];
+            const count = Math.max(2, Math.floor(obs.width / 30));
+            for (let i = 0; i < count; i++) {
+                const bx = obs.x - obs.width / 2 + obs.width * ((i + 0.5) / count);
+                const body = {
+                    x: bx, y: obs.y, radius: obs.height / 2,
+                    isStatic: true, type: 'platform', mass: 9999,
+                    bounce: 0.3, finished: false, eliminated: false,
+                    vx: 0, vy: 0, rotation: 0,
+                };
+                physicsEngine.addStaticBody(body);
+                obs._bodies.push(body);
+            }
+        } else if (obs.type === 'rotating-gate') {
+            obs._bodies = [];
+            for (let i = 0; i < obs.bars; i++) {
+                const a = obs.angle + (i * Math.PI / obs.bars);
+                const len = obs.width / 2;
+                const body = {
+                    x: obs.x + Math.cos(a) * len * 0.6,
+                    y: obs.y + Math.sin(a) * len * 0.6,
+                    radius: 6, isStatic: true, type: 'gate', mass: 9999,
+                    bounce: 0.5, finished: false, eliminated: false,
+                    vx: 0, vy: 0, rotation: 0,
+                };
+                physicsEngine.addStaticBody(body);
+                obs._bodies.push(body);
+            }
         }
     }
 
@@ -1793,19 +1837,34 @@ function fixedUpdate(dt) {
     // Update moving obstacles
     const now = performance.now();
     for (const obs of track.obstacles) {
-        if (obs.type === 'spinner' && obs._body) {
+        if (obs.type === 'spinner' && obs._bodies) {
             obs.angle += obs.speed * dt;
-            // Create rotating arms - this is handled in rendering
+            for (let i = 0; i < obs._bodies.length; i++) {
+                const a = obs.angle + (i * Math.PI * 2 / obs.arms);
+                obs._bodies[i].x = obs.x + Math.cos(a) * obs.radius;
+                obs._bodies[i].y = obs.y + Math.sin(a) * obs.radius;
+            }
         }
-        if (obs.type === 'pendulum') {
+        if (obs.type === 'pendulum' && obs._body) {
             obs.angle = Math.sin(now * 0.001 * obs.swingSpeed) * 0.8;
+            obs._body.x = obs.x + Math.sin(obs.angle) * obs.length;
+            obs._body.y = obs.y + Math.cos(obs.angle) * obs.length;
         }
-        if (obs.type === 'moving-platform') {
+        if (obs.type === 'moving-platform' && obs._bodies) {
+            const prevX = obs.x;
             const t = Math.sin(now * 0.001 * obs.speed * 0.1 + obs.phase);
             obs.x += t * obs.travel * dt * 0.5;
+            const dx = obs.x - prevX;
+            for (const b of obs._bodies) b.x += dx;
         }
-        if (obs.type === 'rotating-gate') {
+        if (obs.type === 'rotating-gate' && obs._bodies) {
             obs.angle += obs.speed * dt;
+            const len = obs.width / 2;
+            for (let i = 0; i < obs._bodies.length; i++) {
+                const a = obs.angle + (i * Math.PI / obs.bars);
+                obs._bodies[i].x = obs.x + Math.cos(a) * len * 0.6;
+                obs._bodies[i].y = obs.y + Math.sin(a) * len * 0.6;
+            }
         }
     }
 
