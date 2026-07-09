@@ -143,33 +143,33 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
 <div id="app">
   <!-- LEFT PANEL -->
   <div id="left-panel">
-    <h1>🏁 MARBLE RACE COUNTRY</h1>
+    <h1>🏁 ĐUA BI QUỐC TẾ</h1>
 
     <div class="section">
-      <h2>Mode</h2>
+      <h2>Chế Độ</h2>
       <div class="mode-select">
-        <button class="mode-btn active" data-mode="quick">Quick Race</button>
-        <button class="mode-btn" data-mode="tournament">Tournament</button>
-        <button class="mode-btn" data-mode="survival">Survival</button>
-        <button class="mode-btn" data-mode="time">Time Trial</button>
+        <button class="mode-btn active" data-mode="quick">Đua Nhanh</button>
+        <button class="mode-btn" data-mode="tournament">Giải Đấu</button>
+        <button class="mode-btn" data-mode="survival">Sinh Tồn</button>
+        <button class="mode-btn" data-mode="time">Vượt Thời Gian</button>
       </div>
     </div>
 
     <div class="section">
-      <h2>Settings</h2>
+      <h2>Cài Đặt</h2>
       <div class="slider-container">
-        <label>Marbles: <span class="slider-value" id="marbleCountDisplay">30</span></label>
+        <label>Số bi: <span class="slider-value" id="marbleCountDisplay">30</span></label>
         <input type="range" id="marbleCount" min="8" max="60" value="30">
       </div>
       <div style="margin-top:6px;">
-        <label>Track Seed</label>
+        <label>Mã Đường</label>
         <div class="seed-row">
           <input type="text" id="trackSeed" value="42" maxlength="10">
           <button class="btn btn-secondary btn-small" id="randomSeedBtn">🎲</button>
         </div>
       </div>
       <div style="margin-top:6px;">
-        <label>Speed</label>
+        <label>Tốc Độ</label>
         <div class="btn-group">
           <button class="btn btn-secondary btn-small speed-btn active" data-speed="1">1×</button>
           <button class="btn btn-secondary btn-small speed-btn" data-speed="2">2×</button>
@@ -179,15 +179,15 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
     </div>
 
     <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
-      <button class="btn btn-primary" id="startBtn" style="flex:1;">START RACE</button>
-      <button class="btn btn-secondary" id="pauseBtn" disabled>PAUSE</button>
-      <button class="btn btn-danger" id="restartBtn">RESTART</button>
+      <button class="btn btn-primary" id="startBtn" style="flex:1;">BẮT ĐẦU</button>
+      <button class="btn btn-secondary" id="pauseBtn" disabled>TẠM DỪNG</button>
+      <button class="btn btn-danger" id="restartBtn">CHƠI LẠI</button>
     </div>
 
     <div class="section" style="margin-top:4px;">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;">
-        <span>Stats: <span id="statMarbles">0</span> marbles</span>
-        <span>Best: <span id="statBestTime">--</span></span>
+        <span>Thống kê: <span id="statMarbles">0</span> bi</span>
+        <span>Tốt nhất: <span id="statBestTime">--</span></span>
       </div>
     </div>
   </div>
@@ -197,11 +197,11 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
     <canvas id="gameCanvas"></canvas>
     <div id="hud-bar">
       <div class="hud-item">
-        <span class="hud-label">Leaderboard</span>
+        <span class="hud-label">Xếp hạng</span>
         <div class="leaderboard-mini" id="leaderboardMini"></div>
       </div>
       <div class="hud-item">
-        <span class="hud-label">Progress</span>
+        <span class="hud-label">Tiến độ</span>
         <span class="hud-value" id="hudProgress">0%</span>
       </div>
       <div class="hud-item">
@@ -209,7 +209,7 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
         <span class="hud-value hud-fps" id="hudFps">60</span>
       </div>
       <div class="hud-item">
-        <span class="hud-label">Active</span>
+        <span class="hud-label">Đang đua</span>
         <span class="hud-value" id="hudActive">0/0</span>
       </div>
     </div>
@@ -1660,7 +1660,7 @@ function startRace() {
 function showCountdown(value) {
     const el = document.getElementById('countdown-text');
     if (value <= 0) {
-        el.textContent = 'GO!';
+        el.textContent = 'ĐI!';
         el.style.color = '#00ff88';
         soundManager.playGo();
     } else {
@@ -1835,11 +1835,11 @@ function endRace() {
 function pauseRace() {
     if (gameState === GameState.RACING) {
         gameState = GameState.PAUSED;
-        document.getElementById('pauseBtn').textContent = 'RESUME';
+        document.getElementById('pauseBtn').textContent = 'TIẾP TỤC';
     } else if (gameState === GameState.PAUSED) {
         gameState = GameState.RACING;
         accumulator = 0;
-        document.getElementById('pauseBtn').textContent = 'PAUSE';
+        document.getElementById('pauseBtn').textContent = 'TẠM DỪNG';
     }
 }
 
@@ -1847,7 +1847,7 @@ function restartRace() {
     if (animationId) cancelAnimationFrame(animationId);
     document.getElementById('overlay').classList.remove('active');
     document.getElementById('countdown').classList.remove('active');
-    document.getElementById('pauseBtn').textContent = 'PAUSE';
+    document.getElementById('pauseBtn').textContent = 'TẠM DỪNG';
     document.getElementById('pauseBtn').disabled = false;
     startRace();
 }
@@ -1873,10 +1873,10 @@ function render() {
         ctx.font = '26px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('🏁 Marble Race Country', canvasW / 2, canvasH / 2 - 24);
+        ctx.fillText('🏁 ĐUA BI QUỐC TẾ', canvasW / 2, canvasH / 2 - 24);
         ctx.font = '15px sans-serif';
         ctx.fillStyle = '#777';
-        ctx.fillText('Configure settings on the left and press START RACE', canvasW / 2, canvasH / 2 + 16);
+        ctx.fillText('Chọn cài đặt bên trái và nhấn BẮT ĐẦU', canvasW / 2, canvasH / 2 + 16);
         return;
     }
 
@@ -2320,7 +2320,7 @@ function drawFinishLine() {
         ctx2.fillStyle = '#fff';
         ctx2.font = '12px sans-serif';
         ctx2.textAlign = 'center';
-        ctx2.fillText('FINISH', (lx + rx) / 2, sy + 4);
+        ctx2.fillText('VỀ ĐÍCH', (lx + rx) / 2, sy + 4);
     }
 }
 
@@ -2378,7 +2378,7 @@ function showResults() {
     const overlay = document.getElementById('overlay');
     const content = document.getElementById('overlayContent');
 
-    let html = '<h2>🏆 Race Complete!</h2>';
+    let html = '<h2>🏆 Hoàn Thành!</h2>';
 
     if (sorted.length >= 3) {
         html += '<div class="podium">';
@@ -2401,19 +2401,19 @@ function showResults() {
     }
 
     // Results table
-    html += '<h3>Full Results</h3>';
+    html += '<h3>Kết Quả</h3>';
     html += '<table class="results-table">';
-    html += '<tr><th>Pos</th><th>Country</th><th>Time</th><th>Speed</th></tr>';
+    html += '<tr><th>STT</th><th>Quốc Gia</th><th>Thời Gian</th><th>Tốc Độ</th></tr>';
 
     const allSorted = [...marbles].sort((a, b) => (a.place || 999) - (b.place || 999));
     for (const m of allSorted) {
         const flag = COUNTRIES[m.countryIndex].colors[0];
-        const timeStr = m.finishTime ? formatTime(m.finishTime) : 'DNF';
+        const timeStr = m.finishTime ? formatTime(m.finishTime) : 'KXĐ';
         const speedStr = Math.round(m.maxSpeedReached || 0);
         html += `<tr>
             <td class="pos">${m.place || '-'}</td>
             <td><span class="flag-dot" style="background:${flag}"></span>${m.name}</td>
-            <td>${m.finishTime ? formatTime(m.finishTime) : '<span style="color:#ff6b6b">DNF</span>'}</td>
+            <td>${m.finishTime ? formatTime(m.finishTime) : '<span style="color:#ff6b6b">KXĐ</span>'}</td>
             <td>${speedStr}</td>
         </tr>`;
     }
@@ -2421,10 +2421,10 @@ function showResults() {
 
     // Tournament standings
     if (gameMode.mode === 'tournament' && gameMode.tournamentStandings.length > 0) {
-        html += '<h3>Tournament Standings (Race ' + (gameMode.currentRace + 1) + '/' + gameMode.totalRaces + ')</h3>';
+        html += '<h3>Bảng Giải Đấu (Vòng ' + (gameMode.currentRace + 1) + '/' + gameMode.totalRaces + ')</h3>';
         const standings = [...gameMode.tournamentStandings].sort((a, b) => b.points - a.points);
         html += '<table class="results-table">';
-        html += '<tr><th>Pos</th><th>Country</th><th>Points</th><th>Best Time</th></tr>';
+        html += '<tr><th>STT</th><th>Quốc Gia</th><th>Điểm</th><th>Xuất Sắc</th></tr>';
         standings.forEach((s, i) => {
             const flag = COUNTRIES[s.countryIndex].colors[0];
             html += `<tr>
@@ -2437,9 +2437,9 @@ function showResults() {
         html += '</table>';
 
         if (gameMode.currentRace < gameMode.totalRaces - 1) {
-            html += '<button class="btn btn-primary" onclick="nextRace()" style="width:100%;margin-top:12px;">Next Race →</button>';
+            html += '<button class="btn btn-primary" onclick="nextRace()" style="width:100%;margin-top:12px;">Vòng Sau →</button>';
         } else {
-            html += '<div style="text-align:center;margin-top:12px;font-size:18px;font-weight:700;color:#ffd93d;">🏆 Tournament Complete! 🏆</div>';
+            html += '<div style="text-align:center;margin-top:12px;font-size:18px;font-weight:700;color:#ffd93d;">🏆 Giải Đấu Hoàn Tất! 🏆</div>';
         }
     }
 
@@ -2447,22 +2447,22 @@ function showResults() {
     if (gameMode.mode === 'survival') {
         const winner = marbles.find(m => !m.eliminated);
         if (winner) {
-            html += `<div style="text-align:center;margin:12px 0;font-size:18px;font-weight:700;color:#ffd93d;">🏆 Winner: ${winner.name}! 🏆</div>`;
+            html += `<div style="text-align:center;margin:12px 0;font-size:18px;font-weight:700;color:#ffd93d;">🏆 Vô Địch: ${winner.name}! 🏆</div>`;
         }
         html += '<table class="results-table">';
-        html += '<tr><th>Pos</th><th>Country</th><th>Status</th></tr>';
+        html += '<tr><th>STT</th><th>Quốc Gia</th><th>Trạng Thái</th></tr>';
         const elimOrder = marbles.sort((a, b) => (a.place || 999) - (b.place || 999));
         elimOrder.forEach((m, i) => {
             const flag = COUNTRIES[m.countryIndex].colors[0];
-            const status = m.eliminated ? 'Eliminated' : m.finished ? 'Finished' : 'Survived!';
+            const status = m.eliminated ? 'Bị Loại' : m.finished ? 'Về Đích' : 'Sống Sót!';
             html += `<tr><td class="pos">${i + 1}</td><td><span class="flag-dot" style="background:${flag}"></span>${m.name}</td><td>${status}</td></tr>`;
         });
         html += '</table>';
     }
 
     html += `<div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn btn-primary" onclick="restartRace()" style="flex:1;">Race Again</button>
-        <button class="btn btn-secondary" onclick="closeResults()" style="flex:1;">Back to Menu</button>
+        <button class="btn btn-primary" onclick="restartRace()" style="flex:1;">Đua Lại</button>
+        <button class="btn btn-secondary" onclick="closeResults()" style="flex:1;">Về Menu</button>
     </div>`;
 
     content.innerHTML = html;
@@ -2570,9 +2570,9 @@ function updateUI() {
     document.getElementById('pauseBtn').disabled = gameState !== GameState.RACING && gameState !== GameState.PAUSED;
 
     if (gameState === GameState.PAUSED) {
-        document.getElementById('pauseBtn').textContent = 'RESUME';
+        document.getElementById('pauseBtn').textContent = 'TIẾP TỤC';
     } else {
-        document.getElementById('pauseBtn').textContent = 'PAUSE';
+        document.getElementById('pauseBtn').textContent = 'TẠM DỪNG';
     }
 }
 
@@ -2673,10 +2673,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = '#333';
     ctx.font = '24px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('🏁 Marble Race Country', canvasW / 2, canvasH / 2 - 20);
+    ctx.fillText('🏁 ĐUA BI QUỐC TẾ', canvasW / 2, canvasH / 2 - 20);
     ctx.font = '14px sans-serif';
     ctx.fillStyle = '#666';
-    ctx.fillText('Configure settings and press START RACE', canvasW / 2, canvasH / 2 + 20);
+    ctx.fillText('Chọn cài đặt và nhấn BẮT ĐẦU', canvasW / 2, canvasH / 2 + 20);
 
     // Init sound
     soundManager = new SoundManager();
