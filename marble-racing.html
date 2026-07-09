@@ -821,7 +821,8 @@ class Marble {
     this.lastTrackIndex = 0;           // Track index ở frame trước (để phát hiện qua line)
     this.crossedFinish = false;        // Đã qua finish line?
     this.respawnTimer = 0;             // Timer hồi sinh (giây)
-    this.collisionCooldown = 0;        // Cooldown va chạm (chống double-hit)
+    this.collisionCooldown = 0;        // Cooldown va chạm marble-marble
+    this.obstacleCooldown = 0;         // Cooldown va chạm obstacle (chống kẹt)
     // Skins
     this.applySkin(saveData.equippedSkin); // Áp dụng skin từ save data
   }
@@ -862,6 +863,7 @@ class Marble {
     this.alive = true;
     this.respawnTimer = 0;
     this.collisionCooldown = 0;
+    this.obstacleCooldown = 0;
   }
 
   update(dt, track, particles) {
@@ -889,8 +891,9 @@ class Marble {
       return;
     }
 
-    // Collision cooldown
+    // Collision cooldowns
     if (this.collisionCooldown > 0) this.collisionCooldown -= dt;
+    if (this.obstacleCooldown > 0) this.obstacleCooldown -= dt;
 
     // Player input → forces
     let ax = 0, ay = 0;
@@ -1296,8 +1299,15 @@ class AIController {
     m.steerInput = clamp(steer, -1, 1);
 
     // Forward movement — always on for AI
-    m.forwardInput = true;
-    m.brake = false;
+    // Obstacle stun: giảm lái + tiến để marble bay ra khỏi obstacle
+    if (m.obstacleCooldown > 0) {
+      m.steerInput *= 0.3;     // Giảm lái để không quay đầu vào obstacle
+      m.forwardInput = true;   // Vẫn tiến để thoát
+      m.brake = false;
+    } else {
+      m.forwardInput = true;
+      m.brake = false;
+    }
 
     // Boost usage
     this.boostTimer -= dt;
@@ -2068,22 +2078,32 @@ class Game {
       if (!obs.active) continue;
       for (const m of this.marbles) {
         if (m.finished || m.respawnTimer > 0) continue;
+        // Skip if still in obstacle cooldown (tránh kẹt liên tục)
+        if (m.obstacleCooldown > 0) continue;
         const overlap = Physics.circleCircleOverlap(m.x, m.y, m.radius, obs.x, obs.y, obs.radius);
         if (overlap) {
-          // Push marble away
-          m.x -= overlap.nx * overlap.overlap;
-          m.y -= overlap.ny * overlap.overlap;
+          // overlap.nx, overlap.ny hướng từ marble → obstacle
+          // Đẩy marble ra xa obstacle gấp 3 lần overlap để đảm bảo không còn dính
+          const pushStr = 3;
+          m.x -= overlap.nx * overlap.overlap * pushStr;
+          m.y -= overlap.ny * overlap.overlap * pushStr;
+
           if (obs.type === 'bumper') {
-            const spd = Math.hypot(m.vx, m.vy);
-            m.vx = overlap.nx * Math.max(spd, 3);
-            m.vy = overlap.ny * Math.max(spd, 3);
+            // Bật marble ra xa với tốc độ mạnh hơn vận tốc hiện tại
+            const spd = Math.max(Math.hypot(m.vx, m.vy), 5);
+            // overlap.nx, overlap.ny hướng từ marble → obstacle → đảo chiều
+            m.vx = -overlap.nx * spd * 1.5;
+            m.vy = -overlap.ny * spd * 1.5;
+            // Cooldown 300ms tránh kẹt
+            m.obstacleCooldown = 0.3;
             audio.playCrash();
-            this.particles.emitSpark(obs.x, obs.y, overlap.nx, overlap.ny);
+            this.particles.emitSpark(obs.x, obs.y, -overlap.nx, -overlap.ny);
           } else {
-            // Hazard — slow down
-            m.vx *= 0.3;
-            m.vy *= 0.3;
+            // Hazard — slow down + đẩy nhẹ ra
+            m.vx = -overlap.nx * 2;
+            m.vy = -overlap.ny * 2;
             m.boostAmount = Math.max(0, m.boostAmount - 10);
+            m.obstacleCooldown = 0.2;
             audio.playCrash();
             this.particles.emitSpark(obs.x, obs.y, -overlap.nx, -overlap.ny);
           }
