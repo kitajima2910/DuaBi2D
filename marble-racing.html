@@ -2200,7 +2200,7 @@ class Game {
     if (this.state === 'racing') {
       this.state = 'paused';
       document.getElementById('overlay').classList.add('active');
-      document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ Tạm DừngD</h2><button class="menu-btn primary" onclick="game.resume()">▶ Tiếp Tục</button><button class="menu-btn" onclick="game.restart()">🔄 Chơi Lại</button><button class="menu-btn" onclick="game.showMenu()">🏠 Menu</button></div>';
+      document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ Tạm Dừng</h2><button class="menu-btn primary" onclick="game.resume()">▶ Tiếp Tục</button><button class="menu-btn" onclick="game.restart()">🔄 Chơi Lại</button><button class="menu-btn" onclick="game.showMenu()">🏠 Menu</button></div>';
     } else if (this.state === 'paused') {
       this.resume();
     }
@@ -3290,7 +3290,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden && game && game.state === 'racing') {
     game.state = 'paused';
     document.getElementById('overlay').classList.add('active');
-    document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ Tạm DừngD</h2><button class="menu-btn primary" onclick="game.resume()">▶ Tiếp Tục</button></div>';
+    document.getElementById('overlay').innerHTML = '<div style="background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center"><h2 style="color:#fff;margin-bottom:20px">⏸ Tạm Dừng</h2><button class="menu-btn primary" onclick="game.resume()">▶ Tiếp Tục</button></div>';
   }
 });
 
