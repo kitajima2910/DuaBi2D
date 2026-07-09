@@ -248,7 +248,7 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
 // ============================================================
 const CONFIG = {
     PHYSICS_DT: 1 / 60,
-    GRAVITY: 800,
+    GRAVITY: 500,
     MARBLE_RADIUS: 14,
     TRACK_WIDTH: 400,
     TRACK_LENGTH: 8000,
@@ -256,12 +256,12 @@ const CONFIG = {
     BOUNCE_DAMPING: 0.5,
     FRICTION_AIR: 0.999,
     FRICTION_ROLLING: 0.98,
-    MAX_SPEED: 600,
+    MAX_SPEED: 400,
     SOUND_ENABLED: true,
     PARTICLE_ENABLED: true,
     GRID_CELL_SIZE: 64,
     MAX_PARTICLES: 500,
-    CAMERA_SMOOTH: 0.08,
+    CAMERA_SMOOTH: 0.04,
     CHECKPOINT_INTERVAL: 400,
     COUNTDOWN_SECONDS: 3,
 };
@@ -845,6 +845,12 @@ class PhysicsEngine {
         const r = body.radius;
         const physDt = CONFIG.PHYSICS_DT;
         for (const seg of this.wallSegments) {
+            // Y-range pre-check: skip segments far from marble (tối ưu lag)
+            const minSegY = Math.min(seg.y1, seg.y2);
+            const maxSegY = Math.max(seg.y1, seg.y2);
+            if (maxSegY < body.y - r - 15) continue;
+            if (minSegY > body.y + r + 15) break;
+
             const ax = seg.x1, ay = seg.y1, bx = seg.x2, by = seg.y2;
             const dx = bx - ax, dy = by - ay;
             const lenSq = dx * dx + dy * dy;
@@ -863,20 +869,16 @@ class PhysicsEngine {
                 if (relV < 0) {
                     const speed = Math.abs(relV);
                     if (speed < 60) {
-                        // RESTING CONTACT: trượt dọc, không nảy, chống gravity
                         const tanX = -ny, tanY = nx;
                         const tanV = body.vx * tanX + body.vy * tanY;
                         body.vx = tanV * tanX;
                         body.vy = tanV * tanY;
-                        // Chống gravity để frame sau không rơi lại vào tường
                         const gPush = CONFIG.GRAVITY * physDt * ny;
                         body.vx -= gPush * nx;
                         body.vy -= gPush * ny;
-                        // Redirect 30% normal energy thành tangential (trượt chủ động)
                         body.vx += speed * 0.3 * tanX;
                         body.vy += speed * 0.3 * tanY;
                     } else {
-                        // DYNAMIC BOUNCE — nảy thật với nhiễu nhẹ
                         const luck = body.luck || 0.5;
                         const angle = (Math.random() - 0.5) * 0.15 * (1.2 - luck * 0.4);
                         const ca = Math.cos(angle), sa = Math.sin(angle);
@@ -1327,7 +1329,7 @@ class Particle {
         this.x = 0; this.y = 0; this.vx = 0; this.vy = 0;
         this.life = 0; this.maxLife = 1; this.size = 4;
         this.color = '#ffffff'; this.gravity = 0;
-        this.type = 'circle'; this.alpha = 1;
+        this.type = 'rect'; this.alpha = 1;
         this.active = false;
     }
 }
@@ -1348,7 +1350,7 @@ class ParticleSystem {
         const life = c.life || 0.5;
         const size = c.size || 3;
         const gravity = c.gravity || 0;
-        const type = c.type || 'circle';
+        const type = c.type || 'rect';
 
         for (let i = 0; i < count; i++) {
             const p = this._getInactive();
@@ -1839,7 +1841,7 @@ function fixedUpdate(dt) {
     for (const m of marbles) {
         if (m.finished || m.eliminated) continue;
         m.trail.push({ x: m.x, y: m.y });
-        if (m.trail.length > 8) m.trail.shift();
+        if (m.trail.length > 6) m.trail.shift();
         const speed = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
         if (speed > m.maxSpeedReached) m.maxSpeedReached = speed;
 
@@ -2407,12 +2409,9 @@ function drawMarbles() {
         for (let i = 0; i < len; i++) {
             const sx = camera.screenX(trail[i].x);
             const sy = camera.screenY(trail[i].y);
-            const alpha = ((i / len) * 0.3);
+            ctx2.globalAlpha = ((i / len) * 0.3);
             const r = m.radius * (0.3 + 0.7 * i / len);
-            ctx2.globalAlpha = alpha;
-            ctx2.beginPath();
-            ctx2.arc(sx, sy, r, 0, Math.PI * 2);
-            ctx2.fill();
+            ctx2.fillRect(sx - r, sy - r, r * 2, r * 2);
         }
     }
     ctx2.globalAlpha = 1;
