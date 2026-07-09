@@ -1475,13 +1475,13 @@ class Camera {
             this.targetY = avgY - canvasH * 0.45;
             this.targetY = Math.max(this.targetY, -100);
         } else {
-            // Find leading marble (most progress = lowest y)
-            let leadY = Infinity;
+            // Find leading marble (most progress = highest y)
+            let leadY = -Infinity;
             let leadX = 0;
             let found = false;
             for (const m of marbles) {
                 if (m.finished || m.eliminated) continue;
-                if (m.y < leadY) {
+                if (m.y > leadY) {
                     leadY = m.y;
                     leadX = m.x;
                     found = true;
@@ -1489,7 +1489,7 @@ class Camera {
             }
             if (!found) {
                 for (const m of marbles) {
-                    if (m.y < leadY) { leadY = m.y; leadX = m.x; }
+                    if (m.y > leadY) { leadY = m.y; leadX = m.x; }
                 }
             }
             this.targetX = 0;
