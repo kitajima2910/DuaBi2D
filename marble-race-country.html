@@ -1230,8 +1230,8 @@ function generateTrack(seed) {
 
     // Add start zone
     const cols = Math.min(10, CONFIG.MARBLE_RADIUS); // approximate
-    const rows = 6;
-    const gridH = rows * CONFIG.MARBLE_RADIUS * 3 + 40;
+    const rows = 2; // max rows cho 12 bi × 10 cột
+    const gridH = rows * CONFIG.MARBLE_RADIUS * 3 + 30;
     track.startZone = { yStart: 80, yEnd: 80 + gridH };
     track.startGrid = { cols: 10, yBase: CONFIG.TRACK_LENGTH * 0.02, height: gridH };
 
@@ -2094,7 +2094,7 @@ function drawTrack() {
             ctx2.stroke();
             ctx2.setLineDash([]);
             // Start line
-            ctx2.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx2.strokeStyle = '#ffd93d';
             ctx2.lineWidth = 3;
             ctx2.setLineDash([6, 6]);
             ctx2.beginPath();
@@ -2103,10 +2103,14 @@ function drawTrack() {
             ctx2.stroke();
             ctx2.setLineDash([]);
             // Label
-            ctx2.fillStyle = 'rgba(255,255,255,0.15)';
+            const startLabel = 'XUẤT PHÁT';
             ctx2.font = 'bold 14px sans-serif';
             ctx2.textAlign = 'center';
-            ctx2.fillText('XUẤT PHÁT', (sl + sr) / 2, syb + 16);
+            const tw = ctx2.measureText(startLabel).width + 20;
+            ctx2.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx2.fillRect((sl + sr) / 2 - tw / 2, syb + 6, tw, 22);
+            ctx2.fillStyle = '#ffd93d';
+            ctx2.fillText(startLabel, (sl + sr) / 2, syb + 22);
         }
     }
 
@@ -2482,10 +2486,15 @@ function drawFinishLine() {
             ctx2.fillStyle = (i % 2 === 0) ? '#fff' : '#000';
             ctx2.fillRect(lx + i * tileW, sy - 8, tileW, 16);
         }
-        ctx2.fillStyle = '#fff';
-        ctx2.font = '12px sans-serif';
+        // Label background + text
+        const label = 'VỀ ĐÍCH';
+        ctx2.font = 'bold 14px sans-serif';
         ctx2.textAlign = 'center';
-        ctx2.fillText('VỀ ĐÍCH', (lx + rx) / 2, sy + 4);
+        const tw = ctx2.measureText(label).width + 20;
+        ctx2.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx2.fillRect((lx + rx) / 2 - tw / 2, sy - 30, tw, 22);
+        ctx2.fillStyle = '#ffd93d';
+        ctx2.fillText(label, (lx + rx) / 2, sy - 14);
     }
 }
 
