@@ -843,6 +843,7 @@ class PhysicsEngine {
 
     _resolveWallCollisions(body) {
         const r = body.radius;
+        const physDt = CONFIG.PHYSICS_DT;
         for (const seg of this.wallSegments) {
             const ax = seg.x1, ay = seg.y1, bx = seg.x2, by = seg.y2;
             const dx = bx - ax, dy = by - ay;
@@ -860,28 +861,31 @@ class PhysicsEngine {
                 body.y += ny * overlap;
                 const relV = body.vx * nx + body.vy * ny;
                 if (relV < 0) {
-                    if (Math.abs(relV) < 40) {
-                        // Redirect normal velocity into tangential slide → thoát khỏi bẫy nảy
+                    const speed = Math.abs(relV);
+                    if (speed < 60) {
+                        // RESTING CONTACT: trượt dọc, không nảy, chống gravity
                         const tanX = -ny, tanY = nx;
                         const tanV = body.vx * tanX + body.vy * tanY;
-                        const speed = Math.abs(relV);
-                        body.vx = tanV * tanX + speed * 0.7 * tanX;
-                        body.vy = tanV * tanY + speed * 0.7 * tanY;
-                        // Giữ lại 5% normal để không bị lún vào tường
-                        body.vx += relV * nx * 0.05;
-                        body.vy += relV * ny * 0.05;
+                        body.vx = tanV * tanX;
+                        body.vy = tanV * tanY;
+                        // Chống gravity để frame sau không rơi lại vào tường
+                        const gPush = CONFIG.GRAVITY * physDt * ny;
+                        body.vx -= gPush * nx;
+                        body.vy -= gPush * ny;
+                        // Redirect 30% normal energy thành tangential (trượt chủ động)
+                        body.vx += speed * 0.3 * tanX;
+                        body.vy += speed * 0.3 * tanY;
                     } else {
-                        // Random perturbation for organic bounces
+                        // DYNAMIC BOUNCE — nảy thật với nhiễu nhẹ
                         const luck = body.luck || 0.5;
-                        const angle = (Math.random() - 0.5) * 0.25 * (1.2 - luck * 0.4);
+                        const angle = (Math.random() - 0.5) * 0.15 * (1.2 - luck * 0.4);
                         const ca = Math.cos(angle), sa = Math.sin(angle);
                         const rnx = nx * ca - ny * sa;
                         const rny = nx * sa + ny * ca;
                         body.vx -= (1 + CONFIG.BOUNCE_DAMPING) * relV * rnx;
                         body.vy -= (1 + CONFIG.BOUNCE_DAMPING) * relV * rny;
-                        // Play bounce sound
-                        if (Math.abs(relV) > 50 && soundManager) {
-                            soundManager.playBounce(Math.min(Math.abs(relV) / 500, 0.5));
+                        if (speed > 50 && soundManager) {
+                            soundManager.playBounce(Math.min(speed / 500, 0.5));
                         }
                     }
                 }
@@ -908,7 +912,6 @@ class PhysicsEngine {
             b.y += ny * pushB;
         }
 
-        // Relative velocity
         const relVx = (a.isStatic ? 0 : a.vx) - (b.isStatic ? 0 : b.vx);
         const relVy = (a.isStatic ? 0 : a.vy) - (b.isStatic ? 0 : b.vy);
         const relVn = relVx * nx + relVy * ny;
@@ -916,23 +919,29 @@ class PhysicsEngine {
 
         const bounce = isBumper ? 1.2 : Math.min(a.bounce || 0.5, b.bounce || 0.5);
         const j = (1 + bounce) * relVn / totalMass;
-
-        // Resting contact: if separating slowly, just stop instead of bouncing
-        const sepSpeed = relVn; // positive = separating
         const isMarbleVsStatic = a.isStatic !== b.isStatic;
-        if (sepSpeed < 20 && isMarbleVsStatic) {
-            // Cancel normal velocity for the non-static body
-            if (!a.isStatic) { a.vx -= relVn * nx / a.mass; a.vy -= relVn * ny / a.mass; }
-            if (!b.isStatic) { b.vx += relVn * nx / b.mass; b.vy += relVn * ny / b.mass; }
+        const luck = (!a.isStatic ? (a.luck || 0.5) : (b.luck || 0.5));
+
+        if (relVn < 20 && isMarbleVsStatic) {
+            // RESTING trên vật cản: trượt ngang, không nảy
+            const tanX = -ny, tanY = nx;
+            const vTanA = a.isStatic ? 0 : (a.vx * tanX + a.vy * tanY);
+            const vTanB = b.isStatic ? 0 : (b.vx * tanX + b.vy * tanY);
+            if (!a.isStatic) {
+                a.vx = vTanA * tanX + relVn * 0.4 * tanX;
+                a.vy = vTanA * tanY + relVn * 0.4 * tanY;
+            }
+            if (!b.isStatic) {
+                b.vx = vTanB * tanX + relVn * 0.4 * tanX;
+                b.vy = vTanB * tanY + relVn * 0.4 * tanY;
+            }
         } else {
-            // Random perturbation for organic obstacle bounces
-            const luck = (!a.isStatic ? (a.luck || 0.5) : (b.luck || 0.5));
-            const spread = isBumper ? 0.35 : 0.2;
+            // DYNAMIC BOUNCE — nảy với perturbation
+            const spread = isBumper ? 0.3 : 0.15;
             const rAngle = (Math.random() - 0.5) * spread * (1.3 - luck * 0.6);
             const ca = Math.cos(rAngle), sa = Math.sin(rAngle);
             const rnx = nx * ca - ny * sa;
             const rny = nx * sa + ny * ca;
-
             if (!a.isStatic) {
                 a.vx -= j * rnx / a.mass;
                 a.vy -= j * rny / a.mass;
@@ -943,10 +952,8 @@ class PhysicsEngine {
             }
         }
 
-        // Play bounce
         if (isBumper) {
             if (soundManager) soundManager.playBounce(0.4);
-            // Emit particles
             if (particleSystem && CONFIG.PARTICLE_ENABLED) {
                 particleSystem.emit((a.x + b.x) / 2, (a.y + b.y) / 2, 5, {
                     color: '#ffd93d', speed: 100, life: 0.5, size: 3
