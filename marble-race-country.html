@@ -248,7 +248,7 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
 // ============================================================
 const CONFIG = {
     PHYSICS_DT: 1 / 60,
-    GRAVITY: 500,
+    GRAVITY: 350,
     MARBLE_RADIUS: 14,
     TRACK_WIDTH: 400,
     TRACK_LENGTH: 8000,
@@ -256,12 +256,12 @@ const CONFIG = {
     BOUNCE_DAMPING: 0.5,
     FRICTION_AIR: 0.999,
     FRICTION_ROLLING: 0.98,
-    MAX_SPEED: 400,
+    MAX_SPEED: 300,
     SOUND_ENABLED: true,
     PARTICLE_ENABLED: true,
     GRID_CELL_SIZE: 64,
     MAX_PARTICLES: 500,
-    CAMERA_SMOOTH: 0.04,
+    CAMERA_SMOOTH: 0.055,
     CHECKPOINT_INTERVAL: 400,
     COUNTDOWN_SECONDS: 3,
 };
@@ -1651,6 +1651,7 @@ let raceStartTime = 0;
 let raceTime = 0;
 let leaderboardCache = [];
 let canvasW = 800, canvasH = 600;
+let renderAlpha = 0;
 let animationId = null;
 let isRunning = false;
 
@@ -1833,6 +1834,13 @@ function showCountdown(value) {
 
 function fixedUpdate(dt) {
     if (gameState !== GameState.RACING) return;
+
+    // Save previous positions for render interpolation
+    for (const m of marbles) {
+        if (m.finished || m.eliminated) continue;
+        m.prevX = m.x;
+        m.prevY = m.y;
+    }
 
     // Update moving obstacles
     const now = performance.now();
@@ -2496,11 +2504,13 @@ function drawMarbles() {
     }
     ctx2.globalAlpha = 1;
 
-    // Draw marbles
+    // Draw marbles (với render interpolation)
     for (const m of marbles) {
         if (m.eliminated) continue;
-        const sx = camera.screenX(m.x);
-        const sy = camera.screenY(m.y);
+        const rx = (m.prevX || m.x) + (m.x - (m.prevX || m.x)) * renderAlpha;
+        const ry = (m.prevY || m.y) + (m.y - (m.prevY || m.y)) * renderAlpha;
+        const sx = camera.screenX(rx);
+        const sy = camera.screenY(ry);
         if (sx > -canvasW / 2 - 100 && sx < canvasW / 2 + 100 && sy > -100 && sy < canvasH + 100) {
             // Shadow
             ctx2.fillStyle = 'rgba(0,0,0,0.3)';
@@ -2885,6 +2895,7 @@ function gameLoop(timestamp) {
     particleSystem.update(rawDt);
 
     // Render
+    renderAlpha = accumulator / CONFIG.PHYSICS_DT;
     render();
 
     // Update UI
