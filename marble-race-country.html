@@ -1,0 +1,2698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Marble Race Country</title>
+<style>
+/* ===== CSS RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #e0e0e0; display: flex; justify-content: center; align-items: center; }
+
+/* ===== APP LAYOUT ===== */
+#app { display: flex; width: 100%; height: 100vh; max-width: 1400px; margin: 0 auto; background: #0f0f1a; overflow: hidden; }
+
+/* ===== LEFT PANEL ===== */
+#left-panel { width: 280px; min-width: 280px; height: 100%; background: linear-gradient(180deg, #14141f 0%, #1a1a2e 100%); padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; border-right: 2px solid #2a2a4a; z-index: 10; }
+#left-panel h1 { font-size: 18px; font-weight: 800; text-align: center; background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcbff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+#left-panel h2 { font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+#left-panel label { font-size: 12px; color: #999; display: block; margin-bottom: 2px; }
+#left-panel .btn-group { display: flex; gap: 4px; flex-wrap: wrap; }
+#left-panel .btn-group .btn { flex: 1; min-width: 60px; padding: 6px 8px; font-size: 11px; }
+
+/* ===== MODE SELECT BUTTONS ===== */
+.mode-select { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.mode-btn { padding: 8px 4px; font-size: 11px; font-weight: 600; background: #22223a; color: #888; border: 1px solid #33335a; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-align: center; }
+.mode-btn:hover { background: #2a2a4a; color: #ccc; }
+.mode-btn.active { background: #3a3a6a; color: #fff; border-color: #6b6bff; box-shadow: 0 0 12px rgba(107,107,255,0.3); }
+
+/* ===== BUTTONS ===== */
+.btn { padding: 8px 16px; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+.btn-primary { background: linear-gradient(135deg, #6b6bff, #8b5cf6); color: #fff; box-shadow: 0 2px 8px rgba(107,107,255,0.4); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(107,107,255,0.6); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-secondary { background: #2a2a4a; color: #aaa; border: 1px solid #3a3a6a; }
+.btn-secondary:hover { background: #3a3a6a; color: #eee; }
+.btn-danger { background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: #fff; }
+.btn-success { background: linear-gradient(135deg, #00b894, #00cec9); color: #fff; }
+.btn-small { padding: 4px 10px; font-size: 10px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+/* ===== SETTINGS CONTROLS ===== */
+.slider-container { display: flex; flex-direction: column; gap: 4px; }
+.slider-container input[type="range"] { width: 100%; height: 6px; -webkit-appearance: none; background: #2a2a4a; border-radius: 3px; outline: none; }
+.slider-container input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #6b6bff; cursor: pointer; border: 2px solid #8b8bff; box-shadow: 0 0 8px rgba(107,107,255,0.5); }
+.slider-value { text-align: center; font-size: 14px; font-weight: 700; color: #6bcbff; }
+.seed-row { display: flex; gap: 4px; align-items: center; }
+.seed-row input { flex: 1; padding: 4px 8px; font-size: 12px; background: #1a1a2e; color: #e0e0e0; border: 1px solid #2a2a4a; border-radius: 4px; outline: none; }
+.seed-row input:focus { border-color: #6b6bff; }
+.seed-row .btn { padding: 4px 8px; font-size: 12px; }
+
+/* ===== GAME CONTAINER ===== */
+#game-container { flex: 1; position: relative; overflow: hidden; background: #0a0a12; min-width: 0; }
+#gameCanvas { display: block; width: 100%; height: 100%; }
+#hud-bar { position: absolute; top: 0; left: 0; right: 0; height: 48px; background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, transparent 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; pointer-events: none; z-index: 5; }
+.hud-item { font-size: 11px; font-weight: 600; color: #ccc; display: flex; align-items: center; gap: 6px; }
+.hud-item .hud-label { color: #666; font-size: 9px; text-transform: uppercase; }
+.hud-item .hud-value { color: #fff; font-weight: 700; }
+.hud-fps { color: #6bcbff !important; }
+.leaderboard-mini { display: flex; gap: 8px; font-size: 10px; }
+.leaderboard-mini .lb-entry { display: flex; align-items: center; gap: 3px; }
+.lb-pos { color: #ffd93d; font-weight: 700; width: 16px; }
+
+/* ===== OVERLAY ===== */
+#overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 20; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+#overlay.active { display: flex; }
+#overlay .overlay-content { background: linear-gradient(180deg, #1a1a2e, #14141f); border: 1px solid #2a2a4a; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+#overlay h2 { text-align: center; font-size: 24px; margin-bottom: 16px; background: linear-gradient(135deg, #ffd93d, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+#overlay h3 { font-size: 16px; color: #aaa; margin: 12px 0 8px; text-align: center; }
+
+/* ===== PODIUM ===== */
+.podium { display: flex; justify-content: center; align-items: flex-end; gap: 12px; margin: 20px 0; height: 140px; }
+.podium-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.podium-item .flag-circle { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.podium-item .name { font-size: 12px; font-weight: 600; text-align: center; }
+.podium-item .time { font-size: 10px; color: #888; }
+.podium-1 { transform: translateY(-10px); }
+.podium-1 .flag-circle { width: 56px; height: 56px; border-color: #ffd93d; }
+.podium-1 .name { font-size: 14px; color: #ffd93d; }
+.podium-2 .flag-circle { border-color: #c0c0c0; }
+.podium-3 .flag-circle { border-color: #cd7f32; }
+.podium-stand { width: 60px; background: #2a2a4a; border-radius: 4px 4px 0 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; }
+.podium-1 .podium-stand { height: 60px; background: linear-gradient(180deg, #ffd93d, #b8860b); color: #000; font-weight: 700; }
+.podium-2 .podium-stand { height: 40px; background: linear-gradient(180deg, #c0c0c0, #808080); color: #000; font-weight: 700; }
+.podium-3 .podium-stand { height: 30px; background: linear-gradient(180deg, #cd7f32, #8b4513); color: #fff; font-weight: 700; }
+
+/* ===== RESULTS TABLE ===== */
+.results-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 8px 0; }
+.results-table th { background: #2a2a4a; color: #888; padding: 6px 8px; text-align: left; font-weight: 600; font-size: 10px; text-transform: uppercase; }
+.results-table td { padding: 5px 8px; border-bottom: 1px solid #1a1a2e; }
+.results-table tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+.results-table .pos { color: #ffd93d; font-weight: 700; width: 24px; }
+.results-table .flag-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 6px; border: 1px solid rgba(255,255,255,0.3); }
+
+/* ===== COUNTDOWN OVERLAY ===== */
+#countdown { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 15; justify-content: center; align-items: center; pointer-events: none; }
+#countdown.active { display: flex; }
+#countdown-text { font-size: 120px; font-weight: 900; color: #fff; text-shadow: 0 0 40px rgba(107,107,255,0.8), 0 0 80px rgba(107,107,255,0.4); animation: countPulse 0.8s ease-out; }
+@keyframes countPulse { 0% { transform: scale(1.8); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+/* ===== SCROLLBAR ===== */
+#left-panel::-webkit-scrollbar { width: 4px; }
+#left-panel::-webkit-scrollbar-track { background: transparent; }
+#left-panel::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 700px) {
+  #left-panel { width: 200px; min-width: 200px; padding: 10px; gap: 8px; }
+  #left-panel h1 { font-size: 14px; }
+  .mode-btn { font-size: 10px; padding: 6px 3px; }
+  .btn { font-size: 10px; padding: 6px 10px; }
+  #hud-bar { height: 38px; padding: 0 8px; }
+  .hud-item { font-size: 9px; }
+  .leaderboard-mini { gap: 4px; }
+  #countdown-text { font-size: 72px; }
+  #overlay .overlay-content { padding: 20px; }
+  .podium-item .flag-circle { width: 32px; height: 32px; }
+  .podium-1 .flag-circle { width: 42px; height: 42px; }
+}
+
+@media (max-width: 480px) {
+  #app { flex-direction: column; }
+  #left-panel { width: 100%; min-width: unset; height: auto; max-height: 40vh; flex-direction: row; flex-wrap: wrap; padding: 8px; gap: 6px; border-right: none; border-bottom: 2px solid #2a2a4a; }
+  #left-panel h1 { width: 100%; font-size: 14px; padding-bottom: 4px; }
+  #left-panel .section { flex: 1; min-width: 120px; }
+  #game-container { height: 60vh; }
+  #hud-bar { height: 32px; }
+  .hud-item { font-size: 8px; }
+  .leaderboard-mini { display: none; }
+}
+
+@media (orientation: portrait) and (min-width: 481px) {
+  #app { flex-direction: column; }
+  #left-panel { width: 100%; min-width: unset; height: auto; max-height: 35vh; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 2px solid #2a2a4a; }
+  #left-panel h1 { width: 100%; }
+  #game-container { height: 65vh; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- LEFT PANEL -->
+  <div id="left-panel">
+    <h1>🏁 MARBLE RACE COUNTRY</h1>
+
+    <div class="section">
+      <h2>Mode</h2>
+      <div class="mode-select">
+        <button class="mode-btn active" data-mode="quick">Quick Race</button>
+        <button class="mode-btn" data-mode="tournament">Tournament</button>
+        <button class="mode-btn" data-mode="survival">Survival</button>
+        <button class="mode-btn" data-mode="time">Time Trial</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Settings</h2>
+      <div class="slider-container">
+        <label>Marbles: <span class="slider-value" id="marbleCountDisplay">30</span></label>
+        <input type="range" id="marbleCount" min="8" max="60" value="30">
+      </div>
+      <div style="margin-top:6px;">
+        <label>Track Seed</label>
+        <div class="seed-row">
+          <input type="text" id="trackSeed" value="42" maxlength="10">
+          <button class="btn btn-secondary btn-small" id="randomSeedBtn">🎲</button>
+        </div>
+      </div>
+      <div style="margin-top:6px;">
+        <label>Speed</label>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-small speed-btn active" data-speed="1">1×</button>
+          <button class="btn btn-secondary btn-small speed-btn" data-speed="2">2×</button>
+          <button class="btn btn-secondary btn-small speed-btn" data-speed="4">4×</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+      <button class="btn btn-primary" id="startBtn" style="flex:1;">START RACE</button>
+      <button class="btn btn-secondary" id="pauseBtn" disabled>PAUSE</button>
+      <button class="btn btn-danger" id="restartBtn">RESTART</button>
+    </div>
+
+    <div class="section" style="margin-top:4px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;">
+        <span>Stats: <span id="statMarbles">0</span> marbles</span>
+        <span>Best: <span id="statBestTime">--</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME CONTAINER -->
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="hud-bar">
+      <div class="hud-item">
+        <span class="hud-label">Leaderboard</span>
+        <div class="leaderboard-mini" id="leaderboardMini"></div>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Progress</span>
+        <span class="hud-value" id="hudProgress">0%</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">FPS</span>
+        <span class="hud-value hud-fps" id="hudFps">60</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Active</span>
+        <span class="hud-value" id="hudActive">0/0</span>
+      </div>
+    </div>
+    <div id="countdown"><span id="countdown-text"></span></div>
+    <div id="overlay">
+      <div class="overlay-content" id="overlayContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// MARBLE RACE COUNTRY — Complete Game Implementation
+// ============================================================
+// Sections:
+//  1. CONFIGURATION
+//  2. SEEDED PRNG (Mulberry32)
+//  3. VECTOR MATH (Vec2)
+//  4. COUNTRY DATA & FLAG RENDERER
+//  5. SOUND MANAGER (Web Audio API)
+//  6. PHYSICS ENGINE (Custom)
+//  7. TRACK GENERATOR
+//  8. MARBLE SYSTEM
+//  9. PARTICLE SYSTEM
+//  10. CAMERA SYSTEM
+//  11. GAME MODES
+//  12. GAME STATE MACHINE
+//  13. UI RENDERING
+//  14. MAIN GAME LOOP
+//  15. INPUT HANDLING
+//  16. BOOTSTRAP
+// ============================================================
+
+// ============================================================
+// SECTION 1: CONFIGURATION
+// ============================================================
+const CONFIG = {
+    PHYSICS_DT: 1 / 60,
+    GRAVITY: 800,
+    MARBLE_RADIUS: 14,
+    TRACK_WIDTH: 400,
+    TRACK_LENGTH: 8000,
+    WALL_THICKNESS: 8,
+    BOUNCE_DAMPING: 0.5,
+    FRICTION_AIR: 0.999,
+    FRICTION_ROLLING: 0.98,
+    MAX_SPEED: 600,
+    SOUND_ENABLED: true,
+    PARTICLE_ENABLED: true,
+    GRID_CELL_SIZE: 64,
+    MAX_PARTICLES: 500,
+    CAMERA_SMOOTH: 0.08,
+    CHECKPOINT_INTERVAL: 400,
+    COUNTDOWN_SECONDS: 3,
+};
+
+// ============================================================
+// SECTION 2: SEEDED PRNG (Mulberry32)
+// ============================================================
+function createRNG(seed) {
+    let s = seed >>> 0;
+    return {
+        next: function() {
+            s |= 0;
+            s = s + 0x6D2B79F5 | 0;
+            let t = Math.imul(s ^ s >>> 15, 1 | s);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        },
+        nextRange: function(min, max) {
+            return min + this.next() * (max - min);
+        },
+        nextInt: function(min, max) {
+            return Math.floor(this.nextRange(min, max + 1));
+        },
+        nextGaussian: function(mean, std) {
+            let u1 = this.next(), u2 = this.next();
+            let z = Math.sqrt(-2 * Math.log(u1 || 0.0001)) * Math.cos(2 * Math.PI * u2);
+            return mean + z * std;
+        }
+    };
+}
+
+// ============================================================
+// SECTION 3: VECTOR MATH (Vec2)
+// ============================================================
+class Vec2 {
+    constructor(x = 0, y = 0) { this.x = x; this.y = y; }
+    add(v) { return new Vec2(this.x + v.x, this.y + v.y); }
+    sub(v) { return new Vec2(this.x - v.x, this.y - v.y); }
+    scale(s) { return new Vec2(this.x * s, this.y * s); }
+    dot(v) { return this.x * v.x + this.y * v.y; }
+    cross(v) { return this.x * v.y - this.y * v.x; }
+    length() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+    lengthSq() { return this.x * this.x + this.y * this.y; }
+    normalize() { const l = this.length() || 1; return new Vec2(this.x / l, this.y / l); }
+    dist(v) { return this.sub(v).length(); }
+    angle() { return Math.atan2(this.y, this.x); }
+    rotate(a) { const c = Math.cos(a), s = Math.sin(a); return new Vec2(this.x * c - this.y * s, this.x * s + this.y * c); }
+    clone() { return new Vec2(this.x, this.y); }
+    static fromAngle(a, len = 1) { return new Vec2(Math.cos(a) * len, Math.sin(a) * len); }
+}
+
+// ============================================================
+// SECTION 4: COUNTRY DATA & FLAG RENDERER
+// ============================================================
+const COUNTRIES = [
+    { name: "USA", colors: ["#B22234","#FFFFFF","#3C3B6E"], pattern: "stripes-vertical" },
+    { name: "UK", colors: ["#012169","#FFFFFF","#C8102E"], pattern: "union-jack" },
+    { name: "Germany", colors: ["#000000","#DD0000","#FFCC00"], pattern: "stripes-horizontal" },
+    { name: "France", colors: ["#002395","#FFFFFF","#ED2939"], pattern: "stripes-vertical" },
+    { name: "Italy", colors: ["#009246","#FFFFFF","#CE2B37"], pattern: "stripes-vertical" },
+    { name: "Spain", colors: ["#C60B1E","#FFC400","#C60B1E"], pattern: "stripes-horizontal" },
+    { name: "Brazil", colors: ["#009739","#FFDF00","#002776"], pattern: "circle" },
+    { name: "Japan", colors: ["#FFFFFF","#BC002D"], pattern: "circle" },
+    { name: "China", colors: ["#DE2910","#FFDE00"], pattern: "star" },
+    { name: "India", colors: ["#FF9933","#FFFFFF","#138808"], pattern: "stripes-horizontal" },
+    { name: "Canada", colors: ["#FF0000","#FFFFFF","#FF0000"], pattern: "stripes-vertical" },
+    { name: "Australia", colors: ["#00008B","#FF0000","#FFFFFF"], pattern: "star" },
+    { name: "Russia", colors: ["#FFFFFF","#0033A0","#DA291C"], pattern: "stripes-horizontal" },
+    { name: "South Korea", colors: ["#FFFFFF","#003478","#CD2E3A"], pattern: "circle" },
+    { name: "Netherlands", colors: ["#AE1C28","#FFFFFF","#21468B"], pattern: "stripes-horizontal" },
+    { name: "Switzerland", colors: ["#FF0000","#FFFFFF"], pattern: "cross" },
+    { name: "Sweden", colors: ["#005BA1","#FECC00"], pattern: "cross" },
+    { name: "Norway", colors: ["#BA0C2F","#FFFFFF","#003087"], pattern: "cross" },
+    { name: "Denmark", colors: ["#C8102E","#FFFFFF"], pattern: "cross" },
+    { name: "Finland", colors: ["#FFFFFF","#003580"], pattern: "cross" },
+    { name: "Poland", colors: ["#FFFFFF","#DC143C"], pattern: "stripes-horizontal" },
+    { name: "Czech Republic", colors: ["#11457E","#FFFFFF","#D7141A"], pattern: "triangle" },
+    { name: "Austria", colors: ["#ED2939","#FFFFFF","#ED2939"], pattern: "stripes-horizontal" },
+    { name: "Hungary", colors: ["#CE2B37","#FFFFFF","#477050"], pattern: "stripes-horizontal" },
+    { name: "Greece", colors: ["#0D5EAF","#FFFFFF"], pattern: "cross" },
+    { name: "Portugal", colors: ["#006600","#FF0000","#FFD700"], pattern: "stripes-vertical" },
+    { name: "Belgium", colors: ["#000000","#FDDA24","#EF3340"], pattern: "stripes-vertical" },
+    { name: "Turkey", colors: ["#E30A17","#FFFFFF"], pattern: "star" },
+    { name: "Argentina", colors: ["#74ACDF","#FFFFFF","#74ACDF"], pattern: "stripes-horizontal" },
+    { name: "Mexico", colors: ["#006341","#FFFFFF","#CE1126"], pattern: "stripes-vertical" },
+    { name: "Thailand", colors: ["#ED1C24","#FFFFFF","#241D4F","#FFFFFF","#ED1C24"], pattern: "stripes-horizontal" },
+    { name: "Egypt", colors: ["#CE1126","#FFFFFF","#000000"], pattern: "stripes-horizontal" },
+    { name: "Saudi Arabia", colors: ["#006C35","#FFFFFF"], pattern: "plain" },
+    { name: "Nigeria", colors: ["#008751","#FFFFFF","#008751"], pattern: "stripes-vertical" },
+    { name: "South Africa", colors: ["#DE3831","#002395","#FFFFFF","#FFB612","#007A4D"], pattern: "triangle" },
+    { name: "Ireland", colors: ["#169B62","#FFFFFF","#FF883E"], pattern: "stripes-vertical" },
+    { name: "Ukraine", colors: ["#0057B7","#FFDD00"], pattern: "stripes-horizontal" },
+    { name: "Romania", colors: ["#002B7F","#FCD116","#CE1126"], pattern: "stripes-vertical" },
+    { name: "Vietnam", colors: ["#DA251D","#FFFF00"], pattern: "star" },
+    { name: "Chile", colors: ["#FFFFFF","#0039A6","#DA291C"], pattern: "triangle" },
+];
+
+const flagTextureCache = new Map();
+
+function renderFlagTexture(country, size) {
+    const key = country.name + size;
+    if (flagTextureCache.has(key)) return flagTextureCache.get(key);
+    const canvas = document.createElement('canvas');
+    canvas.width = size * 2;
+    canvas.height = size * 2;
+    const ctx = canvas.getContext('2d');
+    const s = size * 2;
+    const h = s, w = s;
+    const colors = country.colors;
+    const cx = w / 2, cy = h / 2;
+
+    switch (country.pattern) {
+        case 'stripes-horizontal': {
+            const stripeH = h / colors.length;
+            colors.forEach((c, i) => {
+                ctx.fillStyle = c;
+                ctx.fillRect(0, i * stripeH, w, stripeH + 1);
+            });
+            break;
+        }
+        case 'stripes-vertical': {
+            const stripeW = w / colors.length;
+            colors.forEach((c, i) => {
+                ctx.fillStyle = c;
+                ctx.fillRect(i * stripeW, 0, stripeW + 1, h);
+            });
+            break;
+        }
+        case 'cross': {
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = colors[1];
+            const cw = w * 0.2, ch = h * 0.2;
+            ctx.fillRect(cx - cw / 2, 0, cw, h);
+            ctx.fillRect(0, cy - ch / 2, w, ch);
+            if (colors[2]) {
+                ctx.fillStyle = colors[2];
+                ctx.fillRect(cx - cw / 3, 0, cw * 0.66, h);
+                ctx.fillRect(0, cy - ch / 3, w, ch * 0.66);
+            }
+            break;
+        }
+        case 'circle': {
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            const r = w * 0.35;
+            ctx.fillStyle = colors[1];
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+        }
+        case 'triangle': {
+            // Triangle pattern (like Czech, South Africa)
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            if (colors.length >= 3) {
+                ctx.fillStyle = colors[1];
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(w, 0);
+                ctx.lineTo(w * 0.5, h * 0.5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = colors[2];
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(w * 0.3, 0);
+                ctx.lineTo(0, h * 0.5);
+                ctx.closePath();
+                ctx.fill();
+            }
+            break;
+        }
+        case 'star': {
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = colors[1];
+            const starR = w * 0.3;
+            drawStar(ctx, cx, cy, 5, starR, starR * 0.4);
+            break;
+        }
+        case 'diagonal': {
+            // Diagonal split
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = colors[1];
+            ctx.beginPath();
+            ctx.moveTo(0, h);
+            ctx.lineTo(w, h);
+            ctx.lineTo(w, 0);
+            ctx.closePath();
+            ctx.fill();
+            if (colors[2]) {
+                ctx.fillStyle = colors[2];
+                ctx.beginPath();
+                ctx.moveTo(0, h * 0.7);
+                ctx.lineTo(w * 0.3, h);
+                ctx.lineTo(0, h);
+                ctx.closePath();
+                ctx.fill();
+            }
+            break;
+        }
+        case 'checker': {
+            const n = 4;
+            const cs = w / n;
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = colors[1];
+            for (let r = 0; r < n; r++) {
+                for (let c = 0; c < n; c++) {
+                    if ((r + c) % 2 === 0) {
+                        ctx.fillRect(c * cs, r * cs, cs, cs);
+                    }
+                }
+            }
+            break;
+        }
+        case 'union-jack': {
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            // White diagonal cross
+            ctx.fillStyle = colors[1];
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(Math.PI / 4);
+            ctx.fillRect(-w * 0.25, -h * 0.15, w * 0.5, h * 0.3);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillRect(-w * 0.25, -h * 0.15, w * 0.5, h * 0.3);
+            ctx.restore();
+            // Red diagonal cross
+            ctx.fillStyle = colors[2];
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(Math.PI / 4);
+            ctx.fillRect(-w * 0.25, -h * 0.07, w * 0.5, h * 0.14);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillRect(-w * 0.25, -h * 0.07, w * 0.5, h * 0.14);
+            ctx.restore();
+            // White cross
+            ctx.fillStyle = colors[1];
+            ctx.fillRect(cx - w * 0.06, 0, w * 0.12, h);
+            ctx.fillRect(0, cy - h * 0.06, w, h * 0.12);
+            // Red cross
+            ctx.fillStyle = colors[2];
+            ctx.fillRect(cx - w * 0.03, 0, w * 0.06, h);
+            ctx.fillRect(0, cy - h * 0.03, w, h * 0.06);
+            break;
+        }
+        case 'plain':
+        default: {
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            if (colors[1]) {
+                // Add some detail
+                ctx.fillStyle = colors[1];
+                ctx.font = `${w * 0.5}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+            }
+            break;
+        }
+    }
+
+    // Border
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, w - 2, h - 2);
+
+    // Clip to circle version
+    const circleCanvas = document.createElement('canvas');
+    circleCanvas.width = size;
+    circleCanvas.height = size;
+    const cctx = circleCanvas.getContext('2d');
+    cctx.beginPath();
+    cctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+    cctx.clip();
+    cctx.drawImage(canvas, 0, 0, s, s, 0, 0, size, size);
+
+    flagTextureCache.set(key, circleCanvas);
+    return circleCanvas;
+}
+
+function drawStar(ctx, cx, cy, points, outerR, innerR) {
+    ctx.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const a = (i * Math.PI / points) - Math.PI / 2;
+        const x = cx + r * Math.cos(a);
+        const y = cy + r * Math.sin(a);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+}
+
+// ============================================================
+// SECTION 5: SOUND MANAGER (Web Audio API)
+// ============================================================
+class SoundManager {
+    constructor() {
+        this.ctx = null;
+        this.masterVolume = 0.5;
+        this.initialized = false;
+        this.bounceBuffer = null;
+        this.noiseBuffer = null;
+    }
+
+    init() {
+        if (this.initialized) return;
+        try {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.value = this.masterVolume;
+            this.masterGain.connect(this.ctx.destination);
+            // Generate noise buffer for rolling sounds
+            const sr = this.ctx.sampleRate;
+            const len = sr * 0.5;
+            const buf = this.ctx.createBuffer(1, len, sr);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+            this.noiseBuffer = buf;
+            this.initialized = true;
+        } catch (e) {
+            console.warn('Audio not available');
+        }
+    }
+
+    resume() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
+    setVolume(v) {
+        this.masterVolume = v;
+        if (this.masterGain) this.masterGain.gain.value = v;
+    }
+
+    _playTone(freq, duration, type = 'sine', volume = 0.3) {
+        if (!this.initialized) return;
+        this.resume();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+    }
+
+    playBounce(volume = 0.15) {
+        const freq = 200 + Math.random() * 300;
+        this._playTone(freq, 0.08, 'sine', volume * 0.6);
+        this._playTone(freq * 0.5, 0.06, 'triangle', volume * 0.3);
+    }
+
+    playCheckpoint() {
+        this._playTone(523, 0.1, 'sine', 0.2);
+        setTimeout(() => {
+            if (this.initialized) this._playTone(659, 0.1, 'sine', 0.2);
+        }, 80);
+    }
+
+    playFinish() {
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((f, i) => {
+            setTimeout(() => this._playTone(f, 0.2, 'sine', 0.25), i * 150);
+        });
+    }
+
+    playClick() {
+        this._playTone(800, 0.05, 'square', 0.1);
+    }
+
+    playElimination() {
+        this._playTone(300, 0.3, 'sawtooth', 0.15);
+        this._playTone(200, 0.4, 'sawtooth', 0.1);
+    }
+
+    playCountdown() {
+        this._playTone(440, 0.15, 'sine', 0.2);
+    }
+
+    playGo() {
+        this._playTone(880, 0.3, 'sine', 0.3);
+    }
+
+    startRolling() {
+        // Rolling noise - handled per-frame in game loop
+        // This is a placeholder for continuous rolling sound
+    }
+}
+
+// ============================================================
+// SECTION 6: PHYSICS ENGINE (Custom)
+// ============================================================
+
+class SpatialGrid {
+    constructor(cellSize) {
+        this.cellSize = cellSize;
+        this.cells = new Map();
+    }
+
+    clear() {
+        this.cells.clear();
+    }
+
+    _key(x, y) {
+        return Math.floor(x / this.cellSize) + ',' + Math.floor(y / this.cellSize);
+    }
+
+    insert(body) {
+        const key = this._key(body.x, body.y);
+        if (!this.cells.has(key)) this.cells.set(key, []);
+        this.cells.get(key).push(body);
+    }
+
+    getNearby(body) {
+        const results = [];
+        const cx = Math.floor(body.x / this.cellSize);
+        const cy = Math.floor(body.y / this.cellSize);
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const key = (cx + dx) + ',' + (cy + dy);
+                if (this.cells.has(key)) {
+                    results.push(...this.cells.get(key));
+                }
+            }
+        }
+        return results;
+    }
+
+    getAll() {
+        const all = [];
+        for (const arr of this.cells.values()) all.push(...arr);
+        return all;
+    }
+}
+
+class PhysicsEngine {
+    constructor() {
+        this.bodies = [];
+        this.staticBodies = [];
+        this.grid = new SpatialGrid(CONFIG.GRID_CELL_SIZE);
+        this.wallSegments = [];
+    }
+
+    addBody(body) {
+        this.bodies.push(body);
+        return body;
+    }
+
+    addStaticBody(body) {
+        body.isStatic = true;
+        this.staticBodies.push(body);
+        return body;
+    }
+
+    setWalls(segments) {
+        this.wallSegments = segments;
+    }
+
+    fixedUpdate(dt) {
+        // Apply gravity
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            b.vy += CONFIG.GRAVITY * dt;
+            b.vx *= CONFIG.FRICTION_AIR;
+            b.vy *= CONFIG.FRICTION_AIR;
+            const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+            if (speed > CONFIG.MAX_SPEED) {
+                b.vx = (b.vx / speed) * CONFIG.MAX_SPEED;
+                b.vy = (b.vy / speed) * CONFIG.MAX_SPEED;
+            }
+        }
+
+        // Move bodies (Euler)
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            b.x += b.vx * dt;
+            b.y += b.vy * dt;
+            b.rotation += b.vx * dt * 0.05;
+        }
+
+        // Build spatial grid
+        this.grid.clear();
+        for (const b of this.bodies) {
+            if (!b.isStatic && !b.finished && !b.eliminated) {
+                this.grid.insert(b);
+            }
+        }
+        for (const b of this.staticBodies) {
+            this.grid.insert(b);
+        }
+
+        // Marble-wall collisions
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            this._resolveWallCollisions(b);
+        }
+
+        // Marble-static body collisions
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            const nearby = this.grid.getNearby(b);
+            for (const other of nearby) {
+                if (other === b) continue;
+                if (!other.isStatic) continue;
+                if (other.type === 'peg') {
+                    this._resolveCircleCircle(b, other);
+                } else if (other.type === 'bumper') {
+                    this._resolveCircleCircle(b, other, true);
+                }
+            }
+        }
+
+        // Marble-marble collisions
+        for (let i = 0; i < this.bodies.length; i++) {
+            const a = this.bodies[i];
+            if (a.isStatic || a.finished || a.eliminated) continue;
+            const nearby = this.grid.getNearby(a);
+            for (const b of nearby) {
+                if (b === a || b.isStatic || b.finished || b.eliminated) continue;
+                // Only process each pair once (using index)
+                if (this.bodies.indexOf(b) > i) continue;
+                this._resolveCircleCircle(a, b);
+            }
+        }
+
+        // Apply rolling friction
+        for (const b of this.bodies) {
+            if (b.isStatic || b.finished || b.eliminated) continue;
+            b.vx *= (1 - b.friction * dt * 10);
+            b.vy *= (1 - b.friction * dt * 10);
+        }
+    }
+
+    _resolveWallCollisions(body) {
+        const r = body.radius;
+        for (const seg of this.wallSegments) {
+            const ax = seg.x1, ay = seg.y1, bx = seg.x2, by = seg.y2;
+            const dx = bx - ax, dy = by - ay;
+            const lenSq = dx * dx + dy * dy;
+            if (lenSq < 0.001) continue;
+            let t = ((body.x - ax) * dx + (body.y - ay) * dy) / lenSq;
+            t = Math.max(0, Math.min(1, t));
+            const cx = ax + t * dx, cy = ay + t * dy;
+            const distX = body.x - cx, distY = body.y - cy;
+            const dist = Math.sqrt(distX * distX + distY * distY);
+            if (dist < r && dist > 0) {
+                const overlap = r - dist;
+                const nx = distX / dist, ny = distY / dist;
+                body.x += nx * overlap;
+                body.y += ny * overlap;
+                const relV = body.vx * nx + body.vy * ny;
+                if (relV < 0) {
+                    body.vx -= (1 + CONFIG.BOUNCE_DAMPING) * relV * nx;
+                    body.vy -= (1 + CONFIG.BOUNCE_DAMPING) * relV * ny;
+                    // Play bounce sound
+                    if (Math.abs(relV) > 50 && soundManager) {
+                        soundManager.playBounce(Math.min(Math.abs(relV) / 500, 0.5));
+                    }
+                }
+            }
+        }
+    }
+
+    _resolveCircleCircle(a, b, isBumper = false) {
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const sumR = a.radius + b.radius;
+        if (dist >= sumR || dist < 0.001) return;
+        const overlap = sumR - dist;
+        const nx = dx / dist, ny = dy / dist;
+        const totalMass = (a.isStatic ? 0 : 1 / a.mass) + (b.isStatic ? 0 : 1 / b.mass);
+        if (!a.isStatic) {
+            const pushA = overlap * (b.isStatic ? 1 : (1 / a.mass) / totalMass);
+            a.x -= nx * pushA;
+            a.y -= ny * pushA;
+        }
+        if (!b.isStatic) {
+            const pushB = overlap * (a.isStatic ? 1 : (1 / b.mass) / totalMass);
+            b.x += nx * pushB;
+            b.y += ny * pushB;
+        }
+
+        // Relative velocity
+        const relVx = (a.isStatic ? 0 : a.vx) - (b.isStatic ? 0 : b.vx);
+        const relVy = (a.isStatic ? 0 : a.vy) - (b.isStatic ? 0 : b.vy);
+        const relVn = relVx * nx + relVy * ny;
+        if (relVn < 0) return; // separating
+
+        const bounce = isBumper ? 1.2 : Math.min(a.bounce || 0.5, b.bounce || 0.5);
+        const j = (1 + bounce) * relVn / totalMass;
+        if (!a.isStatic) {
+            a.vx -= j * nx / a.mass;
+            a.vy -= j * ny / a.mass;
+        }
+        if (!b.isStatic) {
+            b.vx += j * nx / b.mass;
+            b.vy += j * ny / b.mass;
+        }
+
+        // Play bounce
+        if (isBumper) {
+            if (soundManager) soundManager.playBounce(0.4);
+            // Emit particles
+            if (particleSystem && CONFIG.PARTICLE_ENABLED) {
+                particleSystem.emit((a.x + b.x) / 2, (a.y + b.y) / 2, 5, {
+                    color: '#ffd93d', speed: 100, life: 0.5, size: 3
+                });
+            }
+        }
+    }
+}
+
+// ============================================================
+// SECTION 7: TRACK GENERATOR
+// ============================================================
+
+function generateTrack(seed) {
+    const rng = createRNG(seed);
+    const track = {
+        walls: { left: [], right: [] },
+        obstacles: [],
+        checkpoints: [],
+        finishLine: 0,
+        startZone: { yStart: 100, yEnd: 300 },
+        wallSegments: [],
+        decorations: [],
+    };
+
+    const trackLen = CONFIG.TRACK_LENGTH;
+    const baseWidth = CONFIG.TRACK_WIDTH;
+    const segments = 40;
+    const segH = trackLen / segments;
+
+    // Generate smooth wall profiles
+    let leftX = -baseWidth / 2;
+    let rightX = baseWidth / 2;
+
+    const leftWalls = [];
+    const rightWalls = [];
+    let prevLeft = leftX;
+    let prevRight = rightX;
+
+    for (let i = 0; i <= segments; i++) {
+        const y = i * segH;
+        const t = i / segments;
+
+        // Sinusoidal variation
+        const variation = rng.nextRange(-40, 40) * (1 - Math.abs(t - 0.5) * 0.8);
+        const widthVar = rng.nextRange(-30, 30) * (1 - Math.abs(t - 0.5));
+
+        const smoothFactor = 0.3;
+        let targetLeft = -baseWidth / 2 + variation - widthVar / 2;
+        let targetRight = baseWidth / 2 + variation + widthVar / 2;
+
+        // Ensure minimum width
+        const minWidth = 120;
+        if (targetRight - targetLeft < minWidth) {
+            const center = (targetLeft + targetRight) / 2;
+            targetLeft = center - minWidth / 2;
+            targetRight = center + minWidth / 2;
+        }
+
+        const lx = prevLeft + (targetLeft - prevLeft) * smoothFactor + rng.nextRange(-5, 5);
+        const rx = prevRight + (targetRight - prevRight) * smoothFactor + rng.nextRange(-5, 5);
+
+        leftWalls.push({ x: lx, y });
+        rightWalls.push({ x: rx, y });
+        prevLeft = lx;
+        prevRight = rx;
+    }
+
+    track.walls.left = leftWalls;
+    track.walls.right = rightWalls;
+
+    // Build wall segments for collision
+    for (let i = 0; i < leftWalls.length - 1; i++) {
+        track.wallSegments.push({
+            x1: leftWalls[i].x, y1: leftWalls[i].y,
+            x2: leftWalls[i + 1].x, y2: leftWalls[i + 1].y,
+            isLeft: true
+        });
+        track.wallSegments.push({
+            x1: rightWalls[i].x, y1: rightWalls[i].y,
+            x2: rightWalls[i + 1].x, y2: rightWalls[i + 1].y,
+            isLeft: false
+        });
+    }
+
+    // Add a bottom wall across the bottom
+    const lastL = leftWalls[leftWalls.length - 1];
+    const lastR = rightWalls[rightWalls.length - 1];
+    track.wallSegments.push({
+        x1: lastL.x, y1: lastL.y,
+        x2: lastR.x, y2: lastR.y
+    });
+
+    // Generate obstacles for each segment
+    for (let i = 2; i < segments - 1; i++) {
+        const y = i * segH;
+        const lw = leftWalls[i];
+        const rw = rightWalls[i];
+        const segWidth = rw.x - lw.x;
+        const midX = (lw.x + rw.x) / 2;
+
+        const typeRoll = rng.next();
+        const obstacleType = typeRoll < 0.12 ? 'funnel' :
+                             typeRoll < 0.25 ? 'pegs' :
+                             typeRoll < 0.35 ? 'spinner' :
+                             typeRoll < 0.45 ? 'pendulum' :
+                             typeRoll < 0.55 ? 'bumpers' :
+                             typeRoll < 0.62 ? 'jump-pad' :
+                             typeRoll < 0.70 ? 'moving-platform' :
+                             typeRoll < 0.77 ? 'split-path' :
+                             typeRoll < 0.83 ? 'rotating-gate' :
+                             typeRoll < 0.89 ? 'scurve' :
+                             typeRoll < 0.94 ? 'gravity-drop' :
+                             'checkpoint';
+
+        const segMidY = y + segH / 2;
+
+        switch (obstacleType) {
+            case 'funnel': {
+                const gap = rng.nextRange(40, 100);
+                const funnelTop = segWidth * 0.8;
+                track.obstacles.push({
+                    type: 'funnel', y: segMidY, segW: segWidth,
+                    gap: gap, midX: midX, height: segH * 0.6
+                });
+                // Add funnel wall segments
+                const fY0 = segMidY - segH * 0.3;
+                const fY1 = segMidY;
+                const fY2 = segMidY + segH * 0.3;
+                const gapHalf = gap / 2;
+                track.wallSegments.push({ x1: lw.x + segWidth * 0.1, y1: fY0, x2: midX - gapHalf, y2: fY1 });
+                track.wallSegments.push({ x1: rw.x - segWidth * 0.1, y1: fY0, x2: midX + gapHalf, y2: fY1 });
+                track.wallSegments.push({ x1: midX - gapHalf, y1: fY1, x2: lw.x + segWidth * 0.1, y2: fY2 });
+                track.wallSegments.push({ x1: midX + gapHalf, y1: fY1, x2: rw.x - segWidth * 0.1, y2: fY2 });
+                break;
+            }
+            case 'pegs': {
+                const numPegs = rng.nextInt(6, 15);
+                for (let p = 0; p < numPegs; p++) {
+                    const px = lw.x + rng.nextRange(20, segWidth - 20);
+                    const py = segMidY - segH * 0.4 + rng.nextRange(0, segH * 0.8);
+                    track.obstacles.push({
+                        type: 'peg', x: px, y: py, radius: rng.nextRange(6, 14)
+                    });
+                }
+                break;
+            }
+            case 'spinner': {
+                track.obstacles.push({
+                    type: 'spinner', x: midX, y: segMidY, radius: segWidth * 0.35,
+                    arms: rng.nextInt(3, 6), speed: rng.nextRange(1, 3) * (rng.next() > 0.5 ? 1 : -1),
+                    angle: rng.nextRange(0, Math.PI * 2)
+                });
+                break;
+            }
+            case 'pendulum': {
+                track.obstacles.push({
+                    type: 'pendulum', x: midX, y: segMidY - segH * 0.3,
+                    length: segH * 0.4, ballRadius: 12, swingSpeed: rng.nextRange(1.5, 3),
+                    angle: rng.nextRange(-0.5, 0.5)
+                });
+                break;
+            }
+            case 'bumpers': {
+                const numBump = rng.nextInt(3, 6);
+                for (let p = 0; p < numBump; p++) {
+                    track.obstacles.push({
+                        type: 'bumper', x: lw.x + rng.nextRange(30, segWidth - 30),
+                        y: segMidY - segH * 0.3 + rng.nextRange(0, segH * 0.6),
+                        radius: rng.nextRange(10, 18), bounce: 1.3
+                    });
+                }
+                break;
+            }
+            case 'jump-pad': {
+                track.obstacles.push({
+                    type: 'jump-pad', x: midX, y: segMidY,
+                    width: segWidth * 0.4, boost: rng.nextRange(-400, -600)
+                });
+                break;
+            }
+            case 'moving-platform': {
+                track.obstacles.push({
+                    type: 'moving-platform', x: midX, y: segMidY,
+                    width: segWidth * 0.5, height: 10,
+                    travel: segWidth * 0.3, speed: rng.nextRange(30, 80),
+                    phase: rng.nextRange(0, Math.PI * 2)
+                });
+                break;
+            }
+            case 'split-path': {
+                const numPaths = rng.nextInt(2, 3);
+                const paths = [];
+                const pathWidth = segWidth / numPaths;
+                for (let p = 0; p < numPaths; p++) {
+                    const pLx = lw.x + p * pathWidth + 10;
+                    const pRx = lw.x + (p + 1) * pathWidth - 10;
+                    paths.push({ left: pLx, right: pRx });
+                    // Add wall segments for split
+                    if (p > 0) {
+                        track.wallSegments.push({ x1: pLx - 5, y1: segMidY - segH * 0.4, x2: pLx - 5, y2: segMidY + segH * 0.4 });
+                    }
+                }
+                track.obstacles.push({
+                    type: 'split-path', y: segMidY, height: segH * 0.8,
+                    paths: paths, numPaths: numPaths, midX: midX
+                });
+                break;
+            }
+            case 'rotating-gate': {
+                track.obstacles.push({
+                    type: 'rotating-gate', x: midX, y: segMidY,
+                    width: segWidth * 0.6, bars: rng.nextInt(2, 4),
+                    speed: rng.nextRange(1, 3), angle: rng.nextRange(0, Math.PI)
+                });
+                break;
+            }
+            case 'scurve': {
+                track.obstacles.push({
+                    type: 'scurve', y: segMidY, height: segH * 0.8,
+                    amplitude: segWidth * 0.25, frequency: 2.5, midX: midX
+                });
+                // Add S-curve wall override segments
+                const steps = 10;
+                for (let s = 0; s < steps; s++) {
+                    const t0 = s / steps, t1 = (s + 1) / steps;
+                    const y0 = segMidY - segH * 0.4 + t0 * segH * 0.8;
+                    const y1 = segMidY - segH * 0.4 + t1 * segH * 0.8;
+                    const a0 = Math.sin(t0 * Math.PI * 2 * 2) * segWidth * 0.25;
+                    const a1 = Math.sin(t1 * Math.PI * 2 * 2) * segWidth * 0.25;
+                    const l0 = lw.x + a0 + 10, r0 = rw.x + a0 - 10;
+                    const l1 = lw.x + a1 + 10, r1 = rw.x + a1 - 10;
+                    // Add wall segments that override existing ones
+                    track.wallSegments.push({ x1: l0, y1: y0, x2: l1, y2: y1 });
+                    track.wallSegments.push({ x1: r0, y1: y0, x2: r1, y2: y1 });
+                }
+                break;
+            }
+            case 'gravity-drop': {
+                track.obstacles.push({
+                    type: 'gravity-drop', y: segMidY, height: segH * 0.6,
+                    width: segWidth, midX: midX, boost: -200
+                });
+                break;
+            }
+            case 'checkpoint': {
+                track.checkpoints.push({
+                    y: segMidY, name: `CP${track.checkpoints.length + 1}`, index: track.checkpoints.length
+                });
+                break;
+            }
+        }
+    }
+
+    // Add checkpoints along the track
+    const numCP = 8;
+    for (let i = 0; i < numCP; i++) {
+        const cpY = (i + 1) * (trackLen / (numCP + 1));
+        if (!track.checkpoints.find(cp => Math.abs(cp.y - cpY) < 100)) {
+            track.checkpoints.push({
+                y: cpY, name: `CP${track.checkpoints.length + 1}`, index: track.checkpoints.length
+            });
+        }
+    }
+    track.checkpoints.sort((a, b) => a.y - b.y);
+    track.checkpoints.forEach((cp, i) => { cp.index = i; cp.name = `CP${i + 1}`; });
+
+    track.finishLine = trackLen - 50;
+
+    // Add finish lane decorations
+    track.decorations.push({ type: 'finish-line', y: track.finishLine });
+
+    // Add start zone
+    track.startZone = { yStart: 50, yEnd: 200 };
+
+    return track;
+}
+
+// ============================================================
+// SECTION 8: MARBLE SYSTEM
+// ============================================================
+
+let nextMarbleId = 0;
+
+function createMarble(countryIndex, x, y, rng) {
+    const country = COUNTRIES[countryIndex];
+    return {
+        id: nextMarbleId++,
+        countryIndex: countryIndex,
+        name: country.name,
+        x: x,
+        y: y,
+        vx: 0,
+        vy: 0,
+        radius: CONFIG.MARBLE_RADIUS,
+        mass: rng.nextRange(0.8, 1.2),
+        bounce: rng.nextRange(0.3, 0.7),
+        friction: rng.nextRange(0.015, 0.035),
+        grip: rng.nextRange(0.7, 1.0),
+        luck: rng.nextRange(0.3, 1.0),
+        rotation: 0,
+        trail: [],
+        finished: false,
+        eliminated: false,
+        checkpointTimes: [],
+        finishTime: null,
+        place: null,
+        maxSpeedReached: 0,
+        collisions: 0,
+        texture: null,
+    };
+}
+
+function initMarbles(count, seed) {
+    const rng = createRNG(seed * 7 + 13);
+    const marbles = [];
+    const selectedIndices = [];
+    // Pick unique countries (or allow repeats if count > countries length)
+    const pool = [...Array(COUNTRIES.length).keys()];
+    for (let i = 0; i < count; i++) {
+        let idx;
+        if (pool.length > 0 && i < COUNTRIES.length) {
+            const pi = rng.nextInt(0, pool.length - 1);
+            idx = pool[pi];
+            pool.splice(pi, 1);
+        } else {
+            idx = rng.nextInt(0, COUNTRIES.length - 1);
+        }
+        selectedIndices.push(idx);
+    }
+
+    // Shuffle for start positions
+    for (let i = selectedIndices.length - 1; i > 0; i--) {
+        const j = rng.nextInt(0, i);
+        [selectedIndices[i], selectedIndices[j]] = [selectedIndices[j], selectedIndices[i]];
+    }
+
+    const trackWidth = CONFIG.TRACK_WIDTH;
+    const spacing = Math.min(trackWidth / count, 28);
+    const startY = CONFIG.TRACK_LENGTH * 0.02;
+
+    for (let i = 0; i < count; i++) {
+        const x = -trackWidth / 2 + spacing / 2 + i * spacing + rng.nextRange(-3, 3);
+        const y = startY + rng.nextRange(0, 20);
+        const marble = createMarble(selectedIndices[i], x, y, rng);
+        marble.texture = renderFlagTexture(COUNTRIES[selectedIndices[i]], CONFIG.MARBLE_RADIUS * 2);
+        marbles.push(marble);
+    }
+    return marbles;
+}
+
+// ============================================================
+// SECTION 9: PARTICLE SYSTEM
+// ============================================================
+
+class Particle {
+    constructor() {
+        this.x = 0; this.y = 0; this.vx = 0; this.vy = 0;
+        this.life = 0; this.maxLife = 1; this.size = 4;
+        this.color = '#ffffff'; this.gravity = 0;
+        this.type = 'circle'; this.alpha = 1;
+        this.active = false;
+    }
+}
+
+class ParticleSystem {
+    constructor(maxParticles = CONFIG.MAX_PARTICLES) {
+        this.particles = [];
+        for (let i = 0; i < maxParticles; i++) {
+            this.particles.push(new Particle());
+        }
+        this.maxParticles = maxParticles;
+    }
+
+    emit(x, y, count, config) {
+        const c = config || {};
+        const color = c.color || '#ffffff';
+        const speed = c.speed || 100;
+        const life = c.life || 0.5;
+        const size = c.size || 3;
+        const gravity = c.gravity || 0;
+        const type = c.type || 'circle';
+
+        for (let i = 0; i < count; i++) {
+            const p = this._getInactive();
+            if (!p) break;
+            const angle = Math.random() * Math.PI * 2;
+            const spd = speed * (0.3 + Math.random() * 0.7);
+            p.x = x + (Math.random() - 0.5) * 10;
+            p.y = y + (Math.random() - 0.5) * 10;
+            p.vx = Math.cos(angle) * spd;
+            p.vy = Math.sin(angle) * spd;
+            p.life = life * (0.5 + Math.random() * 0.5);
+            p.maxLife = p.life;
+            p.size = size * (0.5 + Math.random() * 0.5);
+            p.color = color;
+            p.gravity = gravity;
+            p.type = type;
+            p.alpha = 1;
+            p.active = true;
+        }
+    }
+
+    _getInactive() {
+        for (const p of this.particles) {
+            if (!p.active) return p;
+        }
+        // Recycle oldest
+        return this.particles[0];
+    }
+
+    update(dt) {
+        for (const p of this.particles) {
+            if (!p.active) continue;
+            p.life -= dt;
+            if (p.life <= 0) { p.active = false; continue; }
+            p.vy += p.gravity * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.alpha = Math.max(0, p.life / p.maxLife);
+        }
+    }
+
+    render(ctx, camera) {
+        for (const p of this.particles) {
+            if (!p.active) continue;
+            const sx = p.x - camera.x;
+            const sy = p.y - camera.y;
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            if (p.type === 'circle') {
+                ctx.beginPath();
+                ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillRect(sx - p.size / 2, sy - p.size / 2, p.size, p.size);
+            }
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    emitTrail(marble, camera) {
+        if (!CONFIG.PARTICLE_ENABLED) return;
+        const speed = Math.sqrt(marble.vx * marble.vx + marble.vy * marble.vy);
+        if (speed > 100 && Math.random() < 0.3) {
+            this.emit(marble.x, marble.y, 1, {
+                color: COUNTRIES[marble.countryIndex].colors[0],
+                speed: 20, life: 0.4, size: 2, gravity: 20
+            });
+        }
+    }
+
+    emitCollision(x, y, intensity = 1) {
+        if (!CONFIG.PARTICLE_ENABLED) return;
+        this.emit(x, y, Math.floor(5 * intensity), {
+            color: '#ffd93d', speed: 150 * intensity, life: 0.4, size: 3, gravity: 100
+        });
+        this.emit(x, y, Math.floor(3 * intensity), {
+            color: '#ff6b6b', speed: 100 * intensity, life: 0.3, size: 2, gravity: 50
+        });
+    }
+
+    emitConfetti(x, y, count = 30) {
+        if (!CONFIG.PARTICLE_ENABLED) return;
+        const colors = ['#ff6b6b', '#ffd93d', '#6bcbff', '#00b894', '#a29bfe', '#fd79a8', '#fdcb6e'];
+        for (let i = 0; i < count; i++) {
+            const p = this._getInactive();
+            if (!p) break;
+            const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+            const spd = 100 + Math.random() * 200;
+            p.x = x + (Math.random() - 0.5) * 50;
+            p.y = y;
+            p.vx = Math.cos(angle) * spd;
+            p.vy = Math.sin(angle) * spd;
+            p.life = 1.5 + Math.random() * 1.5;
+            p.maxLife = p.life;
+            p.size = 4 + Math.random() * 4;
+            p.color = colors[Math.floor(Math.random() * colors.length)];
+            p.gravity = 200;
+            p.type = 'rect';
+            p.alpha = 1;
+            p.active = true;
+        }
+    }
+}
+
+// ============================================================
+// SECTION 10: CAMERA SYSTEM
+// ============================================================
+
+class Camera {
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.targetX = 0;
+        this.targetY = 0;
+        this.shakeX = 0;
+        this.shakeY = 0;
+        this.shakeIntensity = 0;
+        this.zoom = 1;
+    }
+
+    update(dt, marbles, canvasW, canvasH) {
+        // Find leading marble (most progress = lowest y)
+        let leadY = Infinity;
+        let leadX = 0;
+        let found = false;
+        for (const m of marbles) {
+            if (m.finished || m.eliminated) continue;
+            if (m.y < leadY) {
+                leadY = m.y;
+                leadX = m.x;
+                found = true;
+            }
+        }
+        if (!found) {
+            // Pick finished marble with smallest y
+            for (const m of marbles) {
+                if (m.y < leadY) {
+                    leadY = m.y;
+                    leadX = m.x;
+                }
+            }
+        }
+
+        this.targetX = 0; // Center on track
+        this.targetY = leadY - canvasH * 0.4;
+
+        // Clamp
+        this.targetY = Math.max(this.targetY, -200);
+        this.targetY = Math.min(this.targetY, CONFIG.TRACK_LENGTH - canvasH * 0.8);
+
+        // Smooth lerp
+        const smooth = CONFIG.CAMERA_SMOOTH;
+        this.x += (this.targetX - this.x) * smooth;
+        this.y += (this.targetY - this.y) * smooth;
+
+        // Camera shake decay
+        if (this.shakeIntensity > 0) {
+            this.shakeX = (Math.random() - 0.5) * this.shakeIntensity;
+            this.shakeY = (Math.random() - 0.5) * this.shakeIntensity;
+            this.shakeIntensity *= 0.9;
+            if (this.shakeIntensity < 0.5) this.shakeIntensity = 0;
+        } else {
+            this.shakeX = 0;
+            this.shakeY = 0;
+        }
+    }
+
+    shake(intensity) {
+        this.shakeIntensity = Math.max(this.shakeIntensity, intensity);
+    }
+
+    screenX(x) {
+        return x - this.x + this.shakeX;
+    }
+
+    screenY(y) {
+        return y - this.y + this.shakeY;
+    }
+
+    isVisible(x, y, margin = 100) {
+        const sx = x - this.x;
+        const sy = y - this.y;
+        return sx > -margin && sx < canvasW + margin && sy > -margin && sy < canvasH + margin;
+    }
+}
+
+// ============================================================
+// SECTION 11: GAME MODES
+// ============================================================
+
+class GameMode {
+    constructor() {
+        this.mode = 'quick';
+        this.tournamentStandings = [];
+        this.currentRace = 0;
+        this.totalRaces = 4;
+        this.survivorCheckpoint = 0;
+    }
+
+    setMode(mode) {
+        this.mode = mode;
+        this.currentRace = 0;
+        this.survivorCheckpoint = 0;
+        if (mode === 'tournament') {
+            this.tournamentStandings = [];
+        }
+    }
+
+    getPointsForPlace(place, total) {
+        if (this.mode === 'survival') {
+            return place === 1 ? 1 : 0;
+        }
+        const pointsTable = [25, 18, 15, 12, 10, 8, 6, 5, 4, 3, 2, 1];
+        return pointsTable[place - 1] || 0;
+    }
+
+    updateTournament(marbles) {
+        if (this.mode !== 'tournament') return;
+        const sorted = [...marbles].filter(m => m.finishTime !== null).sort((a, b) => a.finishTime - b.finishTime);
+        sorted.forEach((m, i) => {
+            let entry = this.tournamentStandings.find(e => e.id === m.id);
+            if (!entry) {
+                entry = { id: m.id, name: m.name, countryIndex: m.countryIndex, points: 0, best: Infinity };
+                this.tournamentStandings.push(entry);
+            }
+            entry.points += this.getPointsForPlace(i + 1, sorted.length);
+            if (m.finishTime < entry.best) entry.best = m.finishTime;
+        });
+    }
+
+    getEliminatedMarbles(marbles, checkpointIndex) {
+        if (this.mode !== 'survival') return [];
+        const active = marbles.filter(m => !m.eliminated && !m.finished);
+        if (active.length <= 1) return [];
+        // Find marbles that passed the checkpoint but are slowest
+        const passed = active.filter(m => m.checkpointTimes.length > checkpointIndex);
+        if (passed.length < 2) return [];
+        passed.sort((a, b) => (a.finishTime || a.y) - (b.finishTime || b.y));
+        return [passed[passed.length - 1]]; // Eliminate last
+    }
+}
+
+// ============================================================
+// SECTION 12: GAME STATE MACHINE
+// ============================================================
+
+const GameState = {
+    MENU: 'MENU',
+    COUNTDOWN: 'COUNTDOWN',
+    RACING: 'RACING',
+    PAUSED: 'PAUSED',
+    FINISHED: 'FINISHED',
+};
+
+// ============================================================
+// SECTION 13: UI RENDERING
+// ============================================================
+
+// Will be integrated into main game
+function formatTime(seconds) {
+    if (seconds === null || seconds === undefined) return '--:--';
+    const mins = Math.floor(seconds / 60);
+    const secs = (seconds % 60).toFixed(2);
+    return `${mins}:${secs.padStart(5, '0')}`;
+}
+
+// ============================================================
+// SECTION 14: MAIN GAME LOOP
+// ============================================================
+
+// Global state
+let canvas, ctx;
+let physicsEngine;
+let particleSystem;
+let camera;
+let soundManager;
+let gameMode;
+let track;
+let marbles;
+let gameState = GameState.MENU;
+let lastTime = 0;
+let accumulator = 0;
+let gameSpeed = 1;
+let frameCount = 0;
+let fpsCounter = 0;
+let fpsTimer = 0;
+let currentFps = 60;
+let countdownTimer = 0;
+let countdownValue = 3;
+let countdownActive = false;
+let raceStartTime = 0;
+let raceTime = 0;
+let leaderboardCache = [];
+let canvasW = 800, canvasH = 600;
+let animationId = null;
+let isRunning = false;
+
+function initGame() {
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    soundManager = new SoundManager();
+    particleSystem = new ParticleSystem();
+    camera = new Camera();
+    gameMode = new GameMode();
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    setupUI();
+    resetGameState();
+    isRunning = true;
+    lastTime = performance.now();
+    if (animationId) cancelAnimationFrame(animationId);
+    gameLoop(lastTime);
+}
+
+function resizeCanvas() {
+    const container = document.getElementById('game-container');
+    const rect = container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvasW = rect.width;
+    canvasH = rect.height;
+    canvas.width = canvasW * dpr;
+    canvas.height = canvasH * dpr;
+    canvas.style.width = canvasW + 'px';
+    canvas.style.height = canvasH + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+}
+
+function resetGameState() {
+    gameState = GameState.MENU;
+    accumulator = 0;
+    countdownActive = false;
+    raceStartTime = 0;
+    raceTime = 0;
+    nextMarbleId = 0;
+    leaderboardCache = [];
+    updateUI();
+}
+
+function startRace() {
+    const count = parseInt(document.getElementById('marbleCount').value);
+    const seed = parseInt(document.getElementById('trackSeed').value) || 42;
+
+    soundManager.init();
+    soundManager.resume();
+
+    physicsEngine = new PhysicsEngine();
+    particleSystem = new ParticleSystem();
+    camera = new Camera();
+
+    // Generate track
+    track = generateTrack(seed);
+
+    // Create marbles
+    marbles = initMarbles(count, seed);
+
+    // Add marbles to physics
+    for (const m of marbles) {
+        physicsEngine.addBody(m);
+    }
+
+    // Add obstacles to physics
+    for (const obs of track.obstacles) {
+        if (obs.type === 'peg') {
+            const staticBody = {
+                x: obs.x, y: obs.y, radius: obs.radius,
+                isStatic: true, type: 'peg', mass: 9999,
+                bounce: 0.6, finished: false, eliminated: false,
+                vx: 0, vy: 0, rotation: 0,
+            };
+            physicsEngine.addStaticBody(staticBody);
+            obs._body = staticBody;
+        } else if (obs.type === 'bumper') {
+            const bumperBody = {
+                x: obs.x, y: obs.y, radius: obs.radius,
+                isStatic: true, type: 'bumper', mass: 9999,
+                bounce: obs.bounce || 1.2, finished: false, eliminated: false,
+                vx: 0, vy: 0, rotation: 0,
+            };
+            physicsEngine.addStaticBody(bumperBody);
+            obs._body = bumperBody;
+        }
+    }
+
+    // Set wall segments for physics
+    physicsEngine.setWalls(track.wallSegments);
+
+    // Start countdown
+    gameState = GameState.COUNTDOWN;
+    countdownTimer = 3;
+    countdownValue = 3;
+    countdownActive = true;
+    raceStartTime = performance.now();
+
+    updateUI();
+    showCountdown(3);
+}
+
+function showCountdown(value) {
+    const el = document.getElementById('countdown-text');
+    if (value <= 0) {
+        el.textContent = 'GO!';
+        el.style.color = '#00ff88';
+        soundManager.playGo();
+    } else {
+        el.textContent = value;
+        el.style.color = '#fff';
+        soundManager.playCountdown();
+    }
+    document.getElementById('countdown').classList.add('active');
+}
+
+function fixedUpdate(dt) {
+    if (gameState !== GameState.RACING && gameState !== GameState.COUNTDOWN) return;
+
+    // Update moving obstacles
+    const now = performance.now();
+    for (const obs of track.obstacles) {
+        if (obs.type === 'spinner' && obs._body) {
+            obs.angle += obs.speed * dt;
+            // Create rotating arms - this is handled in rendering
+        }
+        if (obs.type === 'pendulum') {
+            obs.angle = Math.sin(now * 0.001 * obs.swingSpeed) * 0.8;
+        }
+        if (obs.type === 'moving-platform') {
+            const t = Math.sin(now * 0.001 * obs.speed * 0.1 + obs.phase);
+            obs.x += t * obs.travel * dt * 0.5;
+        }
+        if (obs.type === 'rotating-gate') {
+            obs.angle += obs.speed * dt;
+        }
+    }
+
+    // Apply special obstacle effects on marbles
+    for (const m of marbles) {
+        if (m.finished || m.eliminated) continue;
+        for (const obs of track.obstacles) {
+            if (obs.type === 'jump-pad') {
+                const dx = m.x - obs.x, dy = m.y - obs.y;
+                if (Math.abs(dx) < obs.width / 2 + m.radius && Math.abs(dy) < 20) {
+                    if (m.vy > -100) { // Only boost if not already boosted
+                        m.vy = obs.boost;
+                        particleSystem.emit(m.x, obs.y, 8, { color: '#00ff88', speed: 80, life: 0.4, size: 3 });
+                    }
+                }
+            }
+            if (obs.type === 'gravity-drop') {
+                const halfH = obs.height / 2;
+                if (m.y > obs.y - halfH && m.y < obs.y + halfH) {
+                    const dx = m.x - obs.midX;
+                    if (Math.abs(dx) < obs.width / 2) {
+                        m.vy += 200 * dt; // extra gravity in drop zone
+                    }
+                }
+            }
+        }
+    }
+
+    // Physics step
+    physicsEngine.fixedUpdate(dt);
+
+    // Update trails
+    for (const m of marbles) {
+        if (m.finished || m.eliminated) continue;
+        m.trail.push({ x: m.x, y: m.y });
+        if (m.trail.length > 15) m.trail.shift();
+        const speed = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
+        if (speed > m.maxSpeedReached) m.maxSpeedReached = speed;
+
+        // Particle trail
+        particleSystem.emitTrail(m, camera);
+    }
+
+    // Checkpoint detection
+    for (const m of marbles) {
+        if (m.finished || m.eliminated) continue;
+        for (const cp of track.checkpoints) {
+            if (m.checkpointTimes.length <= cp.index) {
+                if (Math.abs(m.y - cp.y) < 20) {
+                    m.checkpointTimes.push(raceTime);
+                    if (soundManager) soundManager.playCheckpoint();
+
+                    // Survival mode elimination check
+                    if (gameMode.mode === 'survival' && m.checkpointTimes.length === 1) {
+                        // Don't eliminate on first checkpoint
+                    }
+                }
+            }
+        }
+    }
+
+    // Finish line detection
+    for (const m of marbles) {
+        if (m.finished || m.eliminated) continue;
+        if (m.y >= track.finishLine) {
+            m.finished = true;
+            m.finishTime = raceTime;
+            if (soundManager) soundManager.playFinish();
+            particleSystem.emitConfetti(m.x, m.y, 20);
+        }
+    }
+
+    // Survival mode: eliminate last place at each checkpoint
+    if (gameMode.mode === 'survival') {
+        const active = marbles.filter(m => !m.eliminated && !m.finished);
+        if (active.length <= 1 && marbles.filter(m => m.finished).length > 0) {
+            // Last marble standing
+        }
+        // Check if we should eliminate
+        for (const cp of track.checkpoints) {
+            const passed = active.filter(m => m.checkpointTimes.length > cp.index);
+            if (passed.length >= 2) {
+                // Find slowest
+                passed.sort((a, b) => a.checkpointTimes[cp.index] - b.checkpointTimes[cp.index]);
+                const slowest = passed[passed.length - 1];
+                if (!slowest.eliminated && !slowest.finished) {
+                    slowest.eliminated = true;
+                    if (soundManager) soundManager.playElimination();
+                    particleSystem.emit(slowest.x, slowest.y, 15, {
+                        color: '#ff0000', speed: 150, life: 0.6, size: 4
+                    });
+                }
+            }
+        }
+    }
+
+    // Check if race is finished
+    const finished = marbles.filter(m => m.finished);
+    const active = marbles.filter(m => !m.eliminated && !m.finished);
+
+    if (gameState === GameState.RACING) {
+        if (active.length === 0 || finished.length === marbles.length) {
+            endRace();
+        }
+        // Tournament: finish after all marbles finish or top 50%
+        if (gameMode.mode === 'tournament' && finished.length >= marbles.length * 0.5) {
+            // Force finish remaining
+            for (const m of active) {
+                m.finished = true;
+                m.finishTime = raceTime + 10;
+            }
+            endRace();
+        }
+    }
+
+    // Update marble rotation
+    for (const m of marbles) {
+        if (!m.eliminated) m.rotation += m.vx * dt * 0.05;
+    }
+}
+
+function endRace() {
+    gameState = GameState.FINISHED;
+
+    // Sort by finish time
+    const sorted = [...marbles].filter(m => m.finishTime !== null).sort((a, b) => a.finishTime - b.finishTime);
+    sorted.forEach((m, i) => { m.place = i + 1; });
+
+    // Assign places
+    let place = 1;
+    for (const m of sorted) { m.place = place++; }
+    const dnfs = marbles.filter(m => m.finishTime === null);
+    for (const m of dnfs) { m.place = place++; }
+
+    // Update tournament
+    gameMode.updateTournament(marbles);
+
+    // Show results
+    showResults();
+    updateUI();
+}
+
+function pauseRace() {
+    if (gameState === GameState.RACING) {
+        gameState = GameState.PAUSED;
+        document.getElementById('pauseBtn').textContent = 'RESUME';
+    } else if (gameState === GameState.PAUSED) {
+        gameState = GameState.RACING;
+        accumulator = 0;
+        document.getElementById('pauseBtn').textContent = 'PAUSE';
+    }
+}
+
+function restartRace() {
+    if (animationId) cancelAnimationFrame(animationId);
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('countdown').classList.remove('active');
+    document.getElementById('pauseBtn').textContent = 'PAUSE';
+    document.getElementById('pauseBtn').disabled = false;
+    startRace();
+}
+
+// ============================================================
+// RENDER FUNCTION
+// ============================================================
+
+function render() {
+    ctx.clearRect(0, 0, canvasW, canvasH);
+
+    // Background gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, canvasH);
+    grad.addColorStop(0, '#0a0a2e');
+    grad.addColorStop(0.5, '#0f0f1a');
+    grad.addColorStop(1, '#1a0a0a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    // Guard: no active race → show menu prompt
+    if (!track || !marbles || marbles.length === 0) {
+        ctx.fillStyle = '#444';
+        ctx.font = '26px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🏁 Marble Race Country', canvasW / 2, canvasH / 2 - 24);
+        ctx.font = '15px sans-serif';
+        ctx.fillStyle = '#777';
+        ctx.fillText('Configure settings on the left and press START RACE', canvasW / 2, canvasH / 2 + 16);
+        return;
+    }
+
+    ctx.save();
+    // Apply camera transform: world (cam.x, cam.y) → screen (canvasW/2, 0)
+    ctx.translate(canvasW / 2 + camera.shakeX, camera.shakeY);
+    ctx.translate(-camera.x, -camera.y);
+
+    // Draw track background (world coordinates)
+    drawTrack();
+    // Draw obstacles (world coordinates)
+    drawObstacles();
+    // Draw finish line (world coordinates)
+    drawFinishLine();
+    // Draw marbles (world coordinates)
+    drawMarbles();
+    // Draw particles (world coordinates)
+    particleSystem.render(ctx, camera);
+
+    ctx.restore();
+
+    // Draw HUD (no transform)
+    drawHUD();
+}
+
+function drawTrack() {
+    const walls = track.walls;
+    const ctx2 = ctx;
+    const leftPts = walls.left, rightPts = walls.right;
+
+    // Only draw visible portion
+    let startIdx = 0, endIdx = leftPts.length;
+    for (let i = 0; i < leftPts.length; i++) {
+        const sy = leftPts[i].y - camera.y;
+        if (sy > -200 && startIdx === 0) startIdx = Math.max(0, i - 1);
+        if (sy > canvasH + 200) { endIdx = i + 1; break; }
+    }
+
+    // Draw track floor
+    ctx2.fillStyle = '#1a1a2e';
+    ctx2.beginPath();
+    ctx2.moveTo(camera.screenX(leftPts[startIdx].x), camera.screenY(leftPts[startIdx].y));
+    for (let i = startIdx + 1; i < endIdx; i++) {
+        ctx2.lineTo(camera.screenX(leftPts[i].x), camera.screenY(leftPts[i].y));
+    }
+    for (let i = endIdx - 1; i >= startIdx; i--) {
+        ctx2.lineTo(camera.screenX(rightPts[i].x), camera.screenY(rightPts[i].y));
+    }
+    ctx2.closePath();
+    ctx2.fill();
+
+    // Draw left wall
+    ctx2.strokeStyle = '#4a4a7a';
+    ctx2.lineWidth = CONFIG.WALL_THICKNESS;
+    ctx2.beginPath();
+    for (let i = startIdx; i < endIdx; i++) {
+        const x = camera.screenX(leftPts[i].x), y = camera.screenY(leftPts[i].y);
+        if (i === startIdx) ctx2.moveTo(x, y); else ctx2.lineTo(x, y);
+    }
+    ctx2.stroke();
+
+    // Draw right wall
+    ctx2.beginPath();
+    for (let i = startIdx; i < endIdx; i++) {
+        const x = camera.screenX(rightPts[i].x), y = camera.screenY(rightPts[i].y);
+        if (i === startIdx) ctx2.moveTo(x, y); else ctx2.lineTo(x, y);
+    }
+    ctx2.stroke();
+
+    // Draw center line dots
+    ctx2.fillStyle = 'rgba(255,255,255,0.1)';
+    for (let i = startIdx; i < endIdx; i += 3) {
+        if (i >= leftPts.length) break;
+        const mx = (camera.screenX(leftPts[i].x) + camera.screenX(rightPts[i].x)) / 2;
+        const my = (camera.screenY(leftPts[i].y) + camera.screenY(rightPts[i].y)) / 2;
+        ctx2.beginPath();
+        ctx2.arc(mx, my, 2, 0, Math.PI * 2);
+        ctx2.fill();
+    }
+
+    // Draw horizontal grid lines for depth
+    ctx2.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx2.lineWidth = 1;
+    for (let y = -1000; y < CONFIG.TRACK_LENGTH + 1000; y += 100) {
+        const sy = camera.screenY(y);
+        if (sy > -10 && sy < canvasH + 10) {
+            ctx2.beginPath();
+            ctx2.moveTo(0, sy);
+            ctx2.lineTo(canvasW, sy);
+            ctx2.stroke();
+        }
+    }
+}
+
+function drawObstacles() {
+    const ctx2 = ctx;
+    for (const obs of track.obstacles) {
+        const ox = obs.x || 0, oy = obs.y || 0;
+        if (!camera.isVisible(ox, oy, 150)) continue;
+        const sx = camera.screenX(ox);
+        const sy = camera.screenY(oy);
+
+        switch (obs.type) {
+            case 'peg': {
+                ctx2.fillStyle = '#6b6bff';
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, obs.radius, 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.strokeStyle = '#8b8bff';
+                ctx2.lineWidth = 2;
+                ctx2.stroke();
+                // Highlight
+                ctx2.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx2.beginPath();
+                ctx2.arc(sx - obs.radius * 0.2, sy - obs.radius * 0.2, obs.radius * 0.3, 0, Math.PI * 2);
+                ctx2.fill();
+                break;
+            }
+            case 'bumper': {
+                ctx2.fillStyle = '#ff6b6b';
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, obs.radius, 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.strokeStyle = '#ff4444';
+                ctx2.lineWidth = 3;
+                ctx2.stroke();
+                // Bumper inner circle
+                ctx2.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx2.lineWidth = 1;
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, obs.radius * 0.6, 0, Math.PI * 2);
+                ctx2.stroke();
+                break;
+            }
+            case 'funnel': {
+                const halfH = obs.height / 2;
+                const gap = obs.gap;
+                const w = obs.segW * 0.4;
+                ctx2.fillStyle = '#2a2a5a';
+                ctx2.beginPath();
+                ctx2.moveTo(camera.screenX(obs.midX - w), camera.screenY(obs.y - halfH));
+                ctx2.lineTo(camera.screenX(obs.midX - gap / 2), camera.screenY(obs.y));
+                ctx2.lineTo(camera.screenX(obs.midX - w), camera.screenY(obs.y + halfH));
+                ctx2.closePath();
+                ctx2.fill();
+                ctx2.strokeStyle = '#4a4a8a';
+                ctx2.lineWidth = 3;
+                ctx2.stroke();
+                ctx2.beginPath();
+                ctx2.moveTo(camera.screenX(obs.midX + w), camera.screenY(obs.y - halfH));
+                ctx2.lineTo(camera.screenX(obs.midX + gap / 2), camera.screenY(obs.y));
+                ctx2.lineTo(camera.screenX(obs.midX + w), camera.screenY(obs.y + halfH));
+                ctx2.closePath();
+                ctx2.fill();
+                ctx2.stroke();
+                // Arrow indicators
+                ctx2.fillStyle = '#ffd93d';
+                ctx2.font = '20px sans-serif';
+                ctx2.textAlign = 'center';
+                ctx2.fillText('▼', camera.screenX(obs.midX), camera.screenY(obs.y + 6));
+                break;
+            }
+            case 'spinner': {
+                const r = obs.radius;
+                ctx2.strokeStyle = '#8b8bff';
+                ctx2.lineWidth = 4;
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, r, 0, Math.PI * 2);
+                ctx2.stroke();
+                const numArms = obs.arms;
+                for (let i = 0; i < numArms; i++) {
+                    const a = obs.angle + (i * Math.PI * 2 / numArms);
+                    const ex = sx + Math.cos(a) * r;
+                    const ey = sy + Math.sin(a) * r;
+                    ctx2.strokeStyle = '#ff6b6b';
+                    ctx2.lineWidth = 6;
+                    ctx2.beginPath();
+                    ctx2.moveTo(sx, sy);
+                    ctx2.lineTo(ex, ey);
+                    ctx2.stroke();
+                    // Arm end circle
+                    ctx2.fillStyle = '#ff4444';
+                    ctx2.beginPath();
+                    ctx2.arc(ex, ey, 8, 0, Math.PI * 2);
+                    ctx2.fill();
+                }
+                ctx2.fillStyle = '#6b6bff';
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, 8, 0, Math.PI * 2);
+                ctx2.fill();
+                break;
+            }
+            case 'pendulum': {
+                const px = sx;
+                const py = camera.screenY(obs.y);
+                const len = obs.length;
+                const ax = obs.angle;
+                const bx = px + Math.sin(ax) * len;
+                const by = py + Math.cos(ax) * len;
+                // Chain
+                ctx2.strokeStyle = '#888';
+                ctx2.lineWidth = 3;
+                ctx2.beginPath();
+                ctx2.moveTo(px, py);
+                ctx2.lineTo(bx, by);
+                ctx2.stroke();
+                // Ball
+                ctx2.fillStyle = '#ffd93d';
+                ctx2.beginPath();
+                ctx2.arc(bx, by, obs.ballRadius, 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.strokeStyle = '#b8860b';
+                ctx2.lineWidth = 2;
+                ctx2.stroke();
+                break;
+            }
+            case 'jump-pad': {
+                const hw = obs.width / 2;
+                ctx2.fillStyle = '#00b894';
+                ctx2.beginPath();
+                ctx2.moveTo(sx - hw, sy);
+                ctx2.lineTo(sx, sy - 12);
+                ctx2.lineTo(sx + hw, sy);
+                ctx2.closePath();
+                ctx2.fill();
+                ctx2.strokeStyle = '#00ff88';
+                ctx2.lineWidth = 2;
+                ctx2.stroke();
+                // Boost arrows
+                ctx2.fillStyle = 'rgba(0,255,136,0.5)';
+                ctx2.font = '10px sans-serif';
+                ctx2.textAlign = 'center';
+                ctx2.fillText('↑↑↑', sx, sy + 4);
+                break;
+            }
+            case 'moving-platform': {
+                const hw = obs.width / 2;
+                ctx2.fillStyle = '#6c5ce7';
+                ctx2.fillRect(sx - hw, sy - obs.height / 2, obs.width, obs.height);
+                ctx2.strokeStyle = '#a29bfe';
+                ctx2.lineWidth = 2;
+                ctx2.strokeRect(sx - hw, sy - obs.height / 2, obs.width, obs.height);
+                break;
+            }
+            case 'split-path': {
+                // Draw path dividers
+                ctx2.strokeStyle = '#2a2a5a';
+                ctx2.lineWidth = 6;
+                const halfH = obs.height / 2;
+                for (let p = 1; p < obs.numPaths; p++) {
+                    const px = camera.screenX(obs.midX - obs.paths[p].left + 5);
+                    ctx2.beginPath();
+                    ctx2.moveTo(px, camera.screenY(obs.y - halfH));
+                    ctx2.lineTo(px, camera.screenY(obs.y + halfH));
+                    ctx2.stroke();
+                }
+                // Arrow guides
+                ctx2.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx2.font = '14px sans-serif';
+                ctx2.textAlign = 'center';
+                for (let p = 0; p < obs.numPaths; p++) {
+                    const pz = camera.screenX((obs.paths[p].left + obs.paths[p].right) / 2);
+                    ctx2.fillText('↓', pz, camera.screenY(obs.y));
+                }
+                break;
+            }
+            case 'rotating-gate': {
+                const hw = obs.width / 2;
+                ctx2.strokeStyle = '#ff6b6b';
+                ctx2.lineWidth = 4;
+                const numBars = obs.bars;
+                for (let i = 0; i < numBars; i++) {
+                    const a = obs.angle + (i * Math.PI / numBars);
+                    const len = hw;
+                    ctx2.beginPath();
+                    ctx2.moveTo(sx - Math.cos(a) * len, sy - Math.sin(a) * len);
+                    ctx2.lineTo(sx + Math.cos(a) * len, sy + Math.sin(a) * len);
+                    ctx2.stroke();
+                }
+                ctx2.fillStyle = '#ff4444';
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, 6, 0, Math.PI * 2);
+                ctx2.fill();
+                break;
+            }
+            case 'scurve': {
+                // Visual only (physics handled by wall segments)
+                ctx2.strokeStyle = 'rgba(107,107,255,0.2)';
+                ctx2.lineWidth = 2;
+                ctx2.setLineDash([4, 8]);
+                const halfH = obs.height / 2;
+                for (let s = 0; s < 20; s++) {
+                    const t = s / 20;
+                    const y = obs.y - halfH + t * obs.height;
+                    const a = Math.sin(t * Math.PI * 2 * obs.frequency) * obs.amplitude;
+                    const lx = camera.screenX(obs.midX + a - 30);
+                    const rx = camera.screenX(obs.midX + a + 30);
+                    ctx2.beginPath();
+                    ctx2.moveTo(lx, camera.screenY(y));
+                    ctx2.lineTo(rx, camera.screenY(y));
+                    ctx2.stroke();
+                }
+                ctx2.setLineDash([]);
+                break;
+            }
+            case 'gravity-drop': {
+                const hw = obs.width / 2;
+                ctx2.fillStyle = 'rgba(255,100,100,0.1)';
+                ctx2.fillRect(sx - hw, camera.screenY(obs.y - obs.height / 2), hw * 2, obs.height);
+                // Zap indicators
+                ctx2.strokeStyle = 'rgba(255,200,100,0.3)';
+                ctx2.lineWidth = 2;
+                for (let i = 0; i < 5; i++) {
+                    const xOff = -hw + (i / 4) * hw * 2;
+                    ctx2.beginPath();
+                    ctx2.moveTo(sx + xOff, camera.screenY(obs.y - obs.height / 2));
+                    ctx2.lineTo(sx + xOff + 10, camera.screenY(obs.y + obs.height / 2));
+                    ctx2.stroke();
+                }
+                ctx2.fillStyle = 'rgba(255,200,100,0.5)';
+                ctx2.font = '16px sans-serif';
+                ctx2.textAlign = 'center';
+                ctx2.fillText('⚡', sx, camera.screenY(obs.y));
+                break;
+            }
+        }
+    }
+
+    // Draw checkpoints
+    for (const cp of track.checkpoints) {
+        const sy = camera.screenY(cp.y);
+        if (sy > -20 && sy < canvasH + 20) {
+            // Checkpoint flag
+            const lx = camera.screenX(-CONFIG.TRACK_WIDTH / 2 + 10);
+            const rx = camera.screenX(CONFIG.TRACK_WIDTH / 2 - 10);
+            ctx2.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx2.lineWidth = 1;
+            ctx2.setLineDash([4, 6]);
+            ctx2.beginPath();
+            ctx2.moveTo(lx, sy);
+            ctx2.lineTo(rx, sy);
+            ctx2.stroke();
+            ctx2.setLineDash([]);
+            ctx2.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx2.font = '10px sans-serif';
+            ctx2.textAlign = 'left';
+            ctx2.fillText(cp.name, lx + 4, sy - 4);
+        }
+    }
+}
+
+function drawMarbles() {
+    const ctx2 = ctx;
+    const dpr = window.devicePixelRatio || 1;
+
+    // Draw trails first
+    for (const m of marbles) {
+        if (m.eliminated) continue;
+        const trail = m.trail;
+        for (let i = 0; i < trail.length; i++) {
+            const alpha = (i / trail.length) * 0.3;
+            const sx = camera.screenX(trail[i].x);
+            const sy = camera.screenY(trail[i].y);
+            if (sx > -50 && sx < canvasW + 50 && sy > -50 && sy < canvasH + 50) {
+                ctx2.globalAlpha = alpha;
+                ctx2.fillStyle = COUNTRIES[m.countryIndex].colors[0];
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, m.radius * (0.3 + 0.7 * i / trail.length), 0, Math.PI * 2);
+                ctx2.fill();
+            }
+        }
+    }
+    ctx2.globalAlpha = 1;
+
+    // Draw marbles
+    for (const m of marbles) {
+        if (m.eliminated) continue;
+        const sx = camera.screenX(m.x);
+        const sy = camera.screenY(m.y);
+        if (sx > -100 && sx < canvasW + 100 && sy > -100 && sy < canvasH + 100) {
+            // Shadow
+            ctx2.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx2.beginPath();
+            ctx2.ellipse(sx + 3, sy + 4, m.radius, m.radius * 0.6, 0, 0, Math.PI * 2);
+            ctx2.fill();
+
+            // Marble body
+            ctx2.save();
+            ctx2.beginPath();
+            ctx2.arc(sx, sy, m.radius, 0, Math.PI * 2);
+            ctx2.clip();
+
+            // Flag texture
+            if (m.texture) {
+                ctx2.drawImage(m.texture, sx - m.radius, sy - m.radius, m.radius * 2, m.radius * 2);
+            }
+
+            // Shine
+            ctx2.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx2.beginPath();
+            ctx2.arc(sx - m.radius * 0.25, sy - m.radius * 0.25, m.radius * 0.3, 0, Math.PI * 2);
+            ctx2.fill();
+
+            ctx2.restore();
+
+            // Border
+            ctx2.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx2.lineWidth = 1.5;
+            ctx2.beginPath();
+            ctx2.arc(sx, sy, m.radius, 0, Math.PI * 2);
+            ctx2.stroke();
+
+            // Eliminated overlay
+            if (m.eliminated) {
+                ctx2.fillStyle = 'rgba(255,0,0,0.3)';
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, m.radius, 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.fillStyle = '#ff0000';
+                ctx2.font = `${m.radius}px sans-serif`;
+                ctx2.textAlign = 'center';
+                ctx2.textBaseline = 'middle';
+                ctx2.fillText('✕', sx, sy);
+            }
+        }
+    }
+}
+
+function drawFinishLine() {
+    const sy = camera.screenY(track.finishLine);
+    if (sy > -50 && sy < canvasH + 50) {
+        const ctx2 = ctx;
+        const lx = camera.screenX(-CONFIG.TRACK_WIDTH / 2);
+        const rx = camera.screenX(CONFIG.TRACK_WIDTH / 2);
+        const tileW = 20;
+        const numTiles = Math.ceil((rx - lx) / tileW);
+        for (let i = 0; i < numTiles; i++) {
+            ctx2.fillStyle = (i % 2 === 0) ? '#fff' : '#000';
+            ctx2.fillRect(lx + i * tileW, sy - 8, tileW, 16);
+        }
+        ctx2.fillStyle = '#fff';
+        ctx2.font = '12px sans-serif';
+        ctx2.textAlign = 'center';
+        ctx2.fillText('FINISH', (lx + rx) / 2, sy + 4);
+    }
+}
+
+function drawHUD() {
+    const ctx2 = ctx;
+
+    // Progress bar (top center-ish)
+    if (marbles && marbles.length > 0) {
+        const active = marbles.filter(m => !m.eliminated);
+        let maxProgress = 0;
+        for (const m of active) {
+            const prog = m.y / CONFIG.TRACK_LENGTH;
+            if (prog > maxProgress) maxProgress = prog;
+        }
+        const pct = Math.min(100, Math.round(maxProgress * 100));
+        document.getElementById('hudProgress').textContent = pct + '%';
+        document.getElementById('hudActive').textContent = active.length + '/' + marbles.length;
+    }
+
+    // FPS
+    document.getElementById('hudFps').textContent = currentFps;
+
+    // Mini leaderboard
+    updateMiniLeaderboard();
+}
+
+function updateMiniLeaderboard() {
+    if (!marbles) return;
+    const sorted = [...marbles]
+        .filter(m => !m.eliminated)
+        .sort((a, b) => {
+            if (a.finished && b.finished) return a.finishTime - b.finishTime;
+            if (a.finished) return -1;
+            if (b.finished) return 1;
+            return a.y - b.y; // Lower y = further ahead
+        });
+
+    const el = document.getElementById('leaderboardMini');
+    const topN = Math.min(5, sorted.length);
+    let html = '';
+    for (let i = 0; i < topN; i++) {
+        const m = sorted[i];
+        const flag = COUNTRIES[m.countryIndex].colors[0];
+        html += `<span class="lb-entry"><span class="lb-pos">${i + 1}</span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${flag};"></span>${m.name}</span>`;
+    }
+    el.innerHTML = html;
+}
+
+// ============================================================
+// RESULTS & OVERLAY
+// ============================================================
+
+function showResults() {
+    const sorted = [...marbles].filter(m => m.finishTime !== null).sort((a, b) => a.finishTime - b.finishTime);
+    const overlay = document.getElementById('overlay');
+    const content = document.getElementById('overlayContent');
+
+    let html = '<h2>🏆 Race Complete!</h2>';
+
+    if (sorted.length >= 3) {
+        html += '<div class="podium">';
+        // 2nd, 1st, 3rd
+        const order = [1, 0, 2]; // indexes for sorted[1], sorted[0], sorted[2]
+        for (const idx of order) {
+            if (idx >= sorted.length) continue;
+            const m = sorted[idx];
+            const flag = COUNTRIES[m.countryIndex].colors[0];
+            const cls = idx === 0 ? 'podium-1' : idx === 1 ? 'podium-2' : 'podium-3';
+            const pos = idx + 1;
+            html += `<div class="podium-item ${cls}">
+                <div class="flag-circle" style="background:${flag};"></div>
+                <div class="name">${pos}. ${m.name}</div>
+                <div class="time">${formatTime(m.finishTime)}</div>
+                <div class="podium-stand">${pos === 1 ? '🥇' : pos === 2 ? '🥈' : '🥉'}</div>
+            </div>`;
+        }
+        html += '</div>';
+    }
+
+    // Results table
+    html += '<h3>Full Results</h3>';
+    html += '<table class="results-table">';
+    html += '<tr><th>Pos</th><th>Country</th><th>Time</th><th>Speed</th></tr>';
+
+    const allSorted = [...marbles].sort((a, b) => (a.place || 999) - (b.place || 999));
+    for (const m of allSorted) {
+        const flag = COUNTRIES[m.countryIndex].colors[0];
+        const timeStr = m.finishTime ? formatTime(m.finishTime) : 'DNF';
+        const speedStr = Math.round(m.maxSpeedReached || 0);
+        html += `<tr>
+            <td class="pos">${m.place || '-'}</td>
+            <td><span class="flag-dot" style="background:${flag}"></span>${m.name}</td>
+            <td>${m.finishTime ? formatTime(m.finishTime) : '<span style="color:#ff6b6b">DNF</span>'}</td>
+            <td>${speedStr}</td>
+        </tr>`;
+    }
+    html += '</table>';
+
+    // Tournament standings
+    if (gameMode.mode === 'tournament' && gameMode.tournamentStandings.length > 0) {
+        html += '<h3>Tournament Standings (Race ' + (gameMode.currentRace + 1) + '/' + gameMode.totalRaces + ')</h3>';
+        const standings = [...gameMode.tournamentStandings].sort((a, b) => b.points - a.points);
+        html += '<table class="results-table">';
+        html += '<tr><th>Pos</th><th>Country</th><th>Points</th><th>Best Time</th></tr>';
+        standings.forEach((s, i) => {
+            const flag = COUNTRIES[s.countryIndex].colors[0];
+            html += `<tr>
+                <td class="pos">${i + 1}</td>
+                <td><span class="flag-dot" style="background:${flag}"></span>${s.name}</td>
+                <td>${s.points}</td>
+                <td>${formatTime(s.best)}</td>
+            </tr>`;
+        });
+        html += '</table>';
+
+        if (gameMode.currentRace < gameMode.totalRaces - 1) {
+            html += '<button class="btn btn-primary" onclick="nextRace()" style="width:100%;margin-top:12px;">Next Race →</button>';
+        } else {
+            html += '<div style="text-align:center;margin-top:12px;font-size:18px;font-weight:700;color:#ffd93d;">🏆 Tournament Complete! 🏆</div>';
+        }
+    }
+
+    // Survival results
+    if (gameMode.mode === 'survival') {
+        const winner = marbles.find(m => !m.eliminated);
+        if (winner) {
+            html += `<div style="text-align:center;margin:12px 0;font-size:18px;font-weight:700;color:#ffd93d;">🏆 Winner: ${winner.name}! 🏆</div>`;
+        }
+        html += '<table class="results-table">';
+        html += '<tr><th>Pos</th><th>Country</th><th>Status</th></tr>';
+        const elimOrder = marbles.sort((a, b) => (a.place || 999) - (b.place || 999));
+        elimOrder.forEach((m, i) => {
+            const flag = COUNTRIES[m.countryIndex].colors[0];
+            const status = m.eliminated ? 'Eliminated' : m.finished ? 'Finished' : 'Survived!';
+            html += `<tr><td class="pos">${i + 1}</td><td><span class="flag-dot" style="background:${flag}"></span>${m.name}</td><td>${status}</td></tr>`;
+        });
+        html += '</table>';
+    }
+
+    html += `<div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-primary" onclick="restartRace()" style="flex:1;">Race Again</button>
+        <button class="btn btn-secondary" onclick="closeResults()" style="flex:1;">Back to Menu</button>
+    </div>`;
+
+    content.innerHTML = html;
+    overlay.classList.add('active');
+}
+
+function closeResults() {
+    document.getElementById('overlay').classList.remove('active');
+    resetGameState();
+    updateUI();
+}
+
+function nextRace() {
+    gameMode.currentRace++;
+    document.getElementById('overlay').classList.remove('active');
+    // Generate new seed
+    const newSeed = parseInt(document.getElementById('trackSeed').value) + 1;
+    document.getElementById('trackSeed').value = newSeed;
+    startRace();
+}
+
+// ============================================================
+// SECTION 15: INPUT HANDLING
+// ============================================================
+
+function setupUI() {
+    // Mode buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            gameMode.setMode(btn.dataset.mode);
+            soundManager.playClick();
+        });
+    });
+
+    // Speed buttons
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            gameSpeed = parseInt(btn.dataset.speed);
+        });
+    });
+
+    // Marble count slider
+    document.getElementById('marbleCount').addEventListener('input', (e) => {
+        document.getElementById('marbleCountDisplay').textContent = e.target.value;
+    });
+
+    // Seed randomizer
+    document.getElementById('randomSeedBtn').addEventListener('click', () => {
+        document.getElementById('trackSeed').value = Math.floor(Math.random() * 90000) + 1000;
+        soundManager.playClick();
+    });
+
+    // Start button
+    document.getElementById('startBtn').addEventListener('click', () => {
+        soundManager.init();
+        soundManager.resume();
+        startRace();
+    });
+
+    // Pause button
+    document.getElementById('pauseBtn').addEventListener('click', pauseRace);
+
+    // Restart button
+    document.getElementById('restartBtn').addEventListener('click', restartRace);
+
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+        switch (e.key) {
+            case ' ':
+                e.preventDefault();
+                if (gameState === GameState.RACING || gameState === GameState.PAUSED) {
+                    pauseRace();
+                }
+                break;
+            case 'r':
+            case 'R':
+                restartRace();
+                break;
+            case '1': setSpeed(1); break;
+            case '2': setSpeed(2); break;
+            case '4': setSpeed(4); break;
+        }
+    });
+
+    // Prevent touch scrolling
+    document.addEventListener('touchmove', (e) => {
+        if (e.target === canvas) e.preventDefault();
+    }, { passive: false });
+}
+
+function setSpeed(speed) {
+    gameSpeed = speed;
+    document.querySelectorAll('.speed-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.speed) === speed);
+    });
+}
+
+function updateUI() {
+    const isRacing = gameState === GameState.RACING || gameState === GameState.COUNTDOWN;
+    document.getElementById('startBtn').disabled = isRacing || gameState === GameState.PAUSED;
+    document.getElementById('pauseBtn').disabled = gameState !== GameState.RACING && gameState !== GameState.PAUSED;
+
+    if (gameState === GameState.PAUSED) {
+        document.getElementById('pauseBtn').textContent = 'RESUME';
+    } else {
+        document.getElementById('pauseBtn').textContent = 'PAUSE';
+    }
+}
+
+// ============================================================
+// SECTION 16: MAIN GAME LOOP (Final)
+// ============================================================
+
+function gameLoop(timestamp) {
+    if (!isRunning) return;
+
+    const rawDt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
+
+    // FPS counter
+    frameCount++;
+    fpsTimer += rawDt;
+    if (fpsTimer >= 0.5) {
+        currentFps = Math.round(frameCount / fpsTimer);
+        frameCount = 0;
+        fpsTimer = 0;
+    }
+
+    // Handle countdown
+    if (gameState === GameState.COUNTDOWN) {
+        countdownTimer -= rawDt;
+        const newVal = Math.ceil(countdownTimer);
+        if (newVal !== countdownValue) {
+            countdownValue = newVal;
+            showCountdown(countdownValue);
+        }
+        if (countdownTimer <= 0) {
+            gameState = GameState.RACING;
+            countdownActive = false;
+            document.getElementById('countdown').classList.remove('active');
+            raceStartTime = performance.now();
+            updateUI();
+        }
+    }
+
+    // Fixed timestep physics
+    if (gameState === GameState.RACING) {
+        raceTime = (performance.now() - raceStartTime) / 1000;
+        const dt = Math.min(rawDt, 0.05);
+        accumulator += dt * gameSpeed;
+        let steps = 0;
+        while (accumulator >= CONFIG.PHYSICS_DT && steps < 8) {
+            fixedUpdate(CONFIG.PHYSICS_DT);
+            accumulator -= CONFIG.PHYSICS_DT;
+            steps++;
+        }
+        if (steps >= 8) accumulator = 0; // spiral of death protection
+    }
+
+    // Update camera
+    if (marbles) {
+        camera.update(rawDt, marbles, canvasW, canvasH);
+    }
+
+    // Update particles
+    particleSystem.update(rawDt);
+
+    // Render
+    render();
+
+    // Update UI
+    updateUI();
+
+    // Stat display
+    if (marbles) {
+        const active = marbles.filter(m => !m.eliminated).length;
+        document.getElementById('statMarbles').textContent = active;
+        const finished = marbles.filter(m => m.finishTime !== null).sort((a, b) => a.finishTime - b.finishTime);
+        if (finished.length > 0) {
+            document.getElementById('statBestTime').textContent = formatTime(finished[0].finishTime);
+        }
+    }
+
+    animationId = requestAnimationFrame(gameLoop);
+}
+
+// ============================================================
+// BOOTSTRAP
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial render
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    resizeCanvas();
+
+    // Draw initial background
+    const grad = ctx.createLinearGradient(0, 0, 0, canvasH);
+    grad.addColorStop(0, '#0a0a2e');
+    grad.addColorStop(1, '#1a0a0a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    ctx.fillStyle = '#333';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏁 Marble Race Country', canvasW / 2, canvasH / 2 - 20);
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = '#666';
+    ctx.fillText('Configure settings and press START RACE', canvasW / 2, canvasH / 2 + 20);
+
+    // Init sound
+    soundManager = new SoundManager();
+    particleSystem = new ParticleSystem();
+    camera = new Camera();
+    gameMode = new GameMode();
+
+    initGame();
+});
+
+// Expose functions to global scope for HTML onclick
+window.startRace = startRace;
+window.restartRace = restartRace;
+window.pauseRace = pauseRace;
+window.closeResults = closeResults;
+window.nextRace = nextRace;
+
+</script>
+</body>
+</html>
