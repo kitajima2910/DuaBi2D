@@ -166,7 +166,8 @@ const CFG = {
   NUM_CONTROL_POINTS: 14,          // Số điểm điều khiển (14 ≈ oval nhẹ, không xoắn)
   MARBLE_RADIUS: 10,                // Bán kính viên bi
   FRICTION: 0.985,                  // Hệ số ma sát (càng thấp càng trơn, 1 = không ma sát)
-  WALL_BOUNCE: 0.5,                 // Hệ số nảy khi va vào tường (0 = dính, 1 = nảy hoàn toàn)
+  WALL_BOUNCE: 0.7,                 // Hệ số nảy khi va vào tường (0 = dính, 1 = nảy hoàn toàn)
+  CENTERING_FORCE: 0.02,            // Lực kéo về tâm track (chống bám biên)
   GRAVITY: 0.0,                     // Trọng lực (chưa dùng trong top-down view)
   ACCELERATION: 0.15,               // Gia tốc cơ bản của xe
   BRAKE_FORCE: 0.08,                // Lực phanh (càng cao càng dừng nhanh)
@@ -754,7 +755,7 @@ class Physics {
     return { index: bestIdx, dist: minD, point: cl[bestIdx] };
   }
 
-  // Kiểm tra marble có trong track không, trả về normal + overlap
+  // Kiểm tra marble có trong track không + giữ marble ở giữa track
   static constrainToTrack(marble, track) {
     const { x, y, radius } = marble;
     const cp = Physics.closestPointOnPath(x, y, track.centerline);
@@ -765,6 +766,17 @@ class Physics {
     const side = dx * n.x + dy * n.y; // positive = outer side
     const absD = Math.abs(side);
     const maxD = track.halfWidth - radius;
+    const dangerZone = maxD * 0.6; // Vùng nguy hiểm (60% ra mép)
+
+    // === SOFT CENTERING — kéo nhẹ về tâm khi gần mép ===
+    if (absD > dangerZone && absD <= maxD) {
+      const force = (absD - dangerZone) / (maxD - dangerZone) * CFG.CENTERING_FORCE;
+      const dir = side > 0 ? -1 : 1; // Hướng về centerline
+      marble.vx += n.x * dir * force;
+      marble.vy += n.y * dir * force;
+    }
+
+    // === HARD WALL — chặn cứng khi chạm mép ===
     if (absD > maxD) {
       // Push back
       const overlap = absD - maxD;
@@ -1294,6 +1306,8 @@ class AIController {
     this.lookAhead = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 20; // Số điểm nhìn trước trên track
     this.boostTimer = 0;                       // Timer quản lý boost
     this.aggression = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.6 : 0.9; // Mức độ quyết đoán
+    // Mỗi AI có thiên hướng chạy lệch khác nhau (tránh tụ tập một chỗ)
+    this.lineBias = rng(-0.2, 0.2);            // ±20% lệch khỏi centerline
   }
 
   update(dt, track, allMarbles) {
@@ -1336,6 +1350,12 @@ class AIController {
     if (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
     let steer = clamp(angleDiff * 2, -1, 1);
+
+    // Line bias — AI có xu hướng chạy lệch khỏi centerline riêng
+    if (wallDist > 30 && this.currentMistake === 0) {
+      const biasTarget = side - this.lineBias * track.halfWidth;
+      steer += clamp(-biasTarget * 0.008, -0.3, 0.3);
+    }
 
     // Wall avoidance
     if (wallDist < 20) {
