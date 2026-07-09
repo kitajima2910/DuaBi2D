@@ -14,8 +14,7 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 #ui-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
 #hud{position:absolute;top:10px;left:10px;color:#fff;font-size:14px;pointer-events:none;text-shadow:0 0 5px rgba(0,0,0,.8);font-family:monospace}
 #hud div{margin:2px 0}
-#hud-boost-bar{width:120px;height:8px;background:rgba(255,255,255,.2);border-radius:4px;margin-top:4px;overflow:hidden}
-#hud-boost-fill{height:100%;width:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:4px;transition:width .1s}
+/* boost bar removed */
 #lap-notification{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#ffd700;text-shadow:0 0 30px rgba(255,200,0,.6);font-weight:bold;opacity:0;transition:opacity .5s;pointer-events:none}
 #lap-notification.show{opacity:1;animation:lapPulse .8s ease-out}
 @keyframes lapPulse{0%{transform:translate(-50%,-50%) scale(1.5);opacity:0}30%{opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
@@ -25,8 +24,7 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 .mctrl-btn:active{background:rgba(255,255,255,.35)}
 #mctrl-left{position:absolute;left:20px;bottom:0}
 #mctrl-right{position:absolute;left:100px;bottom:0}
-#mctrl-boost{position:absolute;right:20px;bottom:0;width:80px;height:80px;font-size:14px;border-color:rgba(255,200,0,.6);background:rgba(255,200,0,.15)}
-#mctrl-boost:active{background:rgba(255,200,0,.35)}
+/* boost btn removed */
 #mctrl-brake{position:absolute;right:110px;bottom:0;width:64px;height:64px;border-color:rgba(255,50,50,.6);background:rgba(255,50,50,.15)}
 #mctrl-brake:active{background:rgba(255,50,50,.35)}
 #overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;pointer-events:none}
@@ -73,7 +71,7 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 .pos-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);transition:all .3s;flex-shrink:0}
 .pos-dot.player{width:13px;height:13px;border-color:#ffd700;box-shadow:0 0 8px rgba(255,200,0,.5)}
 .pos-dot.finished{opacity:.3;transform:scale(.8)}
-#controls-help{position:absolute;bottom:132px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.35);font-size:11px;text-align:center;pointer-events:none;font-family:monospace;white-space:nowrap;z-index:12}
+/* controls-help removed */
 #leaderboard{position:absolute;right:10px;top:180px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 12px;color:#fff;font-size:11px;font-family:monospace;pointer-events:none;z-index:12;min-width:80px;display:none}
 #leaderboard .lb-title{font-weight:bold;font-size:12px;margin-bottom:4px;color:#aaa;text-align:center;letter-spacing:1px}
 #leaderboard .lb-row{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
@@ -81,6 +79,47 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 #leaderboard .lb-name{flex:1;overflow:hidden;text-overflow:ellipsis}
 #leaderboard .lb-you{color:#ffd700;font-weight:bold}
 #leaderboard .lb-dnf{color:#ff4444}
+/* TV Broadcast Overlay */
+#tv-top-bar {
+  position: absolute; top: 0; left: 0; width: 100%;
+  height: 44px; background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; z-index: 12; pointer-events: none;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+#tv-live { color: #ff4444; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+#tv-live-dot { animation: tvPulse 1s ease-in-out infinite; font-size: 16px; }
+@keyframes tvPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+#tv-title { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 2px; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
+#tv-timer { color: #fff; font-size: 18px; font-weight: bold; font-family: monospace; text-shadow: 0 1px 4px rgba(0,0,0,.8); min-width: 70px; text-align: right; }
+
+#tv-lower-third {
+  position: absolute; bottom: 70px; left: 0;
+  z-index: 12; pointer-events: none;
+  transform: translateX(0);
+  transition: transform 0.4s ease-out;
+}
+#tv-lower-content {
+  background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
+  padding: 12px 24px 12px 16px;
+  border-left: 4px solid #ffd700;
+  color: #fff; font-size: 13px;
+  min-width: 260px;
+}
+#tv-lower-content .tv-lower-row {
+  display: flex; align-items: center; gap: 12px; padding: 3px 0;
+}
+#tv-lower-content .tv-lower-pos { color: #888; width: 20px; text-align: center; font-weight: bold; }
+#tv-lower-content .tv-lower-name { flex: 1; }
+#tv-lower-content .tv-lower-top3 { color: #ffd700; font-weight: bold; }
+
+#tv-cam-label {
+  position: absolute; bottom: 10px; right: 16px;
+  color: rgba(255,255,255,0.4); font-size: 10px;
+  font-family: monospace; letter-spacing: 1px;
+  z-index: 12; pointer-events: none;
+}
+
 @media(max-width:600px){
   #menu-screen h1{font-size:32px}
   .menu-btn{padding:12px 32px;font-size:16px;min-width:180px}
@@ -137,17 +176,23 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 <div id="game-container">
 <canvas id="game-canvas"></canvas>
 <div id="ui-overlay">
-  <div id="hud">
-    <div id="hud-speed">0 km/h</div>
-    <div id="hud-lap">Vòng: 0/3</div>
-    <div id="hud-pos">Hạng: 0/8</div>
-    <div id="hud-coins">Xu: 0</div>
-    <div>Tăng Tốc</div>
-    <div id="hud-boost-bar"><div id="hud-boost-fill" style="width:100%"></div></div>
+   <div id="hud">
+     <div id="hud-lap">Vòng: 0/3</div>
+     <div id="hud-pos">Hạng: 0/8</div>
+   </div>
+   <div id="pos-indicator"></div>
+<div id="leaderboard"><div class="lb-title">BẢNG XẾP HẠNG</div></div>
+
+  <!-- TV Broadcast Overlay -->
+  <div id="tv-top-bar">
+    <div id="tv-live"><span id="tv-live-dot">●</span> TRỰC TIẾP</div>
+    <div id="tv-title">GIẢI ĐUA BI THẾ GIỚI</div>
+    <div id="tv-timer">00:00</div>
   </div>
-  <div id="pos-indicator"></div>
-  <div id="controls-help">WASD / Phím Mũi Tên Để Lái | Space Để Tăng Tốc | P Để Tạm Dừng</div>
-  <div id="leaderboard"><div class="lb-title">BẢNG XẾP HẠNG</div></div>
+  <div id="tv-lower-third">
+    <div id="tv-lower-content"></div>
+  </div>
+  <div id="tv-cam-label">MÁY QUAY: TOÀN CẢNH</div>
   </div>
   <canvas id="mini-map" width="160" height="160"></canvas>
   <button id="pause-btn">⏸ Tạm Dừng</button>
@@ -155,8 +200,7 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
   <div id="mobile-controls">
     <div id="mctrl-left" class="mctrl-btn">?</div>
     <div id="mctrl-right" class="mctrl-btn">?</div>
-    <div id="mctrl-boost" class="mctrl-btn">Tăng Tốc</div>
-    <div id="mctrl-brake" class="mctrl-btn">PHANH</div>
+    <!-- mobile controls removed (broadcast mode) -->
   </div>
   <div id="overlay"></div>
   <div id="lap-notification"></div>
@@ -170,7 +214,7 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 <div id="menu-screen">
   <h1>🏁 ĐUA BI 2D</h1>
   <div class="subtitle">Đua xe bi - Canvas thuần</div>
-  <button class="menu-btn primary" onclick="game.startRace()">🏁 CHƠI</button>
+  <button class="menu-btn primary" onclick="game.startRace()">📺 XEM TRỰC TIẾP</button>
   <button class="menu-btn" onclick="game.showShop()">🏪 SKIN</button>
   <button class="menu-btn" onclick="game.showOptions()">⚙ CÀI ĐẶT</button>
   <button class="menu-btn" onclick="game.showCareer()">🏆 SỰ NGHIỆP</button>
@@ -1020,11 +1064,10 @@ class Marble {
     this.checkpointsPassed = new Set();// Set c�c checkpoint d� di qua
     this.coins = 0;                    // S? coin thu th?p (t?m th?i)
     this.speed = 0;                    // T?c d? hi?n t?i (magnitude c?a velocity)
-    this.boostAmount = 100;            // Lu?ng boost c�n l?i (0-100)
-    this.boosting = false;             // �ang b?t boost?
-    this.brake = false;                // �ang phanh?
-    this.steerInput = 0;               // �?u v�o l�i (-1 tr�i, 1 ph?i)
-    this.forwardInput = false;         // �?u v�o ti?n
+    this.rollSpeed = 2.5 + Math.random() * 1.5; // T?c d? l�n c? b?n (m?i bi kh�c nhau)
+    this.wobble = Math.random() * 0.4; // ?? l?ch ng?u nhi�n (bi c�ng to c�ng l?ch)
+    // H??ng d?n l�n t? AI (lane guidance, kh�ng ph?i l�i xe)
+    this.steerInput = 0;
     this.trackIndex = 0;               // Index g?n nh?t tr�n centerline
     this.trackDist = 0;                // Kho?ng c�ch d� di (0-1 normalized)
     this.lastTrackIndex = 0;           // Track index ? frame tru?c (d? ph�t hi?n qua line)
@@ -1060,11 +1103,7 @@ class Marble {
     this.checkpointsPassed = new Set();
     this.coins = 0;
     this.speed = 0;
-    this.boostAmount = 100;
-    this.boosting = false;
-    this.brake = false;
     this.steerInput = 0;
-    this.forwardInput = false;
     this.trackIndex = 0;
     this.trackDist = 0;
     this.lastTrackIndex = 0;
@@ -1105,66 +1144,55 @@ class Marble {
     if (this.collisionCooldown > 0) this.collisionCooldown -= dt;
     if (this.obstacleCooldown > 0) this.obstacleCooldown -= dt;
 
-    // Player input ? forces
+    // === V?t l� l�n (marble rolling) ===
     let ax = 0, ay = 0;
 
-    // Forward acceleration � AI lu�n ch?y tr? khi brake
-    if (this.forwardInput && !this.brake) {
-      const idx = this.trackIndex;
-      if (track.centerline && track.centerline.length > 0) {
-        const nextIdx = (idx + 1) % track.numPoints;
-        const dirX = track.centerline[nextIdx].x - track.centerline[idx].x;
-        const dirY = track.centerline[nextIdx].y - track.centerline[idx].y;
-        const dirLen = Math.hypot(dirX, dirY);
-        if (dirLen > 0) {
-          const fwdX = dirX / dirLen, fwdY = dirY / dirLen;
-          let accel = CFG.ACCELERATION;
-          if (this.boosting && this.boostAmount > 0) {
-            accel *= CFG.BOOST_SPEED_MULT;
-            this.boostAmount -= CFG.BOOST_DRAIN * dt * 60;
-            if (this.boostAmount < 0) this.boostAmount = 0;
-          }
-          ax += fwdX * accel;
-          ay += fwdY * accel;
+    // 1. ??y v? ph�a tru?c (l?c l�n t? nhi�n)
+    const idx = this.trackIndex;
+    if (track.centerline && track.centerline.length > 0) {
+      const nextIdx = (idx + 1) % track.numPoints;
+      const dirX = track.centerline[nextIdx].x - track.centerline[idx].x;
+      const dirY = track.centerline[nextIdx].y - track.centerline[idx].y;
+      const dirLen = Math.hypot(dirX, dirY);
+      if (dirLen > 0) {
+        const fwdX = dirX / dirLen, fwdY = dirY / dirLen;
+        // L?c ??y nh? (nh? l?c l?n xu?ng d?c)
+        const push = 0.04 * (this.rollSpeed * 0.5);
+        ax += fwdX * push;
+        ay += fwdY * push;
+
+        // 2. L?c h??ng t�m (centering) � gi? bi ? g?n t�m track
+        const cp = Physics.closestPointOnPath(this.x, this.y, track.centerline);
+        const side = cp.side; // > 0 = left side, < 0 = right side
+        const normal = track.normals[cp.index];
+        if (normal && Math.abs(side) > 5) {
+          const centering = -side * 0.003;
+          ax += normal.x * centering;
+          ay += normal.y * centering;
+        }
+
+        // 3. L?i nh? t? AI (lane guidance)
+        if (this.steerInput !== 0) {
+          const n = track.normals[idx];
+          ax += n.x * this.steerInput * 0.01;
+          ay += n.y * this.steerInput * 0.01;
         }
       }
     }
 
-    // Brake
-    if (this.brake) {
-      ax -= this.vx * CFG.BRAKE_FORCE;
-      ay -= this.vy * CFG.BRAKE_FORCE;
-    }
-
-    // Steering (lateral movement)
-    if (this.steerInput !== 0) {
-      const idx = this.trackIndex;
-      const n = track.normals[idx];
-      const steerStr = (this.isPlayer ? CFG.STEER_SPEED : CFG.AI_STEER_SPEED) * this.steerInput;
-      ax += n.x * steerStr;
-      ay += n.y * steerStr;
-    }
-
-    // Apply acceleration
+    // 4. ?p d?ng l?c
     this.vx += ax;
     this.vy += ay;
 
-    // Friction
-    this.vx *= CFG.FRICTION;
-    this.vy *= CFG.FRICTION;
+    // 5. Ma s�t nh? (l?n l�u h?n xe)
+    this.vx *= 0.993;
+    this.vy *= 0.993;
 
-    // Speed cap
-    let maxSpd = CFG.MAX_SPEED;
-    if (this.boosting && this.boostAmount > 0) maxSpd *= CFG.BOOST_SPEED_MULT;
+    // 6. Gi?i h?n t?c d? t?i thi?u (kh�ng d?ng l?i)
     const spd = Math.hypot(this.vx, this.vy);
-    if (spd > maxSpd) {
-      this.vx = (this.vx / spd) * maxSpd;
-      this.vy = (this.vy / spd) * maxSpd;
-    }
-
-    // Boost regen
-    if (!this.boosting) {
-      this.boostAmount = Math.min(100, this.boostAmount + CFG.BOOST_REGEN * dt * 60);
+    if (spd > 12) {
+      this.vx = (this.vx / spd) * 12;
+      this.vy = (this.vy / spd) * 12;
     }
 
     this.speed = Math.hypot(this.vx, this.vy);
@@ -1198,8 +1226,9 @@ class Marble {
     if (this.speed > 1 && Math.random() < this.speed * 0.02) {
       particles.emitDust(this.x, this.y, -this.vx*0.3, -this.vy*0.3, 1);
     }
-    if (this.boosting && this.speed > 2) {
-      particles.emitBoost(this.x, this.y, this.vx / this.speed, this.vy / this.speed);
+    // Dust particles khi l?n nhanh
+    if (this.speed > 5) {
+      particles.emitDust(this.x, this.y, -this.vx*0.2, -this.vy*0.2, 1);
     }
   }
 
@@ -1402,38 +1431,14 @@ class Marble {
     ctx.arc(sx, sy, sr, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Boost effect: outer glow ring + flame particles
-    if (this.boosting && this.boostAmount > 0) {
-      // Outer pulsing ring
-      const pulse = 0.4 + 0.4 * Math.sin(performance.now() * 0.015);
-      ctx.strokeStyle = `rgba(255,200,0,${pulse})`;
-      ctx.lineWidth = 2.5 * camZoom;
+    // Vi?n nh? khi l?n nhanh (t?o hi?u ?ng t?c d?)
+    if (this.speed > 6) {
+      const pulse = 0.15 + 0.15 * Math.sin(performance.now() * 0.01 + this.id);
+      ctx.strokeStyle = `rgba(255,255,255,${pulse})`;
+      ctx.lineWidth = 1.5 * camZoom;
       ctx.beginPath();
-      ctx.arc(sx, sy, sr + 5 * camZoom, 0, Math.PI * 2);
+      ctx.arc(sx, sy, sr + 3 * camZoom, 0, Math.PI * 2);
       ctx.stroke();
-
-      // Secondary glow
-      ctx.strokeStyle = `rgba(255,100,0,${pulse * 0.4})`;
-      ctx.lineWidth = 5 * camZoom;
-      ctx.beginPath();
-      ctx.arc(sx, sy, sr + 8 * camZoom, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Boost flame trail (v? ph�a sau marble theo hu?ng di chuy?n)
-      if (this.speed > 1) {
-        const angle = Math.atan2(this.vy, this.vx);
-        for (let f = 0; f < 3; f++) {
-          const dist = sr * (0.5 + f * 0.4);
-          const spread = rng(-0.3, 0.3);
-          const fx = sx - Math.cos(angle + spread) * dist;
-          const fy = sy - Math.sin(angle + spread) * dist;
-          const size = rng(2, 5) * camZoom * (1 - f * 0.2);
-          ctx.fillStyle = `rgba(255,${150 - f * 50},0,${0.5 - f * 0.15})`;
-          ctx.beginPath();
-          ctx.arc(fx, fy, size, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
     }
   }
 
@@ -1555,16 +1560,15 @@ class AIController {
   constructor(marble, difficulty) {
     this.marble = marble;
     this.difficulty = difficulty;               // 'easy', 'medium', 'hard'
-    // === TH�NG S? K? NANG ===
+    // === TH�NG S? L?N ===
     this.speedMult = difficulty === 'easy' ? 0.7 : difficulty === 'medium' ? 0.9 : 1.1;
-    this.reactionTime = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.15 : 0.05;
-    this.mistakeChance = difficulty === 'easy' ? 0.02 : difficulty === 'medium' ? 0.008 : 0.003;
+    this.mistakeChance = difficulty === 'easy' ? 0.03 : difficulty === 'medium' ? 0.012 : 0.005;
     this.mistakeTimer = 0;
     this.currentMistake = 0;
-    this.lookAhead = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 20;
-    this.boostTimer = 0;
-    this.aggression = difficulty === 'easy' ? 0.3 : difficulty === 'medium' ? 0.6 : 0.9;
-    this.lineBias = rng(-0.2, 0.2);
+    this.lookAhead = difficulty === 'easy' ? 4 : difficulty === 'medium' ? 8 : 15;
+    this.lineBias = rng(-0.25, 0.25);
+    // G�n t?c d? l?n theo c?p
+    marble.rollSpeed = (2.5 + Math.random() * 1.5) * this.speedMult;
   }
 
   update(dt, track, allMarbles) {
@@ -1620,66 +1624,154 @@ class AIController {
       steer = steer * 0.5 + wallAvoid * 0.5;
     }
 
-    // Mistake
+    // Mistake (wobble)
     if (this.currentMistake !== 0) {
-      steer += this.currentMistake * 0.5;
+      steer += this.currentMistake * 0.3;
     }
 
-    m.steerInput = clamp(steer, -1, 1);
+    m.steerInput = clamp(steer, -1, 1) * 0.15; // Guidance nh? (kh�ng ph?i l�i xe)
 
-    // Forward movement � always on for AI
-    // Obstacle stun: gi?m l�i + ti?n d? marble bay ra kh?i obstacle
+    // Obstacle stun: temporarily reduce guidance
     if (m.obstacleCooldown > 0) {
-      m.steerInput *= 0.3;     // Gi?m l�i d? kh�ng quay d?u v�o obstacle
-      m.forwardInput = true;   // V?n ti?n d? tho�t
-      m.brake = false;
-    } else {
-      m.forwardInput = true;
-      m.brake = false;
-    }
-
-    // Boost usage
-    this.boostTimer -= dt;
-    if (this.boostTimer <= 0 && m.boostAmount > 50 && wallDist > 30) {
-      m.boosting = true;
-      this.boostTimer = rng(0.5, 1.5);
-    } else if (m.boostAmount < 20 || wallDist < 15) {
-      m.boosting = false;
-    }
-
-    // Speed modulation based on track ahead
-    if (this.difficulty === 'hard' && wallDist < 15) {
-      m.brake = true; // Brake in tight spots (hard AI is more cautious)
+      m.steerInput *= 0.3;
     }
   }
 }
 
 // ============================================================
-//  CAMERA � Follow player with lerp + auto-zoom
+//  CAMERA — TV Broadcast Camera System
+//  'helicopter' | 'chase' | 'action' | 'finish'
 // ============================================================
 class Camera {
   constructor() {
     this.x = 0; this.y = 0;
     this.zoom = 1;
     this.targetZoom = 1;
+    this.mode = 'helicopter';
+    this.switchTimer = 0;
+    this.switchInterval = 9; // seconds between switches (chậm, d? ch?u)
+    this.targetX = 0;
+    this.targetY = 0;
+    this._finishCp = null;
   }
 
-  follow(target, speed) {
-    // Lerp position
-    this.x = lerp(this.x, target.x, 0.08);
-    this.y = lerp(this.y, target.y, 0.08);
+  update(marbles, dt, raceTime, totalLaps) {
+    this.switchTimer -= dt;
 
-    // Auto-zoom based on speed � zoom ra khi ch?y nhanh (zoom < 1 = zoom out)
-    const speedFactor = clamp(speed / CFG.MAX_SPEED, 0, 1);
-    this.targetZoom = 1 - speedFactor * 0.25; // Zoom out = 0.75x khi max speed
-    if (this.targetZoom < 0.5) this.targetZoom = 0.5;
-    this.zoom = lerp(this.zoom, this.targetZoom, 0.03);
+    // Switch modes — t?i thi?u 6s gi?a m?i l?n chuy?n
+    if (this.switchTimer <= 0) {
+      this.switchTimer = this.switchInterval + Math.random() * 4;
+      this.switchMode(marbles, raceTime, totalLaps);
+    }
+
+    // Update target position based on mode
+    this.updateTarget(marbles, raceTime, totalLaps);
+
+    // Lerp position — chậm rãi, không giật
+    this.x = lerp(this.x, this.targetX, 0.03);
+    this.y = lerp(this.y, this.targetY, 0.03);
+
+    // Zoom mượt mà, không đột ngột
+    this.zoom = lerp(this.zoom, this.targetZoom, 0.015);
   }
+
+  switchMode(marbles, raceTime, totalLaps) {
+    const modes = ['helicopter', 'chase', 'action'];
+    const weights = [0.45, 0.30, 0.25]; // Thiên v?i toàn c?nh, ?t c?n h?n
+    // On final lap, add finish mode
+    const leader = this.getLeader(marbles);
+    if (leader && leader.lap >= totalLaps - 1) {
+      modes.push('finish');
+      weights.push(0.2);
+    }
+    // Weighted random selection
+    const r = Math.random();
+    let cumulative = 0;
+    let chosen = 'helicopter';
+    for (let i = 0; i < modes.length; i++) {
+      cumulative += weights[i] || 0;
+      if (r < cumulative) { chosen = modes[i]; break; }
+    }
+    // Don't repeat same mode
+    if (chosen === this.mode && modes.length > 1) {
+      chosen = modes.find(m => m !== this.mode) || 'helicopter';
+    }
+    this.mode = chosen;
+  }
+
+  updateTarget(marbles, raceTime, totalLaps) {
+    const leader = this.getLeader(marbles);
+    switch (this.mode) {
+      case 'helicopter':
+        // Center on the pack
+        let cx = 0, cy = 0, count = 0;
+        for (const m of marbles) {
+          if (!m.finished) { cx += m.x; cy += m.y; count++; }
+        }
+        if (count > 0) { this.targetX = cx / count; this.targetY = cy / count; }
+        this.targetZoom = 0.65 + count * 0.025;
+        break;
+      case 'chase':
+        if (leader) {
+          this.targetX = leader.x;
+          this.targetY = leader.y;
+        }
+        this.targetZoom = 1.0 + (leader ? leader.speed / 20 : 0);
+        break;
+      case 'action':
+        // Find 2 closest marbles (battle)
+        if (marbles.length >= 2) {
+          let minDist = Infinity, bestI = 0, bestJ = 1;
+          for (let i = 0; i < marbles.length; i++) {
+            for (let j = i + 1; j < marbles.length; j++) {
+              if (marbles[i].finished && marbles[j].finished) continue;
+              const d = Math.hypot(marbles[i].x - marbles[j].x, marbles[i].y - marbles[j].y);
+              if (d < minDist) { minDist = d; bestI = i; bestJ = j; }
+            }
+          }
+          this.targetX = (marbles[bestI].x + marbles[bestJ].x) / 2;
+          this.targetY = (marbles[bestI].y + marbles[bestJ].y) / 2;
+          this.targetZoom = 1.3;
+        }
+        break;
+      case 'finish':
+        // Focus on finish line area
+        if (this._finishCp) {
+          this.targetX = this._finishCp.cx;
+          this.targetY = this._finishCp.cy;
+        } else if (leader) {
+          this.targetX = leader.x;
+          this.targetY = leader.y;
+        }
+        this.targetZoom = 1.4;
+        break;
+    }
+    this.targetZoom = clamp(this.targetZoom, 0.5, 1.6); // Ôn hòa, không zoom gây chói mắt
+  }
+
+  getLeader(marbles) {
+    let best = null, bestProgress = -1;
+    for (const m of marbles) {
+      const p = m.lap + m.trackDist;
+      if (p > bestProgress) { bestProgress = p; best = m; }
+    }
+    return best;
+  }
+
+  getAverageSpeed(marbles) {
+    let sum = 0, count = 0;
+    for (const m of marbles) { if (!m.finished) { sum += m.speed; count++; } }
+    return count > 0 ? sum / count : 0;
+  }
+
+  setFinishCp(cp) { this._finishCp = cp; }
 
   reset(x, y) {
     this.x = x; this.y = y;
-    this.zoom = 1;
-    this.targetZoom = 1;
+    this.targetX = x; this.targetY = y;
+    this.zoom = 1; this.targetZoom = 1;
+    this.mode = 'helicopter';
+    this.switchTimer = 2;
   }
 }
 
@@ -2411,8 +2503,17 @@ class Game {
       this.aiControllers.push(ai);
     }
 
-    // Camera
+// Camera — set finish checkpoint for broadcast mode
     this.camera.reset(startX, startY);
+    this.camera.setFinishCp(this.track.checkpoints[0]);
+
+    // Add AIController for player marble (auto-race in broadcast mode)
+    const playerDiff = 'medium';
+    const playerAI = new AIController(playerMarble, playerDiff);
+    this.aiControllers.push(playerAI);
+
+    // Hide old player controls in broadcast mode
+    document.getElementById('mobile-controls').style.display = 'none';
 
     // Particles
     this.particles.clear();
@@ -2506,12 +2607,10 @@ class Game {
     }
   }
 
-  updateRace(dt) {
+updateRace(dt) {
     this.raceTime += dt;
 
-    // Get player input
-    const player = this.marbles[0];
-    this.processInput(player);
+    // NO player input — all marbles are AI-controlled in broadcast mode
 
     // Update AI
     for (const ai of this.aiControllers) {
@@ -2543,43 +2642,16 @@ class Game {
     // Update particles
     this.particles.update(dt);
 
-    // Update camera
-    this.camera.follow(player, player.speed);
+    // TV Broadcast Camera
+    this.camera.update(this.marbles, dt, this.raceTime, CFG.LAPS);
 
-    // Audio
-    audio.updateEnginePitch(player.speed);
-    if (player.boosting && player.boostAmount > 0) {
-      audio.playBoostLoop(true);
-    } else {
-      audio.playBoostLoop(false);
-    }
-  }
+    // TV Broadcast UI
+    this.updateBroadcastUI();
 
-  processInput(m) {
-    // Keyboard
-    const left = this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A'];
-    const right = this.keys['ArrowRight'] || this.keys['d'] || this.keys['D'];
-    const up = this.keys['ArrowUp'] || this.keys['w'] || this.keys['W'];
-    const down = this.keys['ArrowDown'] || this.keys['s'] || this.keys['S'];
-    const space = this.keys[' '];
-
-    // Touch
-    const tLeft = this.touchInput.left;
-    const tRight = this.touchInput.right;
-    const tBoost = this.touchInput.boost;
-    const tBrake = this.touchInput.brake;
-
-    m.steerInput = 0;
-    if (left || tLeft) m.steerInput = -1;
-    if (right || tRight) m.steerInput = 1;
-
-    m.forwardInput = (up || space || !down) && !tBrake;
-    m.brake = down || tBrake;
-    m.boosting = (space || tBoost) && m.boostAmount > 0;
-
-    // Auto-forward if no input
-    if (!up && !down && !space && !tBoost) {
-      m.forwardInput = true;
+    // Audio — track the leader's engine sound
+    const leader = this.camera.getLeader(this.marbles);
+    if (leader) {
+      audio.updateEnginePitch(leader.speed);
     }
   }
 
@@ -2641,10 +2713,18 @@ class Game {
         if (m.finished) continue;
         const d = dist(m.x, m.y, b.x, b.y);
         if (d < m.radius + 12) {
-          m.boostAmount = Math.min(100, m.boostAmount + 30);
-          m.boosting = true;
+          // ??y nhanh v? ph�a tru?c (boost lane)
+          const idx = m.trackIndex;
+          const nextIdx = (idx + 1) % this.track.numPoints;
+          const dx = this.track.centerline[nextIdx].x - this.track.centerline[idx].x;
+          const dy = this.track.centerline[nextIdx].y - this.track.centerline[idx].y;
+          const dl = Math.hypot(dx, dy);
+          if (dl > 0) {
+            m.vx += (dx / dl) * 2;
+            m.vy += (dy / dl) * 2;
+          }
           b.active = false;
-          b.respawnTime = 3.0; // Respawn sau 3s
+          b.respawnTime = 3.0;
           this.particles.emitBoost(b.x, b.y, 0, 0);
           audio.playBoost();
           break;
@@ -2682,7 +2762,6 @@ class Game {
             // Hazard � slow down + d?y nh? ra
             m.vx = -overlap.nx * 2;
             m.vy = -overlap.ny * 2;
-            m.boostAmount = Math.max(0, m.boostAmount - 10);
             m.obstacleCooldown = 0.2;
             audio.playCrash();
             this.particles.emitSpark(obs.x, obs.y, -overlap.nx, -overlap.ny);
@@ -3308,20 +3387,7 @@ class Game {
     if (!this.marbles || this.marbles.length === 0) return;
     const player = this.marbles[0];
 
-    document.getElementById('hud-speed').textContent = `Tốc: ${Math.round(player.speed * 15)} km/h`;
     document.getElementById('hud-lap').textContent = `Vòng: ${Math.min(player.lap + 1, CFG.LAPS)}/${CFG.LAPS}`;
-    document.getElementById('hud-coins').textContent = `Xu: ${saveData.coins}`;
-
-    // Boost bar
-    const boostPct = player.boostAmount;
-    document.getElementById('hud-boost-fill').style.width = boostPct + '%';
-    if (boostPct > 50) {
-      document.getElementById('hud-boost-fill').style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
-    } else if (boostPct > 20) {
-      document.getElementById('hud-boost-fill').style.background = 'linear-gradient(90deg,#f59e0b,#d97706)';
-    } else {
-      document.getElementById('hud-boost-fill').style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
-    }
 
     // Position ranking
     const finished = this.marbles.filter(m => m.finished);
@@ -3385,6 +3451,63 @@ class Game {
       dot.style.background = m.color;
       container.appendChild(dot);
     }
+  }
+
+// ===================== TV BROADCAST UI =====================
+
+  updateBroadcastUI() {
+    if (!this.marbles || this.marbles.length === 0) return;
+
+    // Update timer
+    const mins = Math.floor(this.raceTime / 60);
+    const secs = Math.floor(this.raceTime % 60);
+    document.getElementById('tv-timer').textContent =
+      String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+    // Update camera label
+    const camLabels = {
+      'helicopter': 'TOÀN CẢNH',
+      'chase': 'THEO ĐUỔI',
+      'action': 'HÀNH ĐỘNG',
+      'finish': 'VỀ ĐÍCH'
+    };
+    document.getElementById('tv-cam-label').textContent =
+      'MÁY QUAY: ' + (camLabels[this.camera.mode] || this.camera.mode.toUpperCase());
+
+    // Update lower third standings (every ~2 seconds)
+    if (!this._broadcastTick || this._broadcastTick <= 0) {
+      this._broadcastTick = 2.0;
+      this.updateLowerThird();
+    } else {
+      this._broadcastTick -= 0.016;
+    }
+  }
+
+  updateLowerThird() {
+    const el = document.getElementById('tv-lower-content');
+    if (!el || !this.marbles) return;
+
+    const sorted = [...this.marbles].sort((a, b) => {
+      if (a.finished && b.finished) return a.finishOrder - b.finishOrder;
+      if (a.finished) return -1;
+      if (b.finished) return 1;
+      return b.lap + b.trackDist - (a.lap + a.trackDist);
+    });
+
+    let html = '';
+    // Show top 4
+    for (let i = 0; i < Math.min(4, sorted.length); i++) {
+      const m = sorted[i];
+      const name = m.country ? m.country.name : 'R' + m.id;
+      const pos = i + 1;
+      const isTop3 = i < 3;
+      html += '<div class="tv-lower-row">' +
+        '<span class="tv-lower-pos">' + pos + '.</span>' +
+        '<span class="tv-lower-name' + (isTop3 ? ' tv-lower-top3' : '') + '">' + name + '</span>' +
+        '<span style="color:#aaa;font-size:11px">' + (m.finished ? '🏁' : 'V' + (m.lap + 1)) + '</span>' +
+      '</div>';
+    }
+    el.innerHTML = html;
   }
 
   showLapNotification(text) {
