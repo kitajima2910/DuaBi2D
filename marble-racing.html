@@ -159,11 +159,11 @@ canvas{display:block;touch-action:none;width:100%;height:100%}
 // ============================================================
 const CFG = {
   canvasW: 0, canvasH: 0,          // Kích thước canvas (sẽ được set khi resize)
-  TRACK_MIN_RADIUS: 250,            // Bán kính tối thiểu của track (điều khiển độ cong)
-  TRACK_MAX_RADIUS: 450,            // Bán kính tối đa — track càng to càng ít cong
-  TRACK_WIDTH: 140,                 // Chiều rộng của đường đua (pixel)
-  TRACK_RESOLUTION: 8,             // Số điểm nội suy giữa 2 control point (càng cao càng mượt)
-  NUM_CONTROL_POINTS: 28,          // Số điểm điều khiển để sinh track (càng nhiều càng phức tạp)
+  TRACK_MIN_RADIUS: 380,            // Bán kính tối thiểu (to hơn cho track rộng rãi)
+  TRACK_MAX_RADIUS: 650,            // Bán kính tối đa — track rộng, đường chạy dài hơn
+  TRACK_WIDTH: 160,                 // Chiều rộng đường đua (pixel)
+  TRACK_RESOLUTION: 12,            // Số điểm nội suy giữa 2 control point (càng cao càng mượt)
+  NUM_CONTROL_POINTS: 14,          // Số điểm điều khiển (14 ≈ oval nhẹ, không xoắn)
   MARBLE_RADIUS: 10,                // Bán kính viên bi
   FRICTION: 0.985,                  // Hệ số ma sát (càng thấp càng trơn, 1 = không ma sát)
   WALL_BOUNCE: 0.5,                 // Hệ số nảy khi va vào tường (0 = dính, 1 = nảy hoàn toàn)
@@ -508,17 +508,22 @@ class ParticleSystem {
 // ============================================================
 class TrackGenerator {
   generate(seed) {
-    // Sinh control points ngẫu nhiên tạo circuit kín
+    // Sinh control points tạo circuit dạng oval nhẹ, không tự cắt nhau
     const cx = 0, cy = 0;
     const n = CFG.NUM_CONTROL_POINTS;
     const pts = [];
-    const baseR = rng(CFG.TRACK_MIN_RADIUS, CFG.TRACK_MAX_RADIUS);
+    const baseRX = rng(420, 580);
+    const baseRY = rng(380, 520);
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
-      const r = baseR + rng(-120, 120);
-      const rx = r + rng(-40, 40) * Math.sin(a * 3);
-      const ry = r + rng(-40, 40) * Math.cos(a * 2);
-      pts.push({ x: cx + rx * Math.cos(a) - ry * Math.sin(a) * 0.3, y: cy + rx * Math.sin(a) + ry * Math.cos(a) * 0.3 });
+      // Hình oval cơ bản + gợn sóng nhẹ cho đa dạng
+      const wave = rng(0.88, 1.12);
+      const rx = baseRX * (0.92 + 0.08 * Math.sin(a * 2.5)) * wave;
+      const ry = baseRY * (0.92 + 0.08 * Math.cos(a * 1.8)) / wave;
+      const perturb = rng(-35, 35);
+      const px = cx + (rx + perturb) * Math.cos(a);
+      const py = cy + (ry + perturb) * Math.sin(a);
+      pts.push({ x: px, y: py });
     }
 
     // Catmull-Rom → centerline
@@ -610,26 +615,73 @@ class TrackGenerator {
 
     // Obstacles — trên track
     const obs = [];
-    for (let i = 0; i < 15; i++) {
+    // Obstacle cố định — rải đều từ mép trong → mép ngoài
+    for (let i = 0; i < 30; i++) {
       const idx = rngInt(0, m - 1);
       const n = smoothNorms[idx];
-      const side = rng(-0.3, 0.3);
+      // Rải obstacle ở mọi vị trí: sát trong (−0.48), giữa, sát ngoài (0.48)
+      const side = rng(-0.48, 0.48);
       const ox = cl[idx].x + n.x * side * hw;
       const oy = cl[idx].y + n.y * side * hw;
       obs.push({
-        x: ox, y: oy, radius: rng(6, 12),
+        x: ox, y: oy, radius: rng(8, 16),
         type: Math.random() < 0.5 ? 'bumper' : 'hazard',
-        active: true,
+        active: true, moving: false,
       });
+    }
+    // Obstacle sát tường — riêng 8 cái ép sát mép trong & ngoài
+    for (let i = 0; i < 8; i++) {
+      const idx = rngInt(0, m - 1);
+      const n = smoothNorms[idx];
+      const side = i < 4 ? rng(-0.48, -0.42) : rng(0.42, 0.48);
+      const ox = cl[idx].x + n.x * side * hw;
+      const oy = cl[idx].y + n.y * side * hw;
+      obs.push({
+        x: ox, y: oy, radius: rng(7, 11),
+        type: i < 4 ? 'hazard' : 'bumper',
+        active: true, moving: false,
+      });
+    }
+    // Obstacle di động — chạy chậm qua lại ngang track
+    for (let i = 0; i < 6; i++) {
+      const idx = rngInt(Math.floor(m * 0.1), Math.floor(m * 0.9));
+      const n = smoothNorms[idx];
+      obs.push({
+        x: cl[idx].x, y: cl[idx].y,
+        radius: rng(12, 16),
+        type: 'bumper',
+        active: true, moving: true,
+        moveSpeed: rng(0.8, 2.2),     // Số lần dao động/giây (chậm, dễ thấy)
+        moveRange: rng(0.35, 0.6),    // Phạm vi di chuyển (% track width)
+        movePhase: rng(0, Math.PI * 2),
+        centerIdx: idx,
+        normal: n,
+      });
+    }
+
+    // Obstacle clusters — chùm obstacle tạo chướng ngại khó
+    for (let c = 0; c < 3; c++) {
+      const idx = rngInt(Math.floor(m * 0.1), Math.floor(m * 0.9));
+      const n = smoothNorms[idx];
+      for (let j = 0; j < 3; j++) {
+        const side = rng(-0.25, 0.25);
+        const dist = rng(10, 25);
+        obs.push({
+          x: cl[idx].x + n.x * side * hw + Math.cos(j * 2.1) * dist,
+          y: cl[idx].y + n.y * side * hw + Math.sin(j * 2.1) * dist,
+          radius: rng(7, 11),
+          type: j === 1 ? 'hazard' : 'bumper',
+          active: true, moving: false,
+        });
+      }
     }
 
     // Boosters
     const boosters = [];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 20; i++) {
       const idx = rngInt(0, m - 1);
-      if (idx % 3 === 0) continue; // tránh trùng
       const n = smoothNorms[idx];
-      const side = rng(-0.3, 0.3);
+      const side = rng(-0.35, 0.35);
       boosters.push({
         x: cl[idx].x + n.x * side * hw,
         y: cl[idx].y + n.y * side * hw,
@@ -640,10 +692,10 @@ class TrackGenerator {
 
     // Coins
     const coins = [];
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 60; i++) {
       const idx = rngInt(0, m - 1);
       const n = smoothNorms[idx];
-      const side = rng(-0.35, 0.35);
+      const side = rng(-0.4, 0.4);
       coins.push({
         x: cl[idx].x + n.x * side * hw,
         y: cl[idx].y + n.y * side * hw,
@@ -1954,6 +2006,8 @@ class Game {
     // Boosters
     this.checkBoosters();
 
+    // Update moving obstacles
+    this.updateMovingObstacles(dt);
     // Obstacles
     this.checkObstacles();
 
@@ -2110,6 +2164,18 @@ class Game {
           break;
         }
       }
+    }
+  }
+
+  updateMovingObstacles(dt) {
+    for (const obs of this.track.obstacles) {
+      if (!obs.moving) continue;
+      // Dao động ngang track (moveSpeed = số chu kỳ/giây)
+      const t = performance.now() / 1000 * Math.PI * 2 * obs.moveSpeed + obs.movePhase;
+      const offset = Math.sin(t) * obs.moveRange * this.track.halfWidth;
+      const n = obs.normal || { x: 0, y: 0 };
+      obs.x = this.track.centerline[obs.centerIdx].x + n.x * offset;
+      obs.y = this.track.centerline[obs.centerIdx].y + n.y * offset;
     }
   }
 
@@ -2310,89 +2376,72 @@ class Game {
     const tr = this.track;
 
     // === BACKGROUND (cỏ / ground) ===
-    // Vẽ nền xanh đậm với hiệu ứng gradient radial
-    const bgGrad = ctx.createRadialGradient(0, 0, 100, 0, 0, 2000);
-    bgGrad.addColorStop(0, '#2d5a2d');
-    bgGrad.addColorStop(0.5, '#1e3a1e');
+    // Gradient nền xanh đậm hơn, mượt hơn
+    const bgGrad = ctx.createRadialGradient(0, 0, 50, 0, 0, 2500);
+    bgGrad.addColorStop(0, '#3a6b3a');
+    bgGrad.addColorStop(0.4, '#2a5a2a');
     bgGrad.addColorStop(1, '#0d1a0d');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(-3000, -3000, 6000, 6000);
 
-    // Grass detail — các chấm cỏ ngẫu nhiên
-    ctx.fillStyle = 'rgba(50,120,50,0.3)';
-    const grassSeed = 12345;
-    for (let i = 0; i < 200; i++) {
-      const gx = ((i * 137 + grassSeed) % 4000) - 2000;
-      const gy = ((i * 269 + grassSeed * 2) % 4000) - 2000;
-      // Chỉ vẽ cỏ ở ngoài track
-      let onTrack = false;
-      for (let j = 0; j < 8; j++) {
-        const idx = Math.floor(j * tr.centerline.length / 8);
-        if (dist(gx, gy, tr.centerline[idx].x, tr.centerline[idx].y) < tr.halfWidth + 30) {
-          onTrack = true; break;
-        }
-      }
-      if (!onTrack) {
-        ctx.beginPath();
-        ctx.arc(gx, gy, 1 + Math.random() * 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
     // === TRACK SURFACE ===
-    // Vẽ track surface như filled polygon giữa outerWall và innerWall
+    // Vẽ track surface (polygon giữa outerWall và innerWall)
     ctx.beginPath();
-    // Trace outer wall
     for (let i = 0; i < tr.outerWall.length; i++) {
       if (i === 0) ctx.moveTo(tr.outerWall[i].x, tr.outerWall[i].y);
       else ctx.lineTo(tr.outerWall[i].x, tr.outerWall[i].y);
     }
     ctx.closePath();
-    // Trace inner wall ngược chiều để tạo hole
     for (let i = tr.innerWall.length - 1; i >= 0; i--) {
       ctx.lineTo(tr.innerWall[i].x, tr.innerWall[i].y);
     }
     ctx.closePath();
 
-    // Track surface gradient
-    const surfGrad = ctx.createLinearGradient(-500, -500, 500, 500);
-    surfGrad.addColorStop(0, '#4a4a5a');
-    surfGrad.addColorStop(0.5, '#5a5a6a');
-    surfGrad.addColorStop(1, '#3a3a4a');
+    // Track surface gradient — màu asphalt tối
+    const surfGrad = ctx.createLinearGradient(-600, -600, 600, 600);
+    surfGrad.addColorStop(0, '#3a3a42');
+    surfGrad.addColorStop(0.3, '#4a4a52');
+    surfGrad.addColorStop(0.5, '#505058');
+    surfGrad.addColorStop(0.7, '#45454d');
+    surfGrad.addColorStop(1, '#35353d');
     ctx.fillStyle = surfGrad;
     ctx.fill();
 
-    // Track border glow
-    ctx.shadowColor = 'rgba(100,100,255,0.1)';
-    ctx.shadowBlur = 20;
-    ctx.strokeStyle = '#666';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
+    // Viền track — đường curb đỏ-trắng bên trong và ngoài
+    const curbStep = Math.max(1, Math.floor(tr.innerWall.length / 40));
+    for (let side = 0; side < 2; side++) {
+      const wall = side === 0 ? tr.innerWall : tr.outerWall;
+      const dir = side === 0 ? 1 : -1; // hướng offset: inner → ra ngoài, outer → vào trong
+      for (let i = 0; i < wall.length - curbStep; i += curbStep) {
+        const n = tr.normals[i];
+        const x1 = wall[i].x + n.x * dir * 3;
+        const y1 = wall[i].y + n.y * dir * 3;
+        const x2 = wall[i + curbStep].x + n.x * dir * 3;
+        const y2 = wall[i + curbStep].y + n.y * dir * 3;
+        const x3 = wall[i + curbStep].x + n.x * dir * 8;
+        const y3 = wall[i + curbStep].y + n.y * dir * 8;
+        const x4 = wall[i].x + n.x * dir * 8;
+        const y4 = wall[i].y + n.y * dir * 8;
+        ctx.fillStyle = Math.floor(i / curbStep) % 2 === 0 ? '#e63946' : '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+        ctx.lineTo(x4, y4);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
 
     // === TRACK MARKINGS ===
-    // Centerline dashed
-    ctx.strokeStyle = 'rgba(255,255,200,0.12)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([6, 10]);
-    ctx.beginPath();
-    for (let i = 0; i < tr.centerline.length; i++) {
-      if (i === 0) ctx.moveTo(tr.centerline[i].x, tr.centerline[i].y);
-      else ctx.lineTo(tr.centerline[i].x, tr.centerline[i].y);
-    }
-    ctx.closePath();
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Edge lines — vạch trắng mép trong và ngoài
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.lineWidth = 1.5;
+    // Vạch trắng mép trong và ngoài (nằm trên curb)
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     for (let i = 0; i < tr.innerWall.length; i++) {
-      // Offset vào trong một chút
       const n = tr.normals[i];
-      const ix = tr.innerWall[i].x + n.x * 4;
-      const iy = tr.innerWall[i].y + n.y * 4;
+      const ix = tr.innerWall[i].x + n.x * 9;
+      const iy = tr.innerWall[i].y + n.y * 9;
       if (i === 0) ctx.moveTo(ix, iy);
       else ctx.lineTo(ix, iy);
     }
@@ -2402,13 +2451,58 @@ class Game {
     ctx.beginPath();
     for (let i = 0; i < tr.outerWall.length; i++) {
       const n = tr.normals[i];
-      const ox = tr.outerWall[i].x - n.x * 4;
-      const oy = tr.outerWall[i].y - n.y * 4;
+      const ox = tr.outerWall[i].x - n.x * 9;
+      const oy = tr.outerWall[i].y - n.y * 9;
       if (i === 0) ctx.moveTo(ox, oy);
       else ctx.lineTo(ox, oy);
     }
     ctx.closePath();
     ctx.stroke();
+
+    // Vạch centerline — màu vàng đứt nét
+    ctx.strokeStyle = 'rgba(255,220,50,0.35)';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([8, 12]);
+    ctx.beginPath();
+    for (let i = 0; i < tr.centerline.length; i++) {
+      if (i === 0) ctx.moveTo(tr.centerline[i].x, tr.centerline[i].y);
+      else ctx.lineTo(tr.centerline[i].x, tr.centerline[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Racing line — đường tối ưu mờ (để tham khảo)
+    ctx.strokeStyle = 'rgba(100,200,255,0.08)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([15, 20]);
+    ctx.beginPath();
+    for (let i = 0; i < tr.centerline.length; i++) {
+      const n = tr.normals[i];
+      // Hơi lệch vào trong ở khúc cua (mô phỏng racing line)
+      const offset = Math.sin(i * 0.3) * tr.halfWidth * 0.15;
+      const rx = tr.centerline[i].x + n.x * offset;
+      const ry = tr.centerline[i].y + n.y * offset;
+      if (i === 0) ctx.moveTo(rx, ry);
+      else ctx.lineTo(rx, ry);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Đổ bóng nhẹ cho track (depth effect)
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 15;
+    ctx.strokeStyle = 'rgba(50,50,60,0.3)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    for (let i = 0; i < tr.outerWall.length; i++) {
+      if (i === 0) ctx.moveTo(tr.outerWall[i].x, tr.outerWall[i].y);
+      else ctx.lineTo(tr.outerWall[i].x, tr.outerWall[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
 
     // === SEGMENT TYPE INDICATORS ===
     for (const seg of tr.segments) {
@@ -2540,8 +2634,37 @@ class Game {
   }
 
   renderObstacles(ctx) {
+    const time = performance.now() * 0.001;
     for (const obs of this.track.obstacles) {
       if (!obs.active) continue;
+
+      if (obs.moving) {
+        // Moving obstacle — hiệu ứng nhấp nháy + glow xanh để phân biệt
+        const pulse = 0.6 + 0.4 * Math.sin(time * 3 + obs.centerIdx);
+        ctx.globalAlpha = pulse;
+        ctx.shadowColor = '#4488ff';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = `rgba(68,136,255,${0.15 * pulse})`;
+        ctx.beginPath();
+        ctx.arc(obs.x, obs.y, obs.radius + 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = `rgba(68,136,255,${pulse})`;
+        ctx.beginPath();
+        ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#aaccff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${obs.radius}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⟳', obs.x + 0.5, obs.y + 0.5);
+        ctx.globalAlpha = 1;
+        continue;
+      }
+
       // Glow effect
       ctx.shadowColor = obs.type === 'bumper' ? '#ff8844' : '#ff4444';
       ctx.shadowBlur = 15;
