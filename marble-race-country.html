@@ -1728,6 +1728,12 @@ function resetGameState() {
 }
 
 function startRace() {
+    // Đóng overlay và countdown nếu đang hiện
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('countdown').classList.remove('active');
+    document.getElementById('pauseBtn').textContent = 'TẠM DỪNG';
+    document.getElementById('pauseBtn').disabled = false;
+
     const count = parseInt(document.getElementById('marbleCount').value);
     const seed = parseInt(document.getElementById('trackSeed').value) || 42;
 
