@@ -5,11 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Marble Race Country</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='35%25' cy='35%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23fff' stop-opacity='.45'/%3E%3Cstop offset='100%25' stop-color='%23fff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='30' fill='%231a1a2e' stroke='%234a4a7a' stroke-width='2'/%3E%3Crect x='14' y='20' width='36' height='24' rx='2' fill='%23ffd93d'/%3E%3Cpath d='M14 20h12v24H14z' fill='%236b6bff'/%3E%3Cpath d='M38 20h12v24H38z' fill='%23ff6b6b'/%3E%3Crect x='14' y='28' width='36' height='8' fill='rgba(0,0,0,.15)'/%3E%3Crect x='14' y='20' width='36' height='24' rx='2' fill='none' stroke='rgba(0,0,0,.2)' stroke-width='1'/%3E%3Ccircle cx='32' cy='32' r='30' fill='url(%23g)'/%3E%3Ccircle cx='24' cy='24' r='4' fill='rgba(255,255,255,.25)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* ===== CSS RESET & BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #e0e0e0; display: flex; justify-content: center; align-items: center; }
+body { background: #0a0a12; font-family: 'Montserrat', 'Segoe UI', system-ui, -apple-system, sans-serif; color: #e0e0e0; display: flex; justify-content: center; align-items: center; }
 
 /* ===== APP LAYOUT ===== */
 #app { display: flex; width: 100%; height: 100vh; max-width: 1400px; margin: 0 auto; background: #0f0f1a; overflow: hidden; }
@@ -485,7 +488,7 @@ const COUNTRIES = [
     { name: "Spain", colors: ["#C60B1E","#FFC400","#C60B1E"], pattern: "stripes-horizontal" },
     { name: "Brazil", colors: ["#009739","#FFDF00","#002776"], pattern: "circle" },
     { name: "Japan", colors: ["#FFFFFF","#BC002D"], pattern: "circle" },
-    { name: "China", colors: ["#DE2910","#FFDE00"], pattern: "star" },
+    { name: "China", colors: ["#DE2910","#FFDE00"], pattern: "china" },
     { name: "India", colors: ["#FF9933","#FFFFFF","#138808"], pattern: "stripes-horizontal" },
     { name: "Canada", colors: ["#FF0000","#FFFFFF","#FF0000"], pattern: "stripes-vertical" },
     { name: "Australia", colors: ["#00008B","#FF0000","#FFFFFF"], pattern: "star" },
@@ -504,7 +507,7 @@ const COUNTRIES = [
     { name: "Greece", colors: ["#0D5EAF","#FFFFFF"], pattern: "cross" },
     { name: "Portugal", colors: ["#006600","#FF0000","#FFD700"], pattern: "stripes-vertical" },
     { name: "Belgium", colors: ["#000000","#FDDA24","#EF3340"], pattern: "stripes-vertical" },
-    { name: "Turkey", colors: ["#E30A17","#FFFFFF"], pattern: "star" },
+    { name: "Turkey", colors: ["#E30A17","#FFFFFF"], pattern: "turkish" },
     { name: "Argentina", colors: ["#74ACDF","#FFFFFF","#74ACDF"], pattern: "stripes-horizontal" },
     { name: "Mexico", colors: ["#006341","#FFFFFF","#CE1126"], pattern: "stripes-vertical" },
     { name: "Thailand", colors: ["#ED1C24","#FFFFFF","#241D4F","#FFFFFF","#ED1C24"], pattern: "stripes-horizontal" },
@@ -594,6 +597,48 @@ function renderFlagTexture(country, size) {
                 ctx.closePath();
                 ctx.fill();
             }
+            break;
+        }
+        case 'china': {
+            // China flag: red bg + 1 large star + 4 small stars in arc
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = colors[1];
+            const bigR = w * 0.2;
+            // Large star in top-left area
+            drawStar(ctx, w * 0.2, h * 0.25, 5, bigR, bigR * 0.4);
+            // 4 small stars in an arc to the right
+            const smallR = bigR * 0.4;
+            const positions = [
+                [w * 0.38, h * 0.12],
+                [w * 0.46, h * 0.22],
+                [w * 0.42, h * 0.35],
+                [w * 0.34, h * 0.42],
+            ];
+            for (const [sx, sy] of positions) {
+                drawStar(ctx, sx, sy, 5, smallR, smallR * 0.4);
+            }
+            break;
+        }
+        case 'turkish': {
+            // Turkey: red bg + white crescent + star
+            ctx.fillStyle = colors[0];
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = colors[1];
+            // Crescent: two overlapping circles with composite
+            const cr = w * 0.3;
+            ctx.beginPath();
+            ctx.arc(cx - w * 0.05, cy, cr, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(cx + w * 0.08, cy, cr * 0.78, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            // Star next to crescent
+            ctx.fillStyle = colors[1];
+            const tStarR = w * 0.1;
+            drawStar(ctx, cx + w * 0.14, cy - h * 0.03, 5, tStarR, tStarR * 0.4);
             break;
         }
         case 'star': {
