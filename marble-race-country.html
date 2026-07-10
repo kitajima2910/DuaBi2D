@@ -175,7 +175,7 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
       <div class="control-group">
         <label>Mã Đường</label>
         <div class="seed-row">
-          <input type="text" id="trackSeed" value="2910" maxlength="10">
+          <input type="text" id="trackSeed" value="4321" maxlength="10">
           <button class="btn btn-secondary btn-small" id="randomSeedBtn">🎲</button>
         </div>
       </div>
@@ -261,9 +261,9 @@ const CONFIG = {
     PHYSICS_DT: 1 / 60,
     GRAVITY: 350,
     MARBLE_RADIUS: 14,
-    TRACK_WIDTH: 400,
+    TRACK_WIDTH: 800,
     TRACK_LENGTH: 8000,
-    WALL_THICKNESS: 8,
+    WALL_THICKNESS: 10,
     BOUNCE_DAMPING: 0.5,
     FRICTION_AIR: 0.999,
     FRICTION_ROLLING: 0.98,
@@ -1006,16 +1006,16 @@ function generateTrack(seed) {
         const y = i * segH;
         const t = i / segments;
 
-        // Sinusoidal variation
-        const variation = rng.nextRange(-40, 40) * (1 - Math.abs(t - 0.5) * 0.8);
-        const widthVar = rng.nextRange(-30, 30) * (1 - Math.abs(t - 0.5));
+        // Sinusoidal variation — tăng biên độ theo track width để wall vẫn uốn lượn
+        const variation = rng.nextRange(-100, 100) * (1 - Math.abs(t - 0.5) * 0.8);
+        const widthVar = rng.nextRange(-80, 80) * (1 - Math.abs(t - 0.5));
 
         const smoothFactor = 0.3;
         let targetLeft = -baseWidth / 2 + variation - widthVar / 2;
         let targetRight = baseWidth / 2 + variation + widthVar / 2;
 
-        // Ensure minimum width
-        const minWidth = 120;
+        // Ensure minimum width (rộng hơn để bi không bị kẹt)
+        const minWidth = 300;
         if (targetRight - targetLeft < minWidth) {
             const center = (targetLeft + targetRight) / 2;
             targetLeft = center - minWidth / 2;
@@ -1065,24 +1065,24 @@ function generateTrack(seed) {
         const midX = (lw.x + rw.x) / 2;
 
         const typeRoll = rng.next();
-        const obstacleType = typeRoll < 0.12 ? 'funnel' :
-                             typeRoll < 0.25 ? 'pegs' :
-                             typeRoll < 0.35 ? 'spinner' :
-                             typeRoll < 0.45 ? 'pendulum' :
-                             typeRoll < 0.55 ? 'bumpers' :
-                             typeRoll < 0.62 ? 'jump-pad' :
-                             typeRoll < 0.70 ? 'moving-platform' :
-                             typeRoll < 0.77 ? 'split-path' :
-                             typeRoll < 0.83 ? 'rotating-gate' :
-                             typeRoll < 0.89 ? 'scurve' :
-                             typeRoll < 0.94 ? 'gravity-drop' :
+        const obstacleType = typeRoll < 0.10 ? 'funnel' :
+                             typeRoll < 0.22 ? 'pegs' :
+                             typeRoll < 0.32 ? 'spinner' :
+                             typeRoll < 0.40 ? 'pendulum' :
+                             typeRoll < 0.52 ? 'bumpers' :
+                             typeRoll < 0.60 ? 'jump-pad' :
+                             typeRoll < 0.67 ? 'moving-platform' :
+                             typeRoll < 0.74 ? 'split-path' :
+                             typeRoll < 0.82 ? 'rotating-gate' :
+                             typeRoll < 0.90 ? 'scurve' :
+                             typeRoll < 0.96 ? 'gravity-drop' :
                              'checkpoint';
 
         const segMidY = y + segH / 2;
 
         switch (obstacleType) {
             case 'funnel': {
-                const gap = rng.nextRange(40, 100);
+                const gap = rng.nextRange(80, 200);
                 const funnelTop = segWidth * 0.8;
                 track.obstacles.push({
                     type: 'funnel', y: segMidY, segW: segWidth,
@@ -1100,12 +1100,12 @@ function generateTrack(seed) {
                 break;
             }
             case 'pegs': {
-                const numPegs = rng.nextInt(6, 15);
+                const numPegs = rng.nextInt(8, 18);
                 for (let p = 0; p < numPegs; p++) {
-                    const px = lw.x + rng.nextRange(20, segWidth - 20);
+                    const px = lw.x + rng.nextRange(30, segWidth - 30);
                     const py = segMidY - segH * 0.4 + rng.nextRange(0, segH * 0.8);
                     track.obstacles.push({
-                        type: 'peg', x: px, y: py, radius: rng.nextRange(6, 14)
+                        type: 'peg', x: px, y: py, radius: rng.nextRange(10, 22)
                     });
                 }
                 break;
@@ -1113,7 +1113,7 @@ function generateTrack(seed) {
             case 'spinner': {
                 track.obstacles.push({
                     type: 'spinner', x: midX, y: segMidY, radius: segWidth * 0.35,
-                    arms: rng.nextInt(3, 6), speed: rng.nextRange(1, 3) * (rng.next() > 0.5 ? 1 : -1),
+                    arms: rng.nextInt(3, 6), speed: rng.nextRange(2, 5) * (rng.next() > 0.5 ? 1 : -1),
                     angle: rng.nextRange(0, Math.PI * 2)
                 });
                 break;
@@ -1121,18 +1121,18 @@ function generateTrack(seed) {
             case 'pendulum': {
                 track.obstacles.push({
                     type: 'pendulum', x: midX, y: segMidY - segH * 0.3,
-                    length: segH * 0.4, ballRadius: 12, swingSpeed: rng.nextRange(1.5, 3),
-                    angle: rng.nextRange(-0.5, 0.5)
+                    length: segH * 0.45, ballRadius: 16, swingSpeed: rng.nextRange(2, 4.5),
+                    angle: rng.nextRange(-0.8, 0.8)
                 });
                 break;
             }
             case 'bumpers': {
-                const numBump = rng.nextInt(3, 6);
+                const numBump = rng.nextInt(4, 8);
                 for (let p = 0; p < numBump; p++) {
                     track.obstacles.push({
-                        type: 'bumper', x: lw.x + rng.nextRange(30, segWidth - 30),
-                        y: segMidY - segH * 0.3 + rng.nextRange(0, segH * 0.6),
-                        radius: rng.nextRange(10, 18), bounce: 1.3
+                        type: 'bumper', x: lw.x + rng.nextRange(40, segWidth - 40),
+                        y: segMidY - segH * 0.35 + rng.nextRange(0, segH * 0.7),
+                        radius: rng.nextRange(16, 30), bounce: 1.3
                     });
                 }
                 break;
@@ -1140,15 +1140,15 @@ function generateTrack(seed) {
             case 'jump-pad': {
                 track.obstacles.push({
                     type: 'jump-pad', x: midX, y: segMidY,
-                    width: segWidth * 0.4, boost: rng.nextRange(-400, -600)
+                    width: segWidth * 0.35, boost: rng.nextRange(-500, -800)
                 });
                 break;
             }
             case 'moving-platform': {
                 track.obstacles.push({
                     type: 'moving-platform', x: midX, y: segMidY,
-                    width: segWidth * 0.5, height: 10,
-                    travel: segWidth * 0.3, speed: rng.nextRange(30, 80),
+                    width: segWidth * 0.5, height: 12,
+                    travel: segWidth * 0.35, speed: rng.nextRange(60, 140),
                     phase: rng.nextRange(0, Math.PI * 2)
                 });
                 break;
@@ -1175,8 +1175,8 @@ function generateTrack(seed) {
             case 'rotating-gate': {
                 track.obstacles.push({
                     type: 'rotating-gate', x: midX, y: segMidY,
-                    width: segWidth * 0.6, bars: rng.nextInt(2, 4),
-                    speed: rng.nextRange(1, 3), angle: rng.nextRange(0, Math.PI)
+                    width: segWidth * 0.6, bars: rng.nextInt(2, 5),
+                    speed: rng.nextRange(2, 5), angle: rng.nextRange(0, Math.PI)
                 });
                 break;
             }
@@ -1307,7 +1307,7 @@ function initMarbles(count, seed) {
     // Starting grid: arrange marbles in neat rows, centered on track
     const trackWidth = CONFIG.TRACK_WIDTH;
     const marbleR = CONFIG.MARBLE_RADIUS;
-    const cols = Math.min(10, count);                   // max 10 per row
+    const cols = Math.min(15, count);                   // max 15 per row (track rộng hơn)
     const rows = Math.ceil(count / cols);
     const cellW = Math.min(trackWidth / cols, marbleR * 3.2);
     const cellH = marbleR * 3;
