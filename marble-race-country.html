@@ -171,6 +171,93 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
   #left-panel .action-row { margin-top: 2px; }
   #game-container { height: 65vh; }
 }
+
+/* ===== CAREER MODE - DASHBOARD ===== */
+.career-dashboard { display:none; }
+.career-dashboard.active { display:block; }
+.career-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.career-header .league-badge { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#ffd93d,#ff6b6b); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#1a1a2e; }
+.career-header .league-name { font-size:13px; font-weight:700; color:#fff; flex:1; }
+.career-header .league-tier { font-size:10px; color:#ffd93d; font-weight:600; }
+
+.career-xp-bar { height:8px; background:#2a2a4a; border-radius:4px; overflow:hidden; margin:4px 0 6px; position:relative; }
+.career-xp-bar .xp-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#6b6bff,#ffd93d); background-size:200% 100%; animation:xpShimmer 2s linear infinite; transition:width 0.5s ease; }
+@keyframes xpShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.career-xp-text { font-size:9px; color:#999; display:flex; justify-content:space-between; }
+
+.career-stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin:6px 0; }
+.career-stat-item { background:rgba(255,255,255,0.03); border-radius:4px; padding:4px 6px; text-align:center; }
+.career-stat-item .stat-val { font-size:12px; font-weight:700; color:#fff; }
+.career-stat-item .stat-lbl { font-size:8px; color:#888; text-transform:uppercase; letter-spacing:0.5px; }
+
+.career-tab-bar { display:flex; gap:2px; margin:6px 0 0; }
+.career-tab { flex:1; padding:5px 2px; font-size:9px; font-weight:600; background:#1a1a2e; color:#777; border:1px solid #2a2a4a; border-radius:4px; cursor:pointer; text-align:center; transition:all 0.2s; }
+.career-tab:hover { background:#2a2a4a; color:#ccc; }
+.career-tab.active { background:#3a3a6a; color:#fff; border-color:#6b6bff; box-shadow:0 0 8px rgba(107,107,255,0.3); }
+.career-tab-content { display:none; }
+.career-tab-content.active { display:block; }
+
+/* ===== CAREER OVERLAY SCREENS ===== */
+.career-overlay-stats .stat-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:13px; }
+.career-overlay-stats .stat-row .label { color:#999; }
+.career-overlay-stats .stat-row .value { color:#fff; font-weight:600; }
+
+.career-garage-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0; }
+.career-garage-item { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:8px 4px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.career-garage-item:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.12); }
+.career-garage-item.locked { opacity:0.35; cursor:not-allowed; filter:grayscale(0.6); }
+.career-garage-item.equipped { border-color:#ffd93d; box-shadow:0 0 8px rgba(255,217,61,0.25); }
+.career-garage-item .item-icon { font-size:22px; margin-bottom:3px; }
+.career-garage-item .item-name { font-size:9px; color:#bbb; }
+.career-garage-item .item-badge { font-size:8px; background:#6b6bff; color:#fff; border-radius:3px; padding:1px 4px; display:inline-block; margin-top:2px; }
+.career-garage-item .lock-icon { font-size:14px; }
+
+.career-mission-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:8px 10px; margin-bottom:6px; }
+.career-mission-card .mission-header { display:flex; justify-content:space-between; align-items:center; }
+.career-mission-card .mission-name { font-size:12px; font-weight:600; color:#ddd; }
+.career-mission-card .mission-reward { font-size:10px; color:#ffd93d; }
+.career-mission-card .mission-progress { margin-top:4px; height:4px; background:#2a2a4a; border-radius:2px; }
+.career-mission-card .mission-progress .mp-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#6b6bff,#6bcbff); transition:width 0.3s; }
+.career-mission-card .mission-desc { font-size:10px; color:#888; margin-top:2px; }
+.career-mission-card .claim-btn { margin-top:4px; padding:3px 10px; font-size:9px; }
+
+.career-achievement-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+.career-achievement-item .ach-icon { font-size:22px; width:30px; text-align:center; }
+.career-achievement-item .ach-info { flex:1; }
+.career-achievement-item .ach-name { font-size:12px; font-weight:600; color:#ddd; }
+.career-achievement-item .ach-desc { font-size:10px; color:#888; }
+.career-achievement-item .ach-status { font-size:10px; color:#6bcbff; }
+.career-achievement-item.locked .ach-icon { filter:grayscale(1); opacity:0.4; }
+.career-achievement-item.locked .ach-name { color:#666; }
+.career-achievement-item.unlocked .ach-status { color:#ffd93d; }
+
+/* ===== CAREER REWARDS ANIMATION ===== */
+.career-rewards-box { background:linear-gradient(135deg,rgba(107,107,255,0.15),rgba(255,217,61,0.08)); border:1px solid rgba(255,217,61,0.2); border-radius:8px; padding:10px 12px; margin:8px 0; text-align:center; }
+.career-rewards-box .rewards-title { font-size:11px; color:#ffd93d; font-weight:600; margin-bottom:4px; }
+.career-rewards-box .rewards-row { display:flex; justify-content:center; gap:12px; }
+.career-rewards-box .reward-item { display:flex; align-items:center; gap:3px; font-size:13px; font-weight:700; color:#fff; }
+.career-rewards-box .reward-item .reward-icon { font-size:16px; }
+
+.career-promotion-overlay { text-align:center; padding:16px; }
+.career-promotion-overlay .promo-icon { font-size:48px; margin-bottom:8px; }
+.career-promotion-overlay .promo-title { font-size:22px; font-weight:800; background:linear-gradient(135deg,#ffd93d,#ff6b6b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.career-promotion-overlay .promo-desc { font-size:13px; color:#999; margin:8px 0; }
+.career-promotion-overlay .promo-bonus { font-size:15px; color:#ffd93d; font-weight:700; }
+
+.career-lock-indicator { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:18px; color:rgba(255,255,255,0.5); text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+
+/* ===== CAREER MODE BUTTON ===== */
+.career-btn { background:linear-gradient(135deg,#6b6bff,#ffd93d); color:#1a1a2e; font-weight:800; }
+.career-btn:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(255,217,61,0.4); }
+.career-btn.active { box-shadow:0 0 16px rgba(255,217,61,0.5); }
+
+/* ===== RESPONSIVE CAREER ===== */
+@media (max-width:700px) {
+  .career-garage-grid { grid-template-columns:repeat(3,1fr); }
+  .career-header .league-name { font-size:11px; }
+  .career-tab { font-size:8px; padding:4px 1px; }
+  .career-stat-item .stat-val { font-size:10px; }
+}
 </style>
 </head>
 <body>
@@ -182,7 +269,39 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
 
     <div class="section">
       <h2>Chế Độ</h2>
-      <button class="mode-btn active" data-mode="tournament" style="width:100%;">Giải Đấu</button>
+      <div class="btn-group" style="display:flex;gap:4px;">
+        <button class="mode-btn active" data-mode="tournament" style="flex:1;">Giải Đấu</button>
+        <button class="mode-btn career-btn" id="careerModeBtn" data-mode="career" style="flex:1;">🏆 Sự Nghiệp</button>
+      </div>
+    </div>
+
+    <!-- CAREER DASHBOARD -->
+    <div class="section career-dashboard" id="careerDashboard">
+      <div class="career-header">
+        <div class="league-badge" id="careerLeagueBadge">D</div>
+        <div>
+          <div class="league-name" id="careerLeagueName">Dirt League</div>
+          <div class="league-tier" id="careerLeagueTier">Hạng Bụi Đất</div>
+        </div>
+      </div>
+      <div class="career-xp-bar"><div class="xp-fill" id="careerXPFill" style="width:0%"></div></div>
+      <div class="career-xp-text"><span id="careerXPText">0 / 200 XP</span><span id="careerLevelText">Cấp 1</span></div>
+      <div class="career-stats-grid">
+        <div class="career-stat-item"><div class="stat-val" id="careerStatCoins">0</div><div class="stat-lbl">🪙 Xu</div></div>
+        <div class="career-stat-item"><div class="stat-val" id="careerStatStars">0</div><div class="stat-lbl">⭐ Sao</div></div>
+        <div class="career-stat-item"><div class="stat-val" id="careerStatRaces">0</div><div class="stat-lbl">🏁 Đua</div></div>
+        <div class="career-stat-item"><div class="stat-val" id="careerStatWins">0</div><div class="stat-lbl">🏆 Thắng</div></div>
+      </div>
+      <div class="career-tab-bar">
+        <button class="career-tab active" data-career-tab="stats">📊</button>
+        <button class="career-tab" data-career-tab="garage">🔧</button>
+        <button class="career-tab" data-career-tab="missions">📋</button>
+        <button class="career-tab" data-career-tab="achievements">🏅</button>
+      </div>
+      <div class="career-tab-content active" id="careerTabStats"><div style="font-size:10px;color:#888;text-align:center;padding:8px 0;">Thống kê sự nghiệp</div></div>
+      <div class="career-tab-content" id="careerTabGarage"><div style="font-size:10px;color:#888;text-align:center;padding:8px 0;">Garage</div></div>
+      <div class="career-tab-content" id="careerTabMissions"><div style="font-size:10px;color:#888;text-align:center;padding:8px 0;">Nhiệm vụ</div></div>
+      <div class="career-tab-content" id="careerTabAchievements"><div style="font-size:10px;color:#888;text-align:center;padding:8px 0;">Thành tựu</div></div>
     </div>
 
     <div class="section">
@@ -1853,7 +1972,7 @@ class GameMode {
     }
 
     updateTournament(marbles) {
-        if (this.mode !== 'tournament') return;
+        if (this.mode !== 'tournament' && this.mode !== 'career') return;
         const sorted = [...marbles].filter(m => m.finishTime !== null).sort((a, b) => a.finishTime - b.finishTime);
         sorted.forEach((m, i) => {
             let entry = this.tournamentStandings.find(e => e.id === m.id);
@@ -1998,9 +2117,27 @@ function startRace() {
     document.getElementById('countdown').classList.remove('active');
     document.getElementById('pauseBtn').textContent = 'TẠM DỪNG';
     document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('pauseBtn').textContent = 'TẠM DỪNG';
 
-    const count = parseInt(document.getElementById('marbleCount').value);
-    const seed = parseInt(document.getElementById('trackSeed').value) || 42;
+    // Career mode: override settings
+    if (gameMode.mode === 'career') {
+        const league = CAREER_LEAGUES[careerGetLeagueNum() - 1];
+        document.getElementById('marbleCount').value = league.marbleCount;
+        document.getElementById('marbleCountDisplay').textContent = league.marbleCount;
+        const seedBase = league.seedMin + (careerGetProfile().currentTournament % (league.seedMax - league.seedMin));
+        document.getElementById('trackSeed').value = Math.min(seedBase + gameMode.currentRace, league.seedMax);
+        document.getElementById('marbleCount').disabled = true;
+        document.getElementById('trackSeed').disabled = true;
+        document.getElementById('randomSeedBtn').disabled = true;
+    } else {
+        document.getElementById('marbleCount').disabled = false;
+        document.getElementById('trackSeed').disabled = false;
+        document.getElementById('randomSeedBtn').disabled = false;
+    }
+
+    // Re-read count and seed in case career mode overrode them
+    const finalCount = parseInt(document.getElementById('marbleCount').value);
+    const finalSeed = parseInt(document.getElementById('trackSeed').value) || 42;
 
     soundManager.init();
     soundManager.resume();
@@ -2010,10 +2147,10 @@ function startRace() {
     camera = new Camera();
 
     // Generate track
-    track = generateTrack(seed);
+    track = generateTrack(finalSeed);
 
     // Create marbles
-    marbles = initMarbles(count, seed);
+    marbles = initMarbles(finalCount, finalSeed);
 
     // Position camera on the starting grid immediately
     if (marbles.length > 0) {
@@ -2145,6 +2282,18 @@ function startRace() {
 
     // Set wall segments for physics
     physicsEngine.setWalls(track.wallSegments);
+
+    // Career mode: mark player marble
+    if (gameMode.mode === 'career' && marbles.length > 0) {
+        marbles.forEach((m, i) => {
+            if (i === 0) {
+                m.isPlayer = true;
+                const eq = careerGetProfile().equipped;
+                m.equippedFlagSkin = eq.flagSkin;
+                m.equippedTrail = eq.marbleTrail;
+            }
+        });
+    }
 
     // Start countdown
     gameState = GameState.COUNTDOWN;
@@ -2385,6 +2534,32 @@ function endRace() {
     if (soundManager) {
         soundManager.stopCrowd();
         soundManager.playVictoryFanfare();
+    }
+
+    // Career mode rewards & progression
+    if (gameMode.mode === 'career') {
+        careerRefreshDailyMissions();
+        careerRefreshWeeklyMissions();
+
+        const playerMarble = marbles.find(m => m.isPlayer);
+        if (playerMarble) {
+            const place = playerMarble.place || (marbles.filter(m2 => m2.finishTime !== null && m2.finishTime < playerMarble.finishTime).length + 1);
+            const rewards = careerCalculateRaceRewards(place, careerGetLeagueNum());
+            careerAddXP(rewards.xp);
+            careerAddCoins(rewards.coins);
+            careerAddStars(rewards.stars);
+            careerRecordRace(place, playerMarble.finishTime, playerMarble.maxSpeed || 0, playerMarble.eliminated);
+
+            // Update missions
+            careerUpdateMissionProgress('daily_complete_race', 1);
+            if (place <= 3) careerUpdateMissionProgress('daily_top3', 1);
+            if (place <= 5) careerUpdateMissionProgress('daily_top5', 1);
+
+            careerSaveProfile();
+
+            // Show career rewards in the results overlay
+            setTimeout(() => careerInjectRewardsToResults(rewards), 100);
+        }
     }
 }
 
@@ -2862,7 +3037,7 @@ function drawMarbles() {
     for (const m of marbles) {
         if (m.eliminated) continue;
         const trail = m.trail;
-        const col = COUNTRIES[m.countryIndex].colors[0];
+        const col = (gameMode.mode === 'career' && m.isPlayer) ? careerGetTrailColor(m, COUNTRIES[m.countryIndex].colors[0]) : COUNTRIES[m.countryIndex].colors[0];
         const len = trail.length;
         if (len < 2) continue;
         // Quick visibility check: only draw if marble itself is on screen
@@ -2921,6 +3096,18 @@ function drawMarbles() {
             ctx2.beginPath();
             ctx2.arc(sx, sy, m.radius, 0, Math.PI * 2);
             ctx2.stroke();
+
+            // Career mode: player glow ring & skin overlay
+            if (gameMode.mode === 'career' && m.isPlayer) {
+                ctx2.save();
+                ctx2.beginPath();
+                ctx2.arc(sx, sy, m.radius + 6, 0, Math.PI * 2);
+                ctx2.strokeStyle = `rgba(255, 217, 61, ${0.3 + Math.sin(Date.now() / 300) * 0.2})`;
+                ctx2.lineWidth = 3;
+                ctx2.stroke();
+                ctx2.restore();
+                careerDrawMarbleOverlay(ctx2, m, sx, sy, m.radius);
+            }
 
             // Eliminated overlay
             if (m.eliminated) {
@@ -3225,7 +3412,7 @@ function showResults() {
     html += '</table>';
 
     // Tournament standings
-    if (gameMode.mode === 'tournament' && gameMode.tournamentStandings.length > 0) {
+    if ((gameMode.mode === 'tournament' || gameMode.mode === 'career') && gameMode.tournamentStandings.length > 0) {
         html += '<h3>Bảng Giải Đấu (Vòng ' + (gameMode.currentRace + 1) + '/' + gameMode.totalRaces + ')</h3>';
         const standings = [...gameMode.tournamentStandings].sort((a, b) => b.points - a.points);
         html += '<table class="results-table">';
@@ -3245,6 +3432,7 @@ function showResults() {
             html += '<button class="btn btn-primary" onclick="nextRace()" style="width:100%;margin-top:12px;">Vòng Sau →</button>';
         } else {
             html += '<div style="text-align:center;margin-top:12px;font-size:18px;font-weight:700;color:#ffd93d;">🏆 Giải Đấu Hoàn Tất! 🏆</div>';
+            html += '<button class="btn btn-success" onclick="careerCompleteAndContinue()" style="width:100%;margin-top:8px;">Nhận Thưởng & Tiếp Tục</button>';
         }
     }
 
@@ -3284,9 +3472,55 @@ function nextRace() {
     gameMode.currentRace++;
     document.getElementById('overlay').classList.remove('active');
     // Generate new seed
-    const newSeed = parseInt(document.getElementById('trackSeed').value) + 1;
-    document.getElementById('trackSeed').value = newSeed;
+    if (gameMode.mode === 'career') {
+        const league = CAREER_LEAGUES[careerGetLeagueNum() - 1];
+        const seedBase = league.seedMin + (careerGetProfile().currentTournament % (league.seedMax - league.seedMin));
+        document.getElementById('trackSeed').value = seedBase + gameMode.currentRace;
+    } else {
+        const newSeed = parseInt(document.getElementById('trackSeed').value) + 1;
+        document.getElementById('trackSeed').value = newSeed;
+    }
     startRace();
+}
+
+function careerCompleteAndContinue() {
+    // Called after final race of a career tournament
+    const p = careerGetProfile();
+    const leagueNum = careerGetLeagueNum();
+    
+    // Determine player's tournament standing
+    const standings = [...gameMode.tournamentStandings].sort((a, b) => b.points - a.points);
+    const playerLeaguePos = standings.findIndex(s => s.id === (marbles && marbles[0] ? marbles[0].id : -1));
+    const place = playerLeaguePos >= 0 ? playerLeaguePos + 1 : standings.length;
+    
+    const tourRewards = careerCalculateTournamentRewards(place);
+    careerAddXP(tourRewards.xp);
+    careerAddCoins(tourRewards.coins);
+    careerAddStars(tourRewards.stars);
+    careerRecordTournament(place);
+    careerUpdateMissionProgress('weekly_win5', place === 1 ? 1 : 0);
+    careerCheckAchievements();
+    careerSaveProfile();
+    
+    // Check promotion
+    const promotion = careerCheckPromotion();
+    
+    // Close overlay and show promotion
+    document.getElementById('overlay').classList.remove('active');
+    resetGameState();
+    
+    if (promotion) {
+        careerShowPromotion(promotion.newLeague, promotion.bonus);
+        // Unlock cosmetic for this league
+        const leagueDef = CAREER_LEAGUES[promotion.newLeague - 1];
+        if (leagueDef.unlockCosmetic) {
+            careerUnlockCosmetic(leagueDef.unlockCosmetic.id);
+        }
+        careerSaveProfile();
+    }
+    
+    careerUpdatePanel();
+    updateUI();
 }
 
 // ============================================================
@@ -3299,8 +3533,13 @@ function setupUI() {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            gameMode.setMode(btn.dataset.mode);
+            const newMode = btn.dataset.mode;
+            gameMode.setMode(newMode);
             soundManager.playClick();
+            if (newMode === 'career') {
+                careerInit();
+            }
+            careerUpdatePanel();
         });
     });
 
@@ -3484,8 +3723,877 @@ function gameLoop(timestamp) {
         }
     }
 
+    // Career mode: track player max speed
+    if (gameMode.mode === 'career') {
+        const pm = marbles && marbles.find(m => m.isPlayer);
+        if (pm && pm.speed) {
+            const profile = careerGetProfile();
+            if (pm.speed > (profile._sessionMaxSpeed || 0)) {
+                profile._sessionMaxSpeed = pm.speed;
+            }
+        }
+    }
+
     animationId = requestAnimationFrame(gameLoop);
 }
+
+// ============================================================
+// SECTION 17: CAREER MODE — CONFIG & DATA
+// ============================================================
+
+// ─── LEAGUE DEFINITIONS (10 leagues) ───
+const CAREER_LEAGUES = [
+    { id: 1, name: 'Dirt League', nameVN: 'Hạng Bụi Đất', tournamentsNeeded: 3, marbleCount: 8, seedMin: 1000, seedMax: 1999, xpThreshold: 0, unlockCosmetic: null },
+    { id: 2, name: 'Clay League', nameVN: 'Hạng Đất Sét', tournamentsNeeded: 3, marbleCount: 10, seedMin: 2000, seedMax: 2999, xpThreshold: 200, unlockCosmetic: { type: 'trail', id: 'trail_dust' } },
+    { id: 3, name: 'Stone League', nameVN: 'Hạng Đá', tournamentsNeeded: 4, marbleCount: 12, seedMin: 3000, seedMax: 3999, xpThreshold: 500, unlockCosmetic: { type: 'badge', id: 'badge_stone' } },
+    { id: 4, name: 'Bronze League', nameVN: 'Hạng Đồng', tournamentsNeeded: 4, marbleCount: 14, seedMin: 4000, seedMax: 4999, xpThreshold: 1000, unlockCosmetic: { type: 'flagSkin', id: 'flag_bronze' } },
+    { id: 5, name: 'Silver League', nameVN: 'Hạng Bạc', tournamentsNeeded: 5, marbleCount: 16, seedMin: 5000, seedMax: 5999, xpThreshold: 1800, unlockCosmetic: { type: 'effect', id: 'victory_sparkle' } },
+    { id: 6, name: 'Gold League', nameVN: 'Hạng Vàng', tournamentsNeeded: 5, marbleCount: 18, seedMin: 6000, seedMax: 6999, xpThreshold: 3000, unlockCosmetic: { type: 'title', id: 'title_golden' } },
+    { id: 7, name: 'Platinum League', nameVN: 'Hạng Bạch Kim', tournamentsNeeded: 5, marbleCount: 20, seedMin: 7000, seedMax: 7999, xpThreshold: 5000, unlockCosmetic: { type: 'badge', id: 'badge_platinum' } },
+    { id: 8, name: 'Diamond League', nameVN: 'Hạng Kim Cương', tournamentsNeeded: 6, marbleCount: 22, seedMin: 8000, seedMax: 8999, xpThreshold: 8000, unlockCosmetic: { type: 'flagSkin', id: 'flag_diamond' } },
+    { id: 9, name: 'Master League', nameVN: 'Hạng Cao Thủ', tournamentsNeeded: 6, marbleCount: 24, seedMin: 9000, seedMax: 9999, xpThreshold: 12000, unlockCosmetic: { type: 'effect', id: 'victory_fire' } },
+    { id: 10, name: 'Champion League', nameVN: 'Hạng Vô Địch', tournamentsNeeded: 8, marbleCount: 30, seedMin: 10000, seedMax: 10999, xpThreshold: 18000, unlockCosmetic: { type: 'title', id: 'title_champion' } },
+];
+
+// ─── REWARDS PER RACE ───
+const CAREER_RACE_REWARDS = [
+    { place: 1, xp: 100, coins: 50, stars: 1 },
+    { place: 2, xp: 70, coins: 30, stars: 0 },
+    { place: 3, xp: 50, coins: 20, stars: 0 },
+    { place: 4, xp: 30, coins: 10, stars: 0 },
+    { place: 5, xp: 30, coins: 10, stars: 0 },
+    { place: 6, xp: 15, coins: 5, stars: 0 },
+    { place: 7, xp: 15, coins: 5, stars: 0 },
+    { place: 8, xp: 15, coins: 5, stars: 0 },
+    { place: 9, xp: 15, coins: 5, stars: 0 },
+    { place: 10, xp: 15, coins: 5, stars: 0 },
+];
+function careerGetRewardForPlace(place) {
+    if (place >= 1 && place <= CAREER_RACE_REWARDS.length) return CAREER_RACE_REWARDS[place - 1];
+    return { xp: 5, coins: 2, stars: 0 };
+}
+
+// ─── TOURNAMENT REWARDS ───
+const CAREER_TOURNAMENT_REWARDS = [
+    { place: 1, xp: 300, coins: 100, stars: 3 },
+    { place: 2, xp: 200, coins: 60, stars: 2 },
+    { place: 3, xp: 100, coins: 40, stars: 1 },
+    { place: 4, xp: 50, coins: 20, stars: 0 },
+    { place: 5, xp: 50, coins: 20, stars: 0 },
+    { place: 6, xp: 20, coins: 10, stars: 0 },
+];
+function careerGetTournamentRewardForPlace(place) {
+    if (place >= 1 && place <= CAREER_TOURNAMENT_REWARDS.length) return CAREER_TOURNAMENT_REWARDS[place - 1];
+    return { xp: 20, coins: 10, stars: 0 };
+}
+
+// ─── LEAGUE COMPLETION BONUS ───
+function careerGetLeagueBonus(leagueNum) {
+    return { xp: 500 * leagueNum, coins: 200 * leagueNum, stars: 5 };
+}
+
+// ─── COSMETICS DEFINITIONS ───
+const CAREER_COSMETICS = {
+    flagSkins: [
+        { id: 'flag_bronze', name: 'Bronze Frame', nameVN: 'Viền Đồng', icon: '🟤', leagueReq: 4, type: 'flagSkin' },
+        { id: 'flag_diamond', name: 'Diamond Frame', nameVN: 'Viền Kim Cương', icon: '💎', leagueReq: 8, type: 'flagSkin' },
+        { id: 'flag_gold', name: 'Gold Frame', nameVN: 'Viền Vàng', icon: '🌟', leagueReq: 6, type: 'flagSkin' },
+        { id: 'flag_silver', name: 'Silver Frame', nameVN: 'Viền Bạc', icon: '⚪', leagueReq: 5, type: 'flagSkin' },
+        { id: 'flag_champion', name: 'Champion Frame', nameVN: 'Viền Vô Địch', icon: '👑', leagueReq: 10, type: 'flagSkin' },
+        { id: 'flag_neon', name: 'Neon Frame', nameVN: 'Viền Neon', icon: '💚', leagueReq: 7, type: 'flagSkin' },
+        { id: 'flag_candy', name: 'Candy Frame', nameVN: 'Viền Kẹo', icon: '🍬', leagueReq: 3, type: 'flagSkin' },
+        { id: 'flag_ocean', name: 'Ocean Frame', nameVN: 'Viền Đại Dương', icon: '🌊', leagueReq: 5, type: 'flagSkin' },
+        { id: 'flag_flame', name: 'Flame Frame', nameVN: 'Viền Lửa', icon: '🔥', leagueReq: 9, type: 'flagSkin' },
+        { id: 'flag_royal', name: 'Royal Frame', nameVN: 'Viền Hoàng Gia', icon: '👑', leagueReq: 8, type: 'flagSkin' },
+    ],
+    marbleTrails: [
+        { id: 'trail_dust', name: 'Dust Trail', nameVN: 'Bụi', icon: '💨', leagueReq: 2, type: 'trail', colors: ['#c8b88a', '#a8986a'] },
+        { id: 'trail_fire', name: 'Fire Trail', nameVN: 'Lửa', icon: '🔥', leagueReq: 7, type: 'trail', colors: ['#ff4444', '#ff8800'] },
+        { id: 'trail_ice', name: 'Ice Trail', nameVN: 'Băng', icon: '❄️', leagueReq: 5, type: 'trail', colors: ['#88ddff', '#ffffff'] },
+        { id: 'trail_neon', name: 'Neon Trail', nameVN: 'Neon', icon: '💜', leagueReq: 6, type: 'trail', colors: ['#ff00ff', '#00ffff'] },
+        { id: 'trail_gold', name: 'Gold Trail', nameVN: 'Vàng', icon: '✨', leagueReq: 8, type: 'trail', colors: ['#ffd700', '#ffaa00'] },
+        { id: 'trail_shadow', name: 'Shadow Trail', nameVN: 'Bóng Tối', icon: '🌑', leagueReq: 4, type: 'trail', colors: ['#333355', '#555577'] },
+        { id: 'trail_rainbow', name: 'Rainbow Trail', nameVN: 'Cầu Vồng', icon: '🌈', leagueReq: 9, type: 'trail', colors: ['#ff0000', '#ff8800', '#ffff00', '#00ff00', '#0088ff', '#8800ff'] },
+        { id: 'trail_star', name: 'Star Trail', nameVN: 'Sao', icon: '⭐', leagueReq: 10, type: 'trail', colors: ['#ffffcc', '#ffdd88'] },
+    ],
+    victoryEffects: [
+        { id: 'victory_sparkle', name: 'Sparkle', nameVN: 'Lấp Lánh', icon: '✨', leagueReq: 5, type: 'effect' },
+        { id: 'victory_fire', name: 'Fireworks', nameVN: 'Pháo Hoa', icon: '🎆', leagueReq: 9, type: 'effect' },
+        { id: 'victory_confetti', name: 'Confetti', nameVN: 'Confetti', icon: '🎊', leagueReq: 6, type: 'effect' },
+        { id: 'victory_hearts', name: 'Hearts', nameVN: 'Trái Tim', icon: '❤️', leagueReq: 3, type: 'effect' },
+        { id: 'victory_stars', name: 'Stars', nameVN: 'Ngôi Sao', icon: '⭐', leagueReq: 7, type: 'effect' },
+        { id: 'victory_crown', name: 'Crown', nameVN: 'Vương Miện', icon: '👑', leagueReq: 10, type: 'effect' },
+    ],
+    profileBadges: [
+        { id: 'badge_stone', name: 'Stone Badge', nameVN: 'Huy Hiệu Đá', icon: '🪨', leagueReq: 3, type: 'badge' },
+        { id: 'badge_platinum', name: 'Platinum Badge', nameVN: 'Huy Hiệu Bạch Kim', icon: '💿', leagueReq: 7, type: 'badge' },
+        { id: 'badge_winner', name: 'Winner Badge', nameVN: 'Huy Hiệu Chiến Thắng', icon: '🏆', leagueReq: 5, type: 'badge' },
+        { id: 'badge_veteran', name: 'Veteran Badge', nameVN: 'Huy Hiệu Kỳ Cựu', icon: '🎖️', leagueReq: 6, type: 'badge' },
+        { id: 'badge_champion', name: 'Champion Badge', nameVN: 'Huy Hiệu Vô Địch', icon: '👑', leagueReq: 10, type: 'badge' },
+        { id: 'badge_speed', name: 'Speed Badge', nameVN: 'Huy Hiệu Tốc Độ', icon: '⚡', leagueReq: 4, type: 'badge' },
+        { id: 'badge_lucky', name: 'Lucky Badge', nameVN: 'Huy Hiệu May Mắn', icon: '🍀', leagueReq: 2, type: 'badge' },
+        { id: 'badge_elite', name: 'Elite Badge', nameVN: 'Huy Hiệu Tinh Nhuệ', icon: '💎', leagueReq: 8, type: 'badge' },
+    ],
+    titles: [
+        { id: 'title_golden', name: 'Golden Racer', nameVN: 'Tay Đua Vàng', icon: '🥇', leagueReq: 6, type: 'title' },
+        { id: 'title_champion', name: 'Champion', nameVN: 'Nhà Vô Địch', icon: '🏆', leagueReq: 10, type: 'title' },
+        { id: 'title_rookie', name: 'Rookie', nameVN: 'Tân Binh', icon: '🌟', leagueReq: 1, type: 'title' },
+        { id: 'title_expert', name: 'Expert', nameVN: 'Chuyên Gia', icon: '🎯', leagueReq: 5, type: 'title' },
+        { id: 'title_legend', name: 'Legend', nameVN: 'Huyền Thoại', icon: '🗿', leagueReq: 9, type: 'title' },
+        { id: 'title_fast', name: 'Speed Demon', nameVN: 'Ác Quỷ Tốc Độ', icon: '💨', leagueReq: 4, type: 'title' },
+        { id: 'title_iron', name: 'Iron Marble', nameVN: 'Bi Sắt', icon: '🛡️', leagueReq: 3, type: 'title' },
+        { id: 'title_diamond', name: 'Diamond Hands', nameVN: 'Bàn Tay Kim Cương', icon: '💎', leagueReq: 8, type: 'title' },
+    ],
+};
+
+// ─── ACHIEVEMENTS ───
+const CAREER_ACHIEVEMENTS = [
+    { id: 'ach_first_race', name: 'First Race', nameVN: 'Cuộc Đua Đầu Tiên', desc: 'Hoàn thành cuộc đua đầu tiên', icon: '🚀', check: (p) => p.stats.races >= 1 },
+    { id: 'ach_10_races', name: '10 Races', nameVN: '10 Cuộc Đua', desc: 'Hoàn thành 10 cuộc đua', icon: '🏁', check: (p) => p.stats.races >= 10 },
+    { id: 'ach_50_races', name: '50 Races', nameVN: '50 Cuộc Đua', desc: 'Hoàn thành 50 cuộc đua', icon: '🏎️', check: (p) => p.stats.races >= 50 },
+    { id: 'ach_first_win', name: 'First Win', nameVN: 'Chiến Thắng Đầu Tiên', desc: 'Về nhất trong một cuộc đua', icon: '🥇', check: (p) => p.stats.wins >= 1 },
+    { id: 'ach_10_wins', name: '10 Wins', nameVN: '10 Chiến Thắng', desc: 'Về nhất 10 lần', icon: '🏆', check: (p) => p.stats.wins >= 10 },
+    { id: 'ach_top3', name: 'Podium Finisher', nameVN: 'Lên Bục', desc: 'Về top 3 trong 5 cuộc đua', icon: '🎯', check: (p) => p.stats.top3 >= 5 },
+    { id: 'ach_tournament_win', name: 'Tournament Winner', nameVN: 'Vô Địch Giải', desc: 'Thắng một giải đấu', icon: '🏟️', check: (p) => p.stats.tournamentsWon >= 1 },
+    { id: 'ach_speed_demon', name: 'Speed Demon', nameVN: 'Ác Quỷ Tốc Độ', desc: 'Đạt tốc độ > 700', icon: '⚡', check: (p) => p.stats.bestSpeed >= 700 },
+    { id: 'ach_league_5', name: 'Silver Star', nameVN: 'Ngôi Sao Bạc', desc: 'Đạt Hạng Bạc', icon: '⭐', check: (p) => careerGetLeagueNum() >= 5 },
+    { id: 'ach_league_10', name: 'Champion Supreme', nameVN: 'Vô Địch Tối Cao', desc: 'Đạt Hạng Vô Địch', icon: '👑', check: (p) => careerGetLeagueNum() >= 10 },
+];
+
+// ─── MISSION POOLS ───
+const CAREER_DAILY_MISSION_POOL = [
+    { id: 'daily_complete_race', name: 'Hoàn Thành Đua', desc: 'Hoàn thành 1 cuộc đua', target: 1, reward: { xp: 30, coins: 15 } },
+    { id: 'daily_top5', name: 'Top 5', desc: 'Về trong top 5', target: 1, reward: { xp: 40, coins: 20 } },
+    { id: 'daily_top3', name: 'Top 3', desc: 'Về trong top 3', target: 1, reward: { xp: 50, coins: 25 } },
+    { id: 'daily_3races', name: '3 Cuộc Đua', desc: 'Hoàn thành 3 cuộc đua', target: 3, reward: { xp: 60, coins: 30 } },
+    { id: 'daily_fastlap', name: 'Tốc Độ Cao', desc: 'Đạt tốc độ > 500', target: 1, reward: { xp: 45, coins: 20 } },
+    { id: 'daily_survive', name: 'Sống Sót', desc: 'Không bị loại trong đua', target: 1, reward: { xp: 35, coins: 15 } },
+];
+const CAREER_WEEKLY_MISSION_POOL = [
+    { id: 'weekly_win5', name: '5 Chiến Thắng', desc: 'Thắng 5 cuộc đua trong tuần', target: 5, reward: { xp: 200, coins: 100, stars: 2 } },
+    { id: 'weekly_20races', name: '20 Cuộc Đua', desc: 'Hoàn thành 20 cuộc đua', target: 20, reward: { xp: 150, coins: 80, stars: 1 } },
+    { id: 'weekly_3tournaments', name: '3 Giải Đấu', desc: 'Hoàn thành 3 giải đấu', target: 3, reward: { xp: 300, coins: 150, stars: 3 } },
+    { id: 'weekly_speed', name: 'Tốc Độ Tối Đa', desc: 'Đạt tốc độ > 600 trong 3 đua', target: 3, reward: { xp: 180, coins: 90, stars: 1 } },
+];
+const CAREER_PROGRESSION_MISSIONS = [
+    { id: 'prog_league2', name: 'Lên Hạng Đất Sét', desc: 'Đạt Hạng Đất Sét', target: 1, reward: { xp: 100, coins: 50, stars: 2 } },
+    { id: 'prog_league4', name: 'Lên Hạng Đồng', desc: 'Đạt Hạng Đồng', target: 1, reward: { xp: 200, coins: 100, stars: 3 } },
+    { id: 'prog_league7', name: 'Lên Hạng Bạch Kim', desc: 'Đạt Hạng Bạch Kim', target: 1, reward: { xp: 500, coins: 250, stars: 5 } },
+    { id: 'prog_league10', name: 'Lên Hạng Vô Địch', desc: 'Đạt Hạng Vô Địch', target: 1, reward: { xp: 1000, coins: 500, stars: 10 } },
+    { id: 'prog_100races', name: '100 Cuộc Đua', desc: 'Hoàn thành 100 cuộc đua', target: 100, reward: { xp: 800, coins: 400, stars: 8 } },
+];
+
+// ─── DEFAULT PROFILE ───
+const CAREER_DEFAULT_PROFILE = {
+    version: 1,
+    xp: 0,
+    coins: 0,
+    stars: 0,
+    currentLeague: 1,
+    currentTournament: 0,
+    leagueProgress: {},
+    inventory: [],
+    equipped: { flagSkin: null, marbleTrail: null, victoryEffect: null, badge: null, title: null },
+    stats: { races: 0, wins: 0, top3: 0, tournamentsWon: 0, bestTime: Infinity, bestSpeed: 0, totalEliminations: 0, totalCheckpoints: 0 },
+    missions: { daily: [], weekly: [], dailyDate: '', weeklyWeek: '' },
+    achievements: {},
+    unlockedCosmetics: [],
+    _sessionMaxSpeed: 0,
+};
+
+// ============================================================
+// SECTION 18: CAREER MODE — PROFILE MANAGER
+// ============================================================
+
+let _careerProfile = null;
+
+function careerLoadProfile() {
+    try {
+        const raw = localStorage.getItem('mrc_career');
+        if (raw) {
+            const data = JSON.parse(raw);
+            // Validate version — migrate if needed
+            if (data && typeof data === 'object' && data.version === 1) {
+                _careerProfile = data;
+                // Ensure all fields exist
+                for (const key of Object.keys(CAREER_DEFAULT_PROFILE)) {
+                    if (!(key in _careerProfile)) {
+                        _careerProfile[key] = JSON.parse(JSON.stringify(CAREER_DEFAULT_PROFILE[key]));
+                    }
+                }
+                return _careerProfile;
+            }
+        }
+    } catch (e) {
+        console.warn('[Career] Corrupt save, resetting:', e.message);
+    }
+    _careerProfile = JSON.parse(JSON.stringify(CAREER_DEFAULT_PROFILE));
+    careerSaveProfile();
+    return _careerProfile;
+}
+
+function careerSaveProfile() {
+    if (!_careerProfile) return;
+    try {
+        localStorage.setItem('mrc_career', JSON.stringify(_careerProfile));
+    } catch (e) {
+        console.warn('[Career] Save failed (quota?):', e.message);
+    }
+}
+
+function careerResetProfile() {
+    _careerProfile = JSON.parse(JSON.stringify(CAREER_DEFAULT_PROFILE));
+    careerSaveProfile();
+    careerUpdatePanel();
+}
+
+function careerGetProfile() {
+    if (!_careerProfile) return careerLoadProfile();
+    return _careerProfile;
+}
+
+function careerAddXP(amount) {
+    const p = careerGetProfile();
+    const oldLeague = careerGetLeagueNum();
+    p.xp += amount;
+    // Check for league promotion
+    const newLeague = careerGetLeagueNum();
+    if (newLeague > oldLeague) {
+        careerCompleteLeague(newLeague);
+    }
+    careerSaveProfile();
+    return { oldLeague, newLeague };
+}
+
+function careerAddCoins(amount) {
+    const p = careerGetProfile();
+    p.coins += amount;
+    careerSaveProfile();
+}
+
+function careerSpendCoins(amount) {
+    const p = careerGetProfile();
+    if (p.coins < amount) return false;
+    p.coins -= amount;
+    careerSaveProfile();
+    return true;
+}
+
+function careerAddStars(amount) {
+    const p = careerGetProfile();
+    p.stars += amount;
+    careerSaveProfile();
+}
+
+function careerGetLeagueNum() {
+    const p = careerGetProfile();
+    let leagueNum = 1;
+    for (let i = CAREER_LEAGUES.length - 1; i >= 0; i--) {
+        if (p.xp >= CAREER_LEAGUES[i].xpThreshold) {
+            leagueNum = CAREER_LEAGUES[i].id;
+            break;
+        }
+    }
+    return leagueNum;
+}
+
+function careerGetLeagueProgress() {
+    const p = careerGetProfile();
+    const league = careerGetLeagueNum();
+    const leagueDef = CAREER_LEAGUES[league - 1];
+    const lp = p.leagueProgress[league] || { tournamentsWon: 0, bestFinish: null };
+    return {
+        tournamentsWon: lp.tournamentsWon || 0,
+        tournamentsNeeded: leagueDef.tournamentsNeeded,
+        bestFinish: lp.bestFinish,
+    };
+}
+
+function careerGetNextLeagueXP() {
+    const league = careerGetLeagueNum();
+    if (league >= CAREER_LEAGUES.length) return Infinity;
+    return CAREER_LEAGUES[league].xpThreshold;
+}
+
+function careerGetLeagueXPProgress() {
+    const p = careerGetProfile();
+    const league = careerGetLeagueNum();
+    const currentXP = p.xp;
+    const currentThreshold = CAREER_LEAGUES[league - 1].xpThreshold;
+    const nextThreshold = league < CAREER_LEAGUES.length ? CAREER_LEAGUES[league].xpThreshold : currentThreshold;
+    const needed = nextThreshold - currentThreshold;
+    const earned = currentXP - currentThreshold;
+    const percent = needed > 0 ? Math.min(100, Math.floor((earned / needed) * 100)) : 100;
+    return { current: earned, needed, percent };
+}
+
+// ============================================================
+// SECTION 19: CAREER MODE — PROGRESSION LOGIC
+// ============================================================
+
+function careerCalculateRaceRewards(place, leagueNum) {
+    const base = careerGetRewardForPlace(place);
+    const multiplier = 1 + (leagueNum - 1) * 0.1;
+    return {
+        xp: Math.round(base.xp * multiplier),
+        coins: Math.round(base.coins * multiplier),
+        stars: base.stars,
+    };
+}
+
+function careerCalculateTournamentRewards(place) {
+    return careerGetTournamentRewardForPlace(place);
+}
+
+function careerRecordRace(place, finishTime, maxSpeed, wasEliminated) {
+    const p = careerGetProfile();
+    p.stats.races++;
+    if (place === 1) p.stats.wins++;
+    if (place <= 3) p.stats.top3++;
+    if (finishTime < p.stats.bestTime) p.stats.bestTime = finishTime;
+    if (maxSpeed > p.stats.bestSpeed) p.stats.bestSpeed = maxSpeed;
+    if (wasEliminated) p.stats.totalEliminations++;
+    careerSaveProfile();
+}
+
+function careerRecordTournament(place) {
+    const p = careerGetProfile();
+    p.currentTournament++;
+    const league = careerGetLeagueNum();
+    if (!p.leagueProgress[league]) {
+        p.leagueProgress[league] = { tournamentsWon: 0, bestFinish: null };
+    }
+    const lp = p.leagueProgress[league];
+    if (place === 1) {
+        lp.tournamentsWon = (lp.tournamentsWon || 0) + 1;
+        p.stats.tournamentsWon++;
+    }
+    if (lp.bestFinish === null || place < lp.bestFinish) {
+        lp.bestFinish = place;
+    }
+    careerSaveProfile();
+}
+
+function careerCheckPromotion() {
+    const league = careerGetLeagueNum();
+    const leagueDef = CAREER_LEAGUES[league - 1];
+    const prog = careerGetLeagueProgress();
+    if (prog.tournamentsWon >= leagueDef.tournamentsNeeded && league < CAREER_LEAGUES.length) {
+        const bonus = careerGetLeagueBonus(league + 1);
+        const unlocks = leagueDef.unlockCosmetic ? [leagueDef.unlockCosmetic] : [];
+        return { promoted: true, newLeague: league + 1, bonus, unlocks };
+    }
+    return null;
+}
+
+function careerCompleteLeague(leagueNum) {
+    const p = careerGetProfile();
+    const bonus = careerGetLeagueBonus(leagueNum);
+    p.xp += bonus.xp;
+    p.coins += bonus.coins;
+    p.stars += bonus.stars;
+    // Unlock cosmetic if any
+    const leagueDef = CAREER_LEAGUES[leagueNum - 1];
+    if (leagueDef.unlockCosmetic) {
+        careerUnlockCosmetic(leagueDef.unlockCosmetic.id);
+    }
+    careerSaveProfile();
+    return bonus;
+}
+
+function careerIsLeagueComplete(leagueNum) {
+    const p = careerGetProfile();
+    const lp = p.leagueProgress[leagueNum];
+    if (!lp) return false;
+    const def = CAREER_LEAGUES[leagueNum - 1];
+    return (lp.tournamentsWon || 0) >= def.tournamentsNeeded;
+}
+
+function careerResetCurrentLeague() {
+    const p = careerGetProfile();
+    const league = careerGetLeagueNum();
+    p.leagueProgress[league] = { tournamentsWon: 0, bestFinish: null };
+    careerSaveProfile();
+}
+
+// ============================================================
+// SECTION 20: CAREER MODE — COSMETICS
+// ============================================================
+
+function careerGetCosmeticsByType(type) {
+    const p = careerGetProfile();
+    return Object.values(CAREER_COSMETICS).flat().filter(c => c.type === type && p.unlockedCosmetics.includes(c.id));
+}
+
+function careerAllCosmeticsByType(type) {
+    return Object.values(CAREER_COSMETICS).flat().filter(c => c.type === type);
+}
+
+function careerIsUnlocked(cosmeticId) {
+    const p = careerGetProfile();
+    return p.unlockedCosmetics.includes(cosmeticId);
+}
+
+function careerUnlockCosmetic(cosmeticId) {
+    const p = careerGetProfile();
+    if (!p.unlockedCosmetics.includes(cosmeticId)) {
+        p.unlockedCosmetics.push(cosmeticId);
+        careerSaveProfile();
+    }
+}
+
+function careerEquipCosmetic(type, id) {
+    const p = careerGetProfile();
+    // Map user-facing type to internal key
+    const typeMap = { flagSkin: 'flagSkin', marbleTrail: 'marbleTrail', trail: 'marbleTrail', victoryEffect: 'victoryEffect', effect: 'victoryEffect', badge: 'badge', title: 'title' };
+    const key = typeMap[type] || type;
+    if (id && !p.unlockedCosmetics.includes(id)) return false;
+    p.equipped[key] = id || null;
+    careerSaveProfile();
+    return true;
+}
+
+function careerGetEquipped(type) {
+    const p = careerGetProfile();
+    const typeMap = { flagSkin: 'flagSkin', marbleTrail: 'marbleTrail', trail: 'marbleTrail', victoryEffect: 'victoryEffect', effect: 'victoryEffect', badge: 'badge', title: 'title' };
+    const key = typeMap[type] || type;
+    return p.equipped[key] || null;
+}
+
+function careerGetEquippedCosmetic(type) {
+    const id = careerGetEquipped(type);
+    if (!id) return null;
+    for (const cat of Object.values(CAREER_COSMETICS)) {
+        const found = cat.find(c => c.id === id);
+        if (found) return found;
+    }
+    return null;
+}
+
+function careerDrawMarbleOverlay(ctx, marble, sx, sy, radius) {
+    // Draw flag skin border if equipped
+    const skinId = marble.equippedFlagSkin || careerGetEquipped('flagSkin');
+    if (skinId) {
+        ctx.save();
+        const skinColors = {
+            flag_bronze: '#cd7f32', flag_diamond: '#b9f2ff', flag_gold: '#ffd700',
+            flag_silver: '#c0c0c0', flag_champion: '#ff6b6b', flag_neon: '#00ff88',
+            flag_candy: '#ff69b4', flag_ocean: '#0077be', flag_flame: '#ff4500', flag_royal: '#4a0080',
+        };
+        const borderColor = skinColors[skinId] || '#ffd93d';
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(sx, sy, radius + 1, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+function careerGetTrailColor(marble, defaultColor) {
+    const trailId = marble.equippedTrail || careerGetEquipped('marbleTrail');
+    if (trailId) {
+        for (const t of CAREER_COSMETICS.marbleTrails) {
+            if (t.id === trailId) return t.colors[0] || defaultColor;
+        }
+    }
+    return defaultColor;
+}
+
+function careerTriggerVictoryEffect(effectId, canvas) {
+    if (!particleSystem) return;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    if (!effectId || effectId === 'victory_sparkle') {
+        particleSystem.emitConfetti(cx, cy, 50);
+        setTimeout(() => particleSystem.emitConfetti(cx, cy, 40), 300);
+    } else if (effectId === 'victory_fire') {
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                particleSystem.emit(cx + (Math.random() - 0.5) * 300, cy, 30, {
+                    color: '#ff4400', speed: 200, life: 1.0, size: 5, gravity: 50
+                });
+            }, i * 200);
+        }
+    } else if (effectId === 'victory_confetti') {
+        particleSystem.emitConfetti(cx, cy, 80);
+    } else if (effectId === 'victory_hearts') {
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                particleSystem.emit(cx + (Math.random() - 0.5) * 200, cy, 20, {
+                    color: '#ff69b4', speed: 120, life: 1.2, size: 4, gravity: -20
+                });
+            }, i * 150);
+        }
+    } else if (effectId === 'victory_stars') {
+        particleSystem.emit(cx, cy, 40, {
+            color: '#ffd700', speed: 180, life: 0.8, size: 4, gravity: 0
+        });
+    } else if (effectId === 'victory_crown') {
+        particleSystem.emitConfetti(cx, cy, 60);
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => particleSystem.emitConfetti(cx, cy, 30), i * 200 + 200);
+        }
+    }
+}
+
+function careerApplySkinToFlag(baseFlagImage, skinId) {
+    const c = document.createElement('canvas');
+    c.width = baseFlagImage.width;
+    c.height = baseFlagImage.height;
+    const ctx2 = c.getContext('2d');
+    ctx2.drawImage(baseFlagImage, 0, 0);
+    const skinColors = {
+        flag_bronze: '#cd7f32', flag_diamond: '#b9f2ff', flag_gold: '#ffd700',
+        flag_silver: '#c0c0c0', flag_champion: '#ff6b6b', flag_neon: '#00ff88',
+        flag_candy: '#ff69b4', flag_ocean: '#0077be', flag_flame: '#ff4500', flag_royal: '#4a0080',
+    };
+    const color = skinColors[skinId];
+    if (color) {
+        ctx2.strokeStyle = color;
+        ctx2.lineWidth = 3;
+        ctx2.beginPath();
+        ctx2.arc(c.width / 2, c.height / 2, c.width / 2 - 2, 0, Math.PI * 2);
+        ctx2.stroke();
+    }
+    return c;
+}
+
+// ============================================================
+// SECTION 21: CAREER MODE — MISSIONS & ACHIEVEMENTS
+// ============================================================
+
+function _getTodayStr() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function _getWeekStr() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    return monday.toISOString().slice(0, 10);
+}
+
+function careerGetDailyMissions() {
+    careerRefreshDailyMissions();
+    const p = careerGetProfile();
+    return p.missions.daily || [];
+}
+
+function careerGetWeeklyMissions() {
+    careerRefreshWeeklyMissions();
+    const p = careerGetProfile();
+    return p.missions.weekly || [];
+}
+
+function careerGenerateDailyMissions() {
+    const pool = [...CAREER_DAILY_MISSION_POOL];
+    const selected = [];
+    for (let i = 0; i < 3 && pool.length > 0; i++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        const mission = { ...pool[idx], progress: 0, completed: false, claimed: false };
+        selected.push(mission);
+        pool.splice(idx, 1);
+    }
+    return selected;
+}
+
+function careerGenerateWeeklyMissions() {
+    const pool = [...CAREER_WEEKLY_MISSION_POOL];
+    const selected = [];
+    for (let i = 0; i < 3 && pool.length > 0; i++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        const mission = { ...pool[idx], progress: 0, completed: false, claimed: false };
+        selected.push(mission);
+        pool.splice(idx, 1);
+    }
+    return selected;
+}
+
+function careerUpdateMissionProgress(missionId, amount) {
+    const p = careerGetProfile();
+    // Check daily
+    for (const m of p.missions.daily || []) {
+        if (m.id === missionId && !m.completed) {
+            m.progress = Math.min(m.target, (m.progress || 0) + amount);
+            if (m.progress >= m.target) m.completed = true;
+        }
+    }
+    // Check weekly
+    for (const m of p.missions.weekly || []) {
+        if (m.id === missionId && !m.completed) {
+            m.progress = Math.min(m.target, (m.progress || 0) + amount);
+            if (m.progress >= m.target) m.completed = true;
+        }
+    }
+    // Check progression
+    for (const m of CAREER_PROGRESSION_MISSIONS) {
+        if (m.id === missionId) {
+            if (!p.missions.progression) p.missions.progression = {};
+            const prog = p.missions.progression[m.id] || { progress: 0, completed: false, claimed: false };
+            prog.progress = Math.min(m.target, (prog.progress || 0) + amount);
+            if (prog.progress >= m.target) prog.completed = true;
+            p.missions.progression[m.id] = prog;
+        }
+    }
+    careerSaveProfile();
+}
+
+function careerClaimMissionReward(missionId, isDaily) {
+    const p = careerGetProfile();
+    let mission = null;
+    if (isDaily) {
+        mission = (p.missions.daily || []).find(m => m.id === missionId);
+    } else {
+        mission = (p.missions.weekly || []).find(m => m.id === missionId);
+    }
+    if (!mission || !mission.completed || mission.claimed) return false;
+    const reward = mission.reward;
+    careerAddXP(reward.xp || 0);
+    careerAddCoins(reward.coins || 0);
+    if (reward.stars) careerAddStars(reward.stars);
+    mission.claimed = true;
+    careerSaveProfile();
+    return true;
+}
+
+function careerGetMissionProgress(missionId) {
+    const p = careerGetProfile();
+    for (const m of p.missions.daily || []) {
+        if (m.id === missionId) return { current: m.progress || 0, target: m.target, completed: m.completed, claimed: m.claimed };
+    }
+    for (const m of p.missions.weekly || []) {
+        if (m.id === missionId) return { current: m.progress || 0, target: m.target, completed: m.completed, claimed: m.claimed };
+    }
+    for (const m of CAREER_PROGRESSION_MISSIONS) {
+        if (m.id === missionId) {
+            const prog = (p.missions.progression || {})[m.id] || { progress: 0, completed: false, claimed: false };
+            return { current: prog.progress, target: m.target, completed: prog.completed, claimed: prog.claimed };
+        }
+    }
+    return { current: 0, target: 1, completed: false, claimed: false };
+}
+
+function careerRefreshDailyMissions() {
+    const p = careerGetProfile();
+    const today = _getTodayStr();
+    if (p.missions.dailyDate !== today) {
+        p.missions.daily = careerGenerateDailyMissions();
+        p.missions.dailyDate = today;
+        careerSaveProfile();
+    }
+}
+
+function careerRefreshWeeklyMissions() {
+    const p = careerGetProfile();
+    const week = _getWeekStr();
+    if (p.missions.weeklyWeek !== week) {
+        p.missions.weekly = careerGenerateWeeklyMissions();
+        p.missions.weeklyWeek = week;
+        careerSaveProfile();
+    }
+}
+
+function careerCheckAchievements() {
+    const p = careerGetProfile();
+    let newUnlock = false;
+    for (const ach of CAREER_ACHIEVEMENTS) {
+        const key = ach.id;
+        if (!p.achievements[key] || !p.achievements[key].unlocked) {
+            if (ach.check(p)) {
+                p.achievements[key] = { unlocked: true, unlockedAt: Date.now() };
+                newUnlock = true;
+                // Give reward
+                careerAddXP(100);
+                careerAddCoins(50);
+            }
+        }
+    }
+    if (newUnlock) careerSaveProfile();
+    return newUnlock;
+}
+
+function careerGetAchievementProgress(achievementId) {
+    const p = careerGetProfile();
+    const ach = CAREER_ACHIEVEMENTS.find(a => a.id === achievementId);
+    if (!ach) return { unlocked: false, progress: 0, target: 1 };
+    const data = p.achievements[achievementId];
+    return { unlocked: !!(data && data.unlocked), progress: 0, target: 1 };
+}
+
+// ============================================================
+// CAREER MODE — UI & INTEGRATION HELPERS
+// ============================================================
+
+function careerInit() {
+    careerLoadProfile();
+    careerRefreshDailyMissions();
+    careerRefreshWeeklyMissions();
+    careerUpdatePanel();
+}
+
+function careerUpdatePanel() {
+    const p = careerGetProfile();
+    const league = careerGetLeagueNum();
+    const leagueDef = CAREER_LEAGUES[league - 1];
+    const dashboard = document.getElementById('careerDashboard');
+    if (gameMode.mode !== 'career') {
+        dashboard.classList.remove('active');
+        return;
+    }
+    dashboard.classList.add('active');
+
+    document.getElementById('careerLeagueBadge').textContent = leagueDef.name[0];
+    document.getElementById('careerLeagueName').textContent = leagueDef.name;
+    document.getElementById('careerLeagueTier').textContent = leagueDef.nameVN;
+
+    const xpProg = careerGetLeagueXPProgress();
+    document.getElementById('careerXPFill').style.width = xpProg.percent + '%';
+    document.getElementById('careerXPText').textContent = `${p.xp} / ${xpProg.needed + (CAREER_LEAGUES[league - 1].xpThreshold)} XP`;
+    document.getElementById('careerLevelText').textContent = `Cấp ${league}`;
+
+    document.getElementById('careerStatCoins').textContent = p.coins;
+    document.getElementById('careerStatStars').textContent = p.stars;
+    document.getElementById('careerStatRaces').textContent = p.stats.races;
+    document.getElementById('careerStatWins').textContent = p.stats.wins;
+
+    careerRenderTab('stats');
+}
+
+function careerInjectRewardsToResults(rewards) {
+    const content = document.getElementById('overlayContent');
+    if (!content || !rewards) return;
+    const box = document.createElement('div');
+    box.className = 'career-rewards-box';
+    box.innerHTML = `
+        <div class="rewards-title">🏆 Phần Thưởng Sự Nghiệp</div>
+        <div class="rewards-row">
+            <span class="reward-item"><span class="reward-icon">✨</span> +${rewards.xp} XP</span>
+            <span class="reward-item"><span class="reward-icon">🪙</span> +${rewards.coins}</span>
+            ${rewards.stars > 0 ? `<span class="reward-item"><span class="reward-icon">⭐</span> +${rewards.stars}</span>` : ''}
+        </div>
+    `;
+    // Insert after the podium or at top
+    const podium = content.querySelector('.podium');
+    if (podium && podium.nextSibling) {
+        content.insertBefore(box, podium.nextSibling);
+    } else {
+        content.appendChild(box);
+    }
+}
+
+function careerShowPromotion(leagueNum, bonus) {
+    const overlay = document.getElementById('overlay');
+    const content = document.getElementById('overlayContent');
+    const leagueDef = CAREER_LEAGUES[leagueNum - 1];
+    content.innerHTML = `
+        <div class="career-promotion-overlay">
+            <div class="promo-icon">🎉</div>
+            <div class="promo-title">Thăng Hạng!</div>
+            <div class="promo-desc">Chúc mừng bạn đã lên <strong>${leagueDef.nameVN}</strong>!</div>
+            <div class="promo-bonus">+${bonus.xp} XP · +${bonus.coins} 🪙 · +${bonus.stars} ⭐</div>
+            ${leagueDef.unlockCosmetic ? `<div style="margin-top:8px;font-size:14px;color:#6bcbff;">🔓 Mở khóa trang bị mới!</div>` : ''}
+            <button class="btn btn-primary" onclick="careerDismissPromotion()" style="margin-top:12px;width:100%;">Tuyệt vời!</button>
+        </div>
+    `;
+    overlay.classList.add('active');
+    if (soundManager) soundManager.playVictoryFanfare();
+}
+
+function careerDismissPromotion() {
+    document.getElementById('overlay').classList.remove('active');
+    careerUpdatePanel();
+}
+
+function careerRenderTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.career-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll(`.career-tab[data-career-tab="${tabName}"]`).forEach(t => t.classList.add('active'));
+    document.querySelectorAll('.career-tab-content').forEach(c => c.classList.remove('active'));
+
+    const p = careerGetProfile();
+    const league = careerGetLeagueNum();
+
+    let html = '';
+    if (tabName === 'stats') {
+        html = `<div class="career-overlay-stats">
+            <div class="stat-row"><span class="label">Tổng số đua</span><span class="value">${p.stats.races}</span></div>
+            <div class="stat-row"><span class="label">Chiến thắng</span><span class="value">${p.stats.wins}</span></div>
+            <div class="stat-row"><span class="label">Top 3</span><span class="value">${p.stats.top3}</span></div>
+            <div class="stat-row"><span class="label">Giải đấu thắng</span><span class="value">${p.stats.tournamentsWon}</span></div>
+            <div class="stat-row"><span class="label">Thời gian tốt nhất</span><span class="value">${p.stats.bestTime < Infinity ? formatTime(p.stats.bestTime) : '--:--'}</span></div>
+            <div class="stat-row"><span class="label">Tốc độ cao nhất</span><span class="value">${Math.round(p.stats.bestSpeed)}</span></div>
+            <div class="stat-row"><span class="label">Số lần bị loại</span><span class="value">${p.stats.totalEliminations}</span></div>
+            <div class="stat-row"><span class="label">Xu</span><span class="value">${p.coins} 🪙</span></div>
+            <div class="stat-row"><span class="label">Sao</span><span class="value">${p.stars} ⭐</span></div>
+        </div>`;
+    } else if (tabName === 'garage') {
+        html = '<div class="career-garage-grid">';
+        const allCosmetics = Object.values(CAREER_COSMETICS).flat();
+        for (const item of allCosmetics) {
+            const unlocked = p.unlockedCosmetics.includes(item.id);
+            const equipped = Object.values(p.equipped).includes(item.id);
+            const locked = !unlocked && item.leagueReq > league;
+            html += `<div class="career-garage-item ${unlocked ? (equipped ? 'equipped' : '') : (locked ? 'locked' : '')}" onclick="${unlocked ? `careerEquipCosmetic('${item.type}','${item.id}');careerUpdatePanel();` : ''}">
+                <div class="item-icon">${locked ? '🔒' : item.icon}</div>
+                <div class="item-name">${item.nameVN || item.name}</div>
+                ${unlocked ? (equipped ? '<div class="item-badge">Đang dùng</div>' : '<div class="item-badge" style="background:#2a2a4a;color:#999;">Trang bị</div>') : `<div class="item-badge" style="background:#444;">Hạng ${item.leagueReq}</div>`}
+            </div>`;
+        }
+        html += '</div>';
+    } else if (tabName === 'missions') {
+        const dailies = careerGetDailyMissions();
+        const weeklies = careerGetWeeklyMissions();
+        html = '<div style="font-size:11px;font-weight:600;color:#ddd;margin-bottom:4px;">📅 Nhiệm Vụ Hàng Ngày</div>';
+        for (const m of dailies) {
+            const pct = m.target > 0 ? Math.min(100, Math.round((m.progress / m.target) * 100)) : 0;
+            html += `<div class="career-mission-card">
+                <div class="mission-header"><span class="mission-name">${m.desc}</span><span class="mission-reward">${m.reward.xp}XP</span></div>
+                <div class="mission-progress"><div class="mp-fill" style="width:${pct}%"></div></div>
+                <div class="mission-desc">${m.progress}/${m.target}</div>
+                ${m.completed && !m.claimed ? `<button class="btn btn-success btn-small claim-btn" onclick="careerClaimMissionReward('${m.id}',true);careerUpdatePanel();">Nhận</button>` : (m.claimed ? '<span style="font-size:10px;color:#6bcbff;">✓ Đã nhận</span>' : '')}
+            </div>`;
+        }
+        html += '<div style="font-size:11px;font-weight:600;color:#ddd;margin:8px 0 4px;">📆 Nhiệm Vụ Hàng Tuần</div>';
+        for (const m of weeklies) {
+            const pct = m.target > 0 ? Math.min(100, Math.round((m.progress / m.target) * 100)) : 0;
+            html += `<div class="career-mission-card">
+                <div class="mission-header"><span class="mission-name">${m.desc}</span><span class="mission-reward">${m.reward.xp}XP ⭐${m.reward.stars || 0}</span></div>
+                <div class="mission-progress"><div class="mp-fill" style="width:${pct}%"></div></div>
+                <div class="mission-desc">${m.progress}/${m.target}</div>
+                ${m.completed && !m.claimed ? `<button class="btn btn-success btn-small claim-btn" onclick="careerClaimMissionReward('${m.id}',false);careerUpdatePanel();">Nhận</button>` : (m.claimed ? '<span style="font-size:10px;color:#6bcbff;">✓ Đã nhận</span>' : '')}
+            </div>`;
+        }
+    } else if (tabName === 'achievements') {
+        for (const ach of CAREER_ACHIEVEMENTS) {
+            const data = p.achievements[ach.id] || {};
+            const unlocked = !!data.unlocked;
+            html += `<div class="career-achievement-item ${unlocked ? 'unlocked' : 'locked'}">
+                <div class="ach-icon">${ach.icon}</div>
+                <div class="ach-info">
+                    <div class="ach-name">${ach.nameVN}</div>
+                    <div class="ach-desc">${ach.desc}</div>
+                </div>
+                <div class="ach-status">${unlocked ? '✅' : '🔒'}</div>
+            </div>`;
+        }
+    }
+
+    const tabEl = document.getElementById('careerTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+    if (tabEl) {
+        tabEl.innerHTML = html;
+        tabEl.classList.add('active');
+    }
+}
+
+// Tab switching
+document.addEventListener('click', (e) => {
+    const tab = e.target.closest('.career-tab');
+    if (tab && tab.dataset.careerTab) {
+        careerRenderTab(tab.dataset.careerTab);
+    }
+});
 
 // ============================================================
 // BOOTSTRAP
@@ -3518,6 +4626,9 @@ document.addEventListener('DOMContentLoaded', () => {
     camera = new Camera();
     gameMode = new GameMode();
 
+    // Load career profile
+    careerLoadProfile();
+
     initGame();
 });
 
@@ -3527,6 +4638,11 @@ window.restartRace = restartRace;
 window.pauseRace = pauseRace;
 window.closeResults = closeResults;
 window.nextRace = nextRace;
+window.careerCompleteAndContinue = careerCompleteAndContinue;
+window.careerEquipCosmetic = careerEquipCosmetic;
+window.careerClaimMissionReward = careerClaimMissionReward;
+window.careerDismissPromotion = careerDismissPromotion;
+window.careerUpdatePanel = careerUpdatePanel;
 
 </script>
 </body>
