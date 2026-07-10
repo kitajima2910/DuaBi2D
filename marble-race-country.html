@@ -287,7 +287,7 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
       <div class="career-xp-bar"><div class="xp-fill" id="careerXPFill" style="width:0%"></div></div>
       <div class="career-xp-text"><span id="careerXPText">0 / 200 XP</span><span id="careerLevelText">Cấp 1</span></div>
       <div class="career-stats-grid">
-        <div class="career-stat-item"><div class="stat-val" id="careerStatCoins">0</div><div class="stat-lbl">🪙 Xu</div></div>
+        <div class="career-stat-item"><div class="stat-val" id="careerStatCoins">0</div><div class="stat-lbl">💰 Xu</div></div>
         <div class="career-stat-item"><div class="stat-val" id="careerStatStars">0</div><div class="stat-lbl">⭐ Sao</div></div>
         <div class="career-stat-item"><div class="stat-val" id="careerStatRaces">0</div><div class="stat-lbl">🏁 Đua</div></div>
         <div class="career-stat-item"><div class="stat-val" id="careerStatWins">0</div><div class="stat-lbl">🏆 Thắng</div></div>
@@ -4470,7 +4470,7 @@ function careerInjectRewardsToResults(rewards) {
         <div class="rewards-title">🏆 Phần Thưởng Sự Nghiệp</div>
         <div class="rewards-row">
             <span class="reward-item"><span class="reward-icon">✨</span> +${rewards.xp} XP</span>
-            <span class="reward-item"><span class="reward-icon">🪙</span> +${rewards.coins}</span>
+            <span class="reward-item"><span class="reward-icon">💰</span> +${rewards.coins}</span>
             ${rewards.stars > 0 ? `<span class="reward-item"><span class="reward-icon">⭐</span> +${rewards.stars}</span>` : ''}
         </div>
     `;
@@ -4492,7 +4492,7 @@ function careerShowPromotion(leagueNum, bonus) {
             <div class="promo-icon">🎉</div>
             <div class="promo-title">Thăng Hạng!</div>
             <div class="promo-desc">Chúc mừng bạn đã lên <strong>${leagueDef.nameVN}</strong>!</div>
-            <div class="promo-bonus">+${bonus.xp} XP · +${bonus.coins} 🪙 · +${bonus.stars} ⭐</div>
+            <div class="promo-bonus">+${bonus.xp} XP · +${bonus.coins} 💰 · +${bonus.stars} ⭐</div>
             ${leagueDef.unlockCosmetic ? `<div style="margin-top:8px;font-size:14px;color:#6bcbff;">🔓 Mở khóa trang bị mới!</div>` : ''}
             <button class="btn btn-primary" onclick="careerDismissPromotion()" style="margin-top:12px;width:100%;">Tuyệt vời!</button>
         </div>
@@ -4525,7 +4525,7 @@ function careerRenderTab(tabName) {
             <div class="stat-row"><span class="label">Thời gian tốt nhất</span><span class="value">${p.stats.bestTime < Infinity ? formatTime(p.stats.bestTime) : '--:--'}</span></div>
             <div class="stat-row"><span class="label">Tốc độ cao nhất</span><span class="value">${Math.round(p.stats.bestSpeed)}</span></div>
             <div class="stat-row"><span class="label">Số lần bị loại</span><span class="value">${p.stats.totalEliminations}</span></div>
-            <div class="stat-row"><span class="label">Xu</span><span class="value">${p.coins} 🪙</span></div>
+            <div class="stat-row"><span class="label">Xu</span><span class="value">${p.coins} 💰</span></div>
             <div class="stat-row"><span class="label">Sao</span><span class="value">${p.stars} ⭐</span></div>
         </div>`;
     } else if (tabName === 'garage') {
