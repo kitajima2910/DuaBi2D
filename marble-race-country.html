@@ -2550,7 +2550,9 @@ function drawMarbles() {
             const sy = camera.screenY(trail[i].y);
             ctx2.globalAlpha = ((i / len) * 0.3);
             const r = m.radius * (0.3 + 0.7 * i / len);
-            ctx2.fillRect(sx - r, sy - r, r * 2, r * 2);
+            ctx2.beginPath();
+            ctx2.arc(sx, sy, r, 0, Math.PI * 2);
+            ctx2.fill();
         }
     }
     ctx2.globalAlpha = 1;
