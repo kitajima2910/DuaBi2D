@@ -2519,6 +2519,10 @@ function render() {
 
     // Draw HUD (no transform)
     drawHUD();
+    // Realtime career dashboard update every 10 frames during race
+    if (gameMode.mode === 'career' && gameState === GameState.RACING) {
+        if (frameCount % 10 === 0) careerUpdatePanel();
+    }
 }
 
 function drawTrack() {
@@ -3220,7 +3224,7 @@ function updateMiniLeaderboard() {
             if (a.finished && b.finished) return a.finishTime - b.finishTime;
             if (a.finished) return -1;
             if (b.finished) return 1;
-            return a.y - b.y; // Lower y = further ahead
+            return b.y - a.y; // Higher y = further ahead (track goes downward)
         });
 
     const el = document.getElementById('leaderboardMini');
