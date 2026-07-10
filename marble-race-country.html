@@ -74,11 +74,11 @@ body { background: #0a0a12; font-family: 'Montserrat', 'Segoe UI', system-ui, -a
 .lb-pos { color: #ffd93d; font-weight: 700; width: 16px; }
 
 /* ===== OVERLAY ===== */
-#overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 20; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-#overlay.active { display: flex; }
-#overlay .overlay-content { background: linear-gradient(180deg, #1a1a2e, #14141f); border: 1px solid #2a2a4a; border-radius: 16px; padding: 28px 24px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
-#overlay h2 { text-align: center; font-size: 24px; margin-bottom: 16px; background: linear-gradient(135deg, #ffd93d, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0.5px; }
-#overlay h3 { font-size: 14px; color: #777; margin: 12px 0 8px; text-align: center; letter-spacing: 0.3px; font-weight: 600; text-transform: uppercase; }
+#overlay, #countryOverlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 20; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+#overlay.active, #countryOverlay.active { display: flex; }
+#overlay .overlay-content, #countryOverlay .overlay-content { background: linear-gradient(180deg, #1a1a2e, #14141f); border: 1px solid #2a2a4a; border-radius: 16px; padding: 28px 24px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+#overlay h2, #countryOverlay h2 { text-align: center; font-size: 24px; margin-bottom: 16px; background: linear-gradient(135deg, #ffd93d, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0.5px; }
+#overlay h3, #countryOverlay h3 { font-size: 14px; color: #777; margin: 12px 0 8px; text-align: center; letter-spacing: 0.3px; font-weight: 600; text-transform: uppercase; }
 
 /* ===== PODIUM ===== */
 .podium { display: flex; justify-content: center; align-items: flex-end; gap: 20px; margin: 20px 0 16px; height: 150px; }
@@ -137,6 +137,8 @@ body { background: #0a0a12; font-family: 'Montserrat', 'Segoe UI', system-ui, -a
   #countdown-text { font-size: 72px; }
   #overlay .overlay-content { padding: 20px 16px; }
   #overlay h2 { font-size: 20px; margin-bottom: 12px; }
+  #countryOverlay .overlay-content { padding: 20px 16px; }
+  #countryOverlay h2 { font-size: 20px; margin-bottom: 12px; }
   .podium { height: 120px; gap: 12px; margin: 12px 0; }
   .podium-item .flag-circle { width: 32px; height: 32px; }
   .podium-1 .flag-circle { width: 44px; height: 44px; }
@@ -379,6 +381,10 @@ body { background: #0a0a12; font-family: 'Montserrat', 'Segoe UI', system-ui, -a
     <div id="countdown"><span id="countdown-text"></span></div>
     <div id="overlay">
       <div class="overlay-content" id="overlayContent"></div>
+    </div>
+    <!-- Separate modal for country selection — không làm mất overlay chính -->
+    <div id="countryOverlay">
+      <div class="overlay-content" id="countryOverlayContent"></div>
     </div>
   </div>
 </div>
@@ -4492,8 +4498,8 @@ document.addEventListener('click', (e) => {
 // ─── PLAYER COUNTRY SELECTION ────────────────────────────────
 
 function careerShowCountrySelect() {
-    const overlay = document.getElementById('overlay');
-    const content = document.getElementById('overlayContent');
+    const overlay = document.getElementById('countryOverlay');
+    const content = document.getElementById('countryOverlayContent');
     let html = '<h2>🏁 Chọn Quốc Gia Của Bạn</h2>';
     html += '<p style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">Đây sẽ là lá cờ đại diện cho bạn trong Sự Nghiệp!</p>';
     html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;max-height:400px;overflow-y:auto;">';
@@ -4507,7 +4513,7 @@ function careerShowCountrySelect() {
         </div>`;
     }
     html += '</div>';
-    html += '<button class="btn btn-secondary" onclick="document.getElementById(\'overlay\').classList.remove(\'active\')" style="width:100%;margin-top:12px;">Để Sau</button>';
+    html += '<button class="btn btn-secondary" onclick="document.getElementById(\'countryOverlay\').classList.remove(\'active\')" style="width:100%;margin-top:12px;">Để Sau</button>';
     content.innerHTML = html;
     overlay.classList.add('active');
 }
@@ -4516,7 +4522,7 @@ function careerSelectCountry(index) {
     const p = careerGetProfile();
     p.playerCountry = index;
     careerSaveProfile();
-    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('countryOverlay').classList.remove('active');
     careerUpdatePanel();
 }
 
