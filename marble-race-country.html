@@ -480,293 +480,121 @@ class Vec2 {
 // SECTION 4: COUNTRY DATA & FLAG RENDERER
 // ============================================================
 const COUNTRIES = [
-    { name: "USA", colors: ["#B22234","#FFFFFF","#3C3B6E"], pattern: "stripes-vertical" },
-    { name: "UK", colors: ["#012169","#FFFFFF","#C8102E"], pattern: "union-jack" },
-    { name: "Germany", colors: ["#000000","#DD0000","#FFCC00"], pattern: "stripes-horizontal" },
-    { name: "France", colors: ["#002395","#FFFFFF","#ED2939"], pattern: "stripes-vertical" },
-    { name: "Italy", colors: ["#009246","#FFFFFF","#CE2B37"], pattern: "stripes-vertical" },
-    { name: "Spain", colors: ["#C60B1E","#FFC400","#C60B1E"], pattern: "stripes-horizontal" },
-    { name: "Brazil", colors: ["#009739","#FFDF00","#002776"], pattern: "circle" },
-    { name: "Japan", colors: ["#FFFFFF","#BC002D"], pattern: "circle" },
-    { name: "China", colors: ["#DE2910","#FFDE00"], pattern: "china" },
-    { name: "India", colors: ["#FF9933","#FFFFFF","#138808"], pattern: "stripes-horizontal" },
-    { name: "Canada", colors: ["#FF0000","#FFFFFF","#FF0000"], pattern: "stripes-vertical" },
-    { name: "Australia", colors: ["#00008B","#FF0000","#FFFFFF"], pattern: "star" },
-    { name: "Russia", colors: ["#FFFFFF","#0033A0","#DA291C"], pattern: "stripes-horizontal" },
-    { name: "South Korea", colors: ["#FFFFFF","#003478","#CD2E3A"], pattern: "circle" },
-    { name: "Netherlands", colors: ["#AE1C28","#FFFFFF","#21468B"], pattern: "stripes-horizontal" },
-    { name: "Switzerland", colors: ["#FF0000","#FFFFFF"], pattern: "cross" },
-    { name: "Sweden", colors: ["#005BA1","#FECC00"], pattern: "cross" },
-    { name: "Norway", colors: ["#BA0C2F","#FFFFFF","#003087"], pattern: "cross" },
-    { name: "Denmark", colors: ["#C8102E","#FFFFFF"], pattern: "cross" },
-    { name: "Finland", colors: ["#FFFFFF","#003580"], pattern: "cross" },
-    { name: "Poland", colors: ["#FFFFFF","#DC143C"], pattern: "stripes-horizontal" },
-    { name: "Czech Republic", colors: ["#11457E","#FFFFFF","#D7141A"], pattern: "triangle" },
-    { name: "Austria", colors: ["#ED2939","#FFFFFF","#ED2939"], pattern: "stripes-horizontal" },
-    { name: "Hungary", colors: ["#CE2B37","#FFFFFF","#477050"], pattern: "stripes-horizontal" },
-    { name: "Greece", colors: ["#0D5EAF","#FFFFFF"], pattern: "cross" },
-    { name: "Portugal", colors: ["#006600","#FF0000","#FFD700"], pattern: "stripes-vertical" },
-    { name: "Belgium", colors: ["#000000","#FDDA24","#EF3340"], pattern: "stripes-vertical" },
-    { name: "Turkey", colors: ["#E30A17","#FFFFFF"], pattern: "turkish" },
-    { name: "Argentina", colors: ["#74ACDF","#FFFFFF","#74ACDF"], pattern: "stripes-horizontal" },
-    { name: "Mexico", colors: ["#006341","#FFFFFF","#CE1126"], pattern: "stripes-vertical" },
-    { name: "Thailand", colors: ["#ED1C24","#FFFFFF","#241D4F","#FFFFFF","#ED1C24"], pattern: "stripes-horizontal" },
-    { name: "Egypt", colors: ["#CE1126","#FFFFFF","#000000"], pattern: "stripes-horizontal" },
-    { name: "Saudi Arabia", colors: ["#006C35","#FFFFFF"], pattern: "plain" },
-    { name: "Nigeria", colors: ["#008751","#FFFFFF","#008751"], pattern: "stripes-vertical" },
-    { name: "South Africa", colors: ["#DE3831","#002395","#FFFFFF","#FFB612","#007A4D"], pattern: "triangle" },
-    { name: "Ireland", colors: ["#169B62","#FFFFFF","#FF883E"], pattern: "stripes-vertical" },
-    { name: "Ukraine", colors: ["#0057B7","#FFDD00"], pattern: "stripes-horizontal" },
-    { name: "Romania", colors: ["#002B7F","#FCD116","#CE1126"], pattern: "stripes-vertical" },
-    { name: "Vietnam", colors: ["#DA251D","#FFFF00"], pattern: "star" },
-    { name: "Chile", colors: ["#FFFFFF","#0039A6","#DA291C"], pattern: "triangle" },
+    { code: "us", name: "USA", colors: ["#B22234","#FFFFFF","#3C3B6E"], pattern: "stripes-vertical" },
+    { code: "gb", name: "UK", colors: ["#012169","#FFFFFF","#C8102E"], pattern: "union-jack" },
+    { code: "de", name: "Germany", colors: ["#000000","#DD0000","#FFCC00"], pattern: "stripes-horizontal" },
+    { code: "fr", name: "France", colors: ["#002395","#FFFFFF","#ED2939"], pattern: "stripes-vertical" },
+    { code: "it", name: "Italy", colors: ["#009246","#FFFFFF","#CE2B37"], pattern: "stripes-vertical" },
+    { code: "es", name: "Spain", colors: ["#C60B1E","#FFC400","#C60B1E"], pattern: "stripes-horizontal" },
+    { code: "br", name: "Brazil", colors: ["#009739","#FFDF00","#002776"], pattern: "circle" },
+    { code: "jp", name: "Japan", colors: ["#FFFFFF","#BC002D"], pattern: "circle" },
+    { code: "cn", name: "China", colors: ["#DE2910","#FFDE00"], pattern: "china" },
+    { code: "in", name: "India", colors: ["#FF9933","#FFFFFF","#138808"], pattern: "stripes-horizontal" },
+    { code: "ca", name: "Canada", colors: ["#FF0000","#FFFFFF","#FF0000"], pattern: "stripes-vertical" },
+    { code: "au", name: "Australia", colors: ["#00008B","#FF0000","#FFFFFF"], pattern: "star" },
+    { code: "ru", name: "Russia", colors: ["#FFFFFF","#0033A0","#DA291C"], pattern: "stripes-horizontal" },
+    { code: "kr", name: "South Korea", colors: ["#FFFFFF","#003478","#CD2E3A"], pattern: "circle" },
+    { code: "nl", name: "Netherlands", colors: ["#AE1C28","#FFFFFF","#21468B"], pattern: "stripes-horizontal" },
+    { code: "ch", name: "Switzerland", colors: ["#FF0000","#FFFFFF"], pattern: "cross" },
+    { code: "se", name: "Sweden", colors: ["#005BA1","#FECC00"], pattern: "cross" },
+    { code: "no", name: "Norway", colors: ["#BA0C2F","#FFFFFF","#003087"], pattern: "cross" },
+    { code: "dk", name: "Denmark", colors: ["#C8102E","#FFFFFF"], pattern: "cross" },
+    { code: "fi", name: "Finland", colors: ["#FFFFFF","#003580"], pattern: "cross" },
+    { code: "pl", name: "Poland", colors: ["#FFFFFF","#DC143C"], pattern: "stripes-horizontal" },
+    { code: "cz", name: "Czech Republic", colors: ["#11457E","#FFFFFF","#D7141A"], pattern: "triangle" },
+    { code: "at", name: "Austria", colors: ["#ED2939","#FFFFFF","#ED2939"], pattern: "stripes-horizontal" },
+    { code: "hu", name: "Hungary", colors: ["#CE2B37","#FFFFFF","#477050"], pattern: "stripes-horizontal" },
+    { code: "gr", name: "Greece", colors: ["#0D5EAF","#FFFFFF"], pattern: "cross" },
+    { code: "pt", name: "Portugal", colors: ["#006600","#FF0000","#FFD700"], pattern: "stripes-vertical" },
+    { code: "be", name: "Belgium", colors: ["#000000","#FDDA24","#EF3340"], pattern: "stripes-vertical" },
+    { code: "tr", name: "Turkey", colors: ["#E30A17","#FFFFFF"], pattern: "turkish" },
+    { code: "ar", name: "Argentina", colors: ["#74ACDF","#FFFFFF","#74ACDF"], pattern: "stripes-horizontal" },
+    { code: "mx", name: "Mexico", colors: ["#006341","#FFFFFF","#CE1126"], pattern: "stripes-vertical" },
+    { code: "th", name: "Thailand", colors: ["#ED1C24","#FFFFFF","#241D4F","#FFFFFF","#ED1C24"], pattern: "stripes-horizontal" },
+    { code: "eg", name: "Egypt", colors: ["#CE1126","#FFFFFF","#000000"], pattern: "stripes-horizontal" },
+    { code: "sa", name: "Saudi Arabia", colors: ["#006C35","#FFFFFF"], pattern: "plain" },
+    { code: "ng", name: "Nigeria", colors: ["#008751","#FFFFFF","#008751"], pattern: "stripes-vertical" },
+    { code: "za", name: "South Africa", colors: ["#DE3831","#002395","#FFFFFF","#FFB612","#007A4D"], pattern: "triangle" },
+    { code: "ie", name: "Ireland", colors: ["#169B62","#FFFFFF","#FF883E"], pattern: "stripes-vertical" },
+    { code: "ua", name: "Ukraine", colors: ["#0057B7","#FFDD00"], pattern: "stripes-horizontal" },
+    { code: "ro", name: "Romania", colors: ["#002B7F","#FCD116","#CE1126"], pattern: "stripes-vertical" },
+    { code: "vn", name: "Vietnam", colors: ["#DA251D","#FFFF00"], pattern: "star" },
+    { code: "cl", name: "Chile", colors: ["#FFFFFF","#0039A6","#DA291C"], pattern: "triangle" },
 ];
 
+
+// ─── FLAG CDN SYSTEM ────────────────────────────────────────
+// Uses flagcdn.com for real SVG-based country flags
 const flagTextureCache = new Map();
+const FLAG_CDN_BASE = 'https://flagcdn.com/';
+
+function getFlagCDNUrl(code, size) {
+    const sw = size <= 32 ? 'w40' : size <= 64 ? 'w80' : 'w160';
+    return FLAG_CDN_BASE + sw + '/' + code + '.png';
+}
 
 function renderFlagTexture(country, size) {
-    const key = country.name + size;
+    const key = country.code + '_tex_' + size;
     if (flagTextureCache.has(key)) return flagTextureCache.get(key);
+    const dpr = 2;
+    const cs = size * dpr;
     const canvas = document.createElement('canvas');
-    canvas.width = size * 2;
-    canvas.height = size * 2;
+    canvas.width = cs; canvas.height = cs;
     const ctx = canvas.getContext('2d');
-    const s = size * 2;
-    const h = s, w = s;
-    const colors = country.colors;
-    const cx = w / 2, cy = h / 2;
+    ctx.fillStyle = country.colors[0] || '#666';
+    ctx.beginPath(); ctx.arc(cs/2, cs/2, cs/2 - 1, 0, Math.PI*2); ctx.fill();
+    flagTextureCache.set(key, canvas);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+        ctx.clearRect(0, 0, cs, cs);
+        ctx.save();
+        ctx.beginPath(); ctx.arc(cs/2, cs/2, cs/2 - 1, 0, Math.PI*2); ctx.clip();
+        ctx.drawImage(img, 0, 0, cs, cs);
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cs/2, cs/2, cs/2 - 1, 0, Math.PI*2); ctx.stroke();
+    };
+    img.onerror = () => { fallbackFlagTexture(ctx, country, cs); };
+    img.src = getFlagCDNUrl(country.code, size);
+    return canvas;
+}
 
+function fallbackFlagTexture(ctx, country, size) {
+    const w = size, h = size, colors = country.colors, cx = w/2, cy = h/2;
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(w/2, h/2, w/2 - 1, 0, Math.PI*2); ctx.clip();
     switch (country.pattern) {
-        case 'stripes-horizontal': {
-            const stripeH = h / colors.length;
-            colors.forEach((c, i) => {
-                ctx.fillStyle = c;
-                ctx.fillRect(0, i * stripeH, w, stripeH + 1);
-            });
-            break;
-        }
-        case 'stripes-vertical': {
-            const stripeW = w / colors.length;
-            colors.forEach((c, i) => {
-                ctx.fillStyle = c;
-                ctx.fillRect(i * stripeW, 0, stripeW + 1, h);
-            });
-            break;
-        }
-        case 'cross': {
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = colors[1];
-            const cw = w * 0.2, ch = h * 0.2;
-            ctx.fillRect(cx - cw / 2, 0, cw, h);
-            ctx.fillRect(0, cy - ch / 2, w, ch);
-            if (colors[2]) {
-                ctx.fillStyle = colors[2];
-                ctx.fillRect(cx - cw / 3, 0, cw * 0.66, h);
-                ctx.fillRect(0, cy - ch / 3, w, ch * 0.66);
-            }
-            break;
-        }
-        case 'circle': {
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            const r = w * 0.35;
-            ctx.fillStyle = colors[1];
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.fill();
-            break;
-        }
-        case 'triangle': {
-            // Triangle pattern (like Czech, South Africa)
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            if (colors.length >= 3) {
-                ctx.fillStyle = colors[1];
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(w, 0);
-                ctx.lineTo(w * 0.5, h * 0.5);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle = colors[2];
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(w * 0.3, 0);
-                ctx.lineTo(0, h * 0.5);
-                ctx.closePath();
-                ctx.fill();
-            }
-            break;
-        }
-        case 'china': {
-            // China flag: red bg + 1 large star + 4 small stars in arc
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = colors[1];
-            const bigR = w * 0.2;
-            // Large star in top-left area
-            drawStar(ctx, w * 0.2, h * 0.25, 5, bigR, bigR * 0.4);
-            // 4 small stars in an arc to the right
-            const smallR = bigR * 0.4;
-            const positions = [
-                [w * 0.38, h * 0.12],
-                [w * 0.46, h * 0.22],
-                [w * 0.42, h * 0.35],
-                [w * 0.34, h * 0.42],
-            ];
-            for (const [sx, sy] of positions) {
-                drawStar(ctx, sx, sy, 5, smallR, smallR * 0.4);
-            }
-            break;
-        }
-        case 'turkish': {
-            // Turkey: red bg + white crescent + star
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = colors[1];
-            // Crescent: two overlapping circles with composite
-            const cr = w * 0.3;
-            ctx.beginPath();
-            ctx.arc(cx - w * 0.05, cy, cr, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            ctx.arc(cx + w * 0.08, cy, cr * 0.78, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = 'source-over';
-            // Star next to crescent
-            ctx.fillStyle = colors[1];
-            const tStarR = w * 0.1;
-            drawStar(ctx, cx + w * 0.14, cy - h * 0.03, 5, tStarR, tStarR * 0.4);
-            break;
-        }
-        case 'star': {
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = colors[1];
-            const starR = w * 0.3;
-            drawStar(ctx, cx, cy, 5, starR, starR * 0.4);
-            break;
-        }
-        case 'diagonal': {
-            // Diagonal split
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = colors[1];
-            ctx.beginPath();
-            ctx.moveTo(0, h);
-            ctx.lineTo(w, h);
-            ctx.lineTo(w, 0);
-            ctx.closePath();
-            ctx.fill();
-            if (colors[2]) {
-                ctx.fillStyle = colors[2];
-                ctx.beginPath();
-                ctx.moveTo(0, h * 0.7);
-                ctx.lineTo(w * 0.3, h);
-                ctx.lineTo(0, h);
-                ctx.closePath();
-                ctx.fill();
-            }
-            break;
-        }
-        case 'checker': {
-            const n = 4;
-            const cs = w / n;
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = colors[1];
-            for (let r = 0; r < n; r++) {
-                for (let c = 0; c < n; c++) {
-                    if ((r + c) % 2 === 0) {
-                        ctx.fillRect(c * cs, r * cs, cs, cs);
-                    }
-                }
-            }
-            break;
-        }
-        case 'union-jack': {
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            // White diagonal cross
-            ctx.fillStyle = colors[1];
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(Math.PI / 4);
-            ctx.fillRect(-w * 0.25, -h * 0.15, w * 0.5, h * 0.3);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillRect(-w * 0.25, -h * 0.15, w * 0.5, h * 0.3);
-            ctx.restore();
-            // Red diagonal cross
-            ctx.fillStyle = colors[2];
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(Math.PI / 4);
-            ctx.fillRect(-w * 0.25, -h * 0.07, w * 0.5, h * 0.14);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillRect(-w * 0.25, -h * 0.07, w * 0.5, h * 0.14);
-            ctx.restore();
-            // White cross
-            ctx.fillStyle = colors[1];
-            ctx.fillRect(cx - w * 0.06, 0, w * 0.12, h);
-            ctx.fillRect(0, cy - h * 0.06, w, h * 0.12);
-            // Red cross
-            ctx.fillStyle = colors[2];
-            ctx.fillRect(cx - w * 0.03, 0, w * 0.06, h);
-            ctx.fillRect(0, cy - h * 0.03, w, h * 0.06);
-            break;
-        }
-        case 'plain':
-        default: {
-            ctx.fillStyle = colors[0];
-            ctx.fillRect(0, 0, w, h);
-            if (colors[1]) {
-                // Add some detail
-                ctx.fillStyle = colors[1];
-                ctx.font = `${w * 0.5}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-            }
-            break;
-        }
+        case 'stripes-horizontal': { var sh = h/colors.length; colors.forEach(function(c,i){ ctx.fillStyle=c; ctx.fillRect(0,i*sh,w,sh+1); }); break; }
+        case 'stripes-vertical': { var sw2 = w/colors.length; colors.forEach(function(c,i){ ctx.fillStyle=c; ctx.fillRect(i*sw2,0,sw2+1,h); }); break; }
+        case 'cross': { ctx.fillStyle=colors[0]; ctx.fillRect(0,0,w,h); ctx.fillStyle=colors[1]; var cw=w*0.2,ch=h*0.2; ctx.fillRect(cx-cw/2,0,cw,h); ctx.fillRect(0,cy-ch/2,w,ch); if(colors[2]){ctx.fillStyle=colors[2]; ctx.fillRect(cx-cw/3,0,cw*0.66,h); ctx.fillRect(0,cy-ch/3,w,ch*0.66);} break; }
+        case 'circle': { ctx.fillStyle=colors[0]; ctx.fillRect(0,0,w,h); ctx.fillStyle=colors[1]; ctx.beginPath(); ctx.arc(cx,cy,w*0.35,0,Math.PI*2); ctx.fill(); break; }
+        case 'triangle': { ctx.fillStyle=colors[0]; ctx.fillRect(0,0,w,h); if(colors.length>=3){ctx.fillStyle=colors[1]; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(w,0); ctx.lineTo(w*0.5,h*0.5); ctx.closePath(); ctx.fill(); ctx.fillStyle=colors[2]; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(w*0.3,0); ctx.lineTo(0,h*0.5); ctx.closePath(); ctx.fill();} break; }
+        case 'china': { ctx.fillStyle=colors[0]; ctx.fillRect(0,0,w,h); ctx.fillStyle=colors[1]; var br=w*0.2; drawStar(ctx,w*0.2,h*0.25,5,br,br*0.4); var sr=br*0.4; [[w*0.38,h*0.12],[w*0.46,h*0.22],[w*0.42,h*0.35],[w*0.34,h*0.42]].forEach(function(p){drawStar(ctx,p[0],p[1],5,sr,sr*0.4)}); break; }
+        case 'turkish': { ctx.fillStyle=colors[0]; ctx.fillRect(0,0,w,h); ctx.fillStyle=colors[1]; var cr=w*0.3; ctx.beginPath(); ctx.arc(cx-w*0.05,cy,cr,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.arc(cx+w*0.08,cy,cr*0.78,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='source-over'; ctx.fillStyle=colors[1]; var tr=w*0.1; drawStar(ctx,cx+w*0.14,cy-h*0.03,5,tr,tr*0.4); break; }
+        case 'star': { ctx.fillStyle=colors[0]; ctx.fillRect(0,0,w,h); ctx.fillStyle=colors[1]; drawStar(ctx,cx,cy,5,w*0.3,w*0.12); break; }
+        case 'union-jack': { ctx.fillStyle=colors[0]; ctx.fillRect(0,0,w,h); ctx.fillStyle=colors[1]; ctx.save(); ctx.translate(cx,cy); ctx.rotate(Math.PI/4); ctx.fillRect(-w*0.25,-h*0.15,w*0.5,h*0.3); ctx.rotate(-Math.PI/2); ctx.fillRect(-w*0.25,-h*0.15,w*0.5,h*0.3); ctx.restore(); ctx.fillStyle=colors[2]; ctx.save(); ctx.translate(cx,cy); ctx.rotate(Math.PI/4); ctx.fillRect(-w*0.25,-h*0.07,w*0.5,h*0.14); ctx.rotate(-Math.PI/2); ctx.fillRect(-w*0.25,-h*0.07,w*0.5,h*0.14); ctx.restore(); ctx.fillStyle=colors[1]; ctx.fillRect(cx-w*0.06,0,w*0.12,h); ctx.fillRect(0,cy-h*0.06,w,h*0.12); ctx.fillStyle=colors[2]; ctx.fillRect(cx-w*0.03,0,w*0.06,h); ctx.fillRect(0,cy-h*0.03,w,h*0.06); break; }
+        default: { ctx.fillStyle=colors[0]||'#888'; ctx.fillRect(0,0,w,h); if(colors[1]){ctx.fillStyle=colors[1];ctx.fillRect(0,h*0.2,w,h*0.6);} }
     }
-
-    // Border
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(1, 1, w - 2, h - 2);
-
-    // Clip to circle version
-    const circleCanvas = document.createElement('canvas');
-    circleCanvas.width = size;
-    circleCanvas.height = size;
-    const cctx = circleCanvas.getContext('2d');
-    cctx.beginPath();
-    cctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
-    cctx.clip();
-    cctx.drawImage(canvas, 0, 0, s, s, 0, 0, size, size);
-
-    flagTextureCache.set(key, circleCanvas);
-    return circleCanvas;
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(w/2, h/2, w/2 - 1, 0, Math.PI*2); ctx.stroke();
 }
 
-function drawStar(ctx, cx, cy, points, outerR, innerR) {
-    ctx.beginPath();
-    for (let i = 0; i < points * 2; i++) {
-        const r = i % 2 === 0 ? outerR : innerR;
-        const a = (i * Math.PI / points) - Math.PI / 2;
-        const x = cx + r * Math.cos(a);
-        const y = cy + r * Math.sin(a);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.fill();
+function getFlagDataURL(countryIndex, size) {
+    var country = COUNTRIES[countryIndex];
+    if (!country) return '';
+    return getFlagCDNUrl(country.code, size);
 }
 
-// ============================================================
-// SECTION 5: SOUND MANAGER (Web Audio API)
+function preloadFlags() {
+    for (var i = 0; i < COUNTRIES.length; i++) {
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = getFlagCDNUrl(COUNTRIES[i].code, 40);
+    }
+}
 // ============================================================
 class SoundManager {
     constructor() {
@@ -3405,18 +3233,6 @@ function updateMiniLeaderboard() {
 // FLAG HELPER — Tạo flag texture data URL cho overlay
 // ============================================================
 
-const flagDataURLCache = new Map();
-
-function getFlagDataURL(countryIndex, size) {
-    const key = countryIndex + '_' + size;
-    if (flagDataURLCache.has(key)) return flagDataURLCache.get(key);
-    const country = COUNTRIES[countryIndex];
-    const canvas = renderFlagTexture(country, size);
-    const url = canvas.toDataURL();
-    flagDataURLCache.set(key, url);
-    return url;
-}
-
 // ============================================================
 // RESULTS & OVERLAY
 // ============================================================
@@ -4742,6 +4558,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load career profile
     careerLoadProfile();
+
+    // Preload flags from CDN
+    preloadFlags();
 
     initGame();
 });
