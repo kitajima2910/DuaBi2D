@@ -278,7 +278,7 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
     <!-- CAREER DASHBOARD -->
     <div class="section career-dashboard" id="careerDashboard">
       <div class="career-header">
-        <div class="league-badge" id="careerLeagueBadge">D</div>
+        <div id="careerPlayerFlag" style="width:40px;height:40px;border-radius:50%;border:2px solid #ffd93d;background-size:cover;background-position:center;flex-shrink:0;"></div>
         <div>
           <div class="league-name" id="careerLeagueName">Dirt League</div>
           <div class="league-tier" id="careerLeagueTier">Hạng Bụi Đất</div>
@@ -291,6 +291,9 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
         <div class="career-stat-item"><div class="stat-val" id="careerStatStars">0</div><div class="stat-lbl">⭐ Sao</div></div>
         <div class="career-stat-item"><div class="stat-val" id="careerStatRaces">0</div><div class="stat-lbl">🏁 Đua</div></div>
         <div class="career-stat-item"><div class="stat-val" id="careerStatWins">0</div><div class="stat-lbl">🏆 Thắng</div></div>
+      </div>
+      <div style="display:flex;gap:4px;margin:4px 0;">
+        <button class="btn btn-secondary btn-small" onclick="careerShowCountrySelect()" style="flex:1;font-size:9px;">🚩 Đổi Cờ</button>
       </div>
       <div class="career-tab-bar">
         <button class="career-tab active" data-career-tab="stats">📊</button>
@@ -2285,10 +2288,19 @@ function startRace() {
 
     // Career mode: mark player marble
     if (gameMode.mode === 'career' && marbles.length > 0) {
+        const p = careerGetProfile();
+        // Override player marble's country to chosen one
+        if (careerHasPlayerCountry()) {
+            const pm = marbles[0];
+            const ci = p.playerCountry;
+            pm.countryIndex = ci;
+            pm.name = COUNTRIES[ci].name;
+            pm.texture = renderFlagTexture(COUNTRIES[ci], CONFIG.MARBLE_RADIUS * 2);
+        }
         marbles.forEach((m, i) => {
             if (i === 0) {
                 m.isPlayer = true;
-                const eq = careerGetProfile().equipped;
+                const eq = p.equipped;
                 m.equippedFlagSkin = eq.flagSkin;
                 m.equippedTrail = eq.marbleTrail;
             }
@@ -3886,6 +3898,8 @@ const CAREER_PROGRESSION_MISSIONS = [
 // ─── DEFAULT PROFILE ───
 const CAREER_DEFAULT_PROFILE = {
     version: 1,
+    playerCountry: null,
+    playerName: 'Tay Đua',
     xp: 0,
     coins: 0,
     stars: 0,
@@ -4444,7 +4458,17 @@ function careerUpdatePanel() {
     }
     dashboard.classList.add('active');
 
-    document.getElementById('careerLeagueBadge').textContent = leagueDef.name[0];
+    // Player flag
+    const flagEl = document.getElementById('careerPlayerFlag');
+    if (careerHasPlayerCountry()) {
+        flagEl.style.backgroundImage = `url(${getFlagDataURL(p.playerCountry, 48)})`;
+        flagEl.title = COUNTRIES[p.playerCountry].name;
+    } else {
+        flagEl.style.backgroundImage = 'none';
+        flagEl.style.border = '2px dashed #555';
+        flagEl.title = 'Chưa chọn quốc gia';
+    }
+
     document.getElementById('careerLeagueName').textContent = leagueDef.name;
     document.getElementById('careerLeagueTier').textContent = leagueDef.nameVN;
 
@@ -4594,6 +4618,51 @@ document.addEventListener('click', (e) => {
         careerRenderTab(tab.dataset.careerTab);
     }
 });
+
+// ─── PLAYER COUNTRY SELECTION ────────────────────────────────
+
+function careerShowCountrySelect() {
+    const overlay = document.getElementById('overlay');
+    const content = document.getElementById('overlayContent');
+    let html = '<h2>🏁 Chọn Quốc Gia Của Bạn</h2>';
+    html += '<p style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">Đây sẽ là lá cờ đại diện cho bạn trong Sự Nghiệp!</p>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;max-height:400px;overflow-y:auto;">';
+    for (let i = 0; i < COUNTRIES.length; i++) {
+        const flagURL = getFlagDataURL(i, 48);
+        html += `<div onclick="careerSelectCountry(${i})" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);transition:all 0.2s;" 
+            onmouseover="this.style.background='rgba(107,107,255,0.2)';this.style.borderColor='#6b6bff'" 
+            onmouseout="this.style.background='rgba(255,255,255,0.03)';this.style.borderColor='rgba(255,255,255,0.06)'">
+            <div style="width:44px;height:44px;border-radius:50%;background-image:url(${flagURL});background-size:cover;background-position:center;border:2px solid rgba(255,255,255,0.2);"></div>
+            <span style="font-size:10px;color:#ccc;text-align:center;word-break:break-word;">${COUNTRIES[i].name}</span>
+        </div>`;
+    }
+    html += '</div>';
+    html += '<button class="btn btn-secondary" onclick="document.getElementById(\'overlay\').classList.remove(\'active\')" style="width:100%;margin-top:12px;">Để Sau</button>';
+    content.innerHTML = html;
+    overlay.classList.add('active');
+}
+
+function careerSelectCountry(index) {
+    const p = careerGetProfile();
+    p.playerCountry = index;
+    careerSaveProfile();
+    document.getElementById('overlay').classList.remove('active');
+    careerUpdatePanel();
+}
+
+function careerHasPlayerCountry() {
+    const p = careerGetProfile();
+    return p.playerCountry !== null && p.playerCountry !== undefined && p.playerCountry >= 0;
+}
+
+// Override init to prompt country selection on first time
+const _origCareerInit = careerInit;
+careerInit = function() {
+    _origCareerInit();
+    if (!careerHasPlayerCountry()) {
+        setTimeout(careerShowCountrySelect, 300);
+    }
+};
 
 // ============================================================
 // BOOTSTRAP
