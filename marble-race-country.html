@@ -210,7 +210,9 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
         <label>BLV (giọng nói)</label>
         <div class="btn-group" style="display:flex;gap:4px;">
           <button class="btn btn-secondary btn-small active" id="blvToggle" style="flex:1;">🔊 Bật</button>
+          <button class="btn btn-secondary btn-small" id="blvTestBtn" title="Kiểm tra giọng nói">🎧</button>
         </div>
+        <div style="font-size:9px;color:#666;margin-top:3px;" id="blvStatus">Đang tải giọng...</div>
       </div>
     </div>
 
@@ -237,8 +239,8 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
         <div class="leaderboard-mini" id="leaderboardMini"></div>
       </div>
       <div class="hud-item hud-commentator-box">
-        <span class="hud-label">Bình luận</span>
-        <span class="hud-value hud-commentator" id="hudCommentator">Sẵn sàng!</span>
+        <span class="hud-label">Commentary</span>
+        <span class="hud-value hud-commentator" id="hudCommentator">Ready!</span>
       </div>
       <div class="hud-item">
         <span class="hud-label">FPS</span>
@@ -1687,9 +1689,9 @@ let raceStartTime = 0;
 let raceTime = 0;
 let leaderboardCache = [];
 let lastCommentatorChange = 0;
-let commentatorText = 'Sẵn sàng!';
+let commentatorText = 'Ready!';
 let blvEnabled = true;
-let blvInitialized = false;
+let blvSpeechTimer = null;
 let canvasW = 800, canvasH = 600;
 let renderAlpha = 0;
 let animationId = null;
@@ -1709,13 +1711,12 @@ function initGame() {
     setupUI();
     resetGameState();
 
-    // Pre-load Vietnamese voice for BLV
+    // BLV — pre-load English voices
     if (window.speechSynthesis) {
-        window.speechSynthesis.getVoices(); // Trigger loading
-        window.speechSynthesis.onvoiceschanged = () => {
-            blvInitialized = false; // Will re-init on next speak
-        };
+        window.speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => updateBLVStatus();
     }
+    updateBLVStatus();
 
     isRunning = true;
     lastTime = performance.now();
@@ -2726,24 +2727,55 @@ function drawHUD() {
     updateMiniLeaderboard();
 }
 
+function updateBLVStatus() {
+    const el = document.getElementById('blvStatus');
+    if (!el) return;
+    const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    const enVoices = voices.filter(v => v.lang && v.lang.startsWith('en'));
+    const voiceName = enVoices.length > 0 ? enVoices[0].name : 'default';
+    el.textContent = '🎙️ English (' + voiceName + ')';
+    el.style.color = '#4ade80';
+}
+
 function speakCommentary(text) {
     if (!blvEnabled || !window.speechSynthesis) return;
     try {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'vi-VN';
-        utterance.rate = 1.15;
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
-        // Try to find Vietnamese voice
-        if (!blvInitialized) {
-            const voices = window.speechSynthesis.getVoices();
-            const vi = voices.find(v => v.lang.startsWith('vi'));
-            if (vi) utterance.voice = vi;
-            blvInitialized = true;
+
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.95;
+        u.pitch = 0.85;
+        u.volume = 1.0;
+
+        // Pick best English voice
+        const voices = window.speechSynthesis.getVoices();
+        const enVoices = voices.filter(v => v.lang && v.lang.startsWith('en'));
+        if (enVoices.length > 0) {
+            // Priority: Natural/Online > female clear (Zira) > male deep (David/Mark) > any EN
+            const best = enVoices.find(v => v.name.includes('Natural') || v.name.includes('Online'))
+                      || enVoices.find(v => v.name.includes('Zira'))
+                      || enVoices.find(v => v.name.includes('David'))
+                      || enVoices.find(v => v.name.includes('Mark'))
+                      || enVoices[0];
+            u.voice = best;
         }
-        window.speechSynthesis.speak(utterance);
-    } catch (e) { /* silently fail */ }
+
+        // Retry if speech doesn't start (Chrome bug workaround)
+        let started = false;
+        u.onstart = () => { started = true; };
+        if (blvSpeechTimer) clearTimeout(blvSpeechTimer);
+        blvSpeechTimer = setTimeout(() => {
+            if (!started) {
+                // Try once more with a different approach
+                window.speechSynthesis.speak(u);
+            }
+        }, 250);
+
+        window.speechSynthesis.speak(u);
+    } catch (e) {
+        console.warn('[BLV] Error:', e.message);
+    }
 }
 
 function setBLVText(el, text) {
@@ -2756,24 +2788,24 @@ function updateCommentator() {
     const el = document.getElementById('hudCommentator');
     if (!el) return;
     if (!marbles || marbles.length === 0) {
-        setBLVText(el, 'Sẵn sàng!');
+        setBLVText(el, 'Ready!');
         return;
     }
 
     if (gameState === GameState.COUNTDOWN) {
         const v = Math.ceil(countdownTimer);
-        setBLVText(el, v > 0 ? 'Xuất phát sau ' + v + '...' : 'Đi!');
+        setBLVText(el, v > 0 ? 'Starting in ' + v + '...' : 'GO!');
         return;
     }
 
     if (gameState === GameState.FINISHED) {
         const winner = marbles.find(m => m.place === 1);
-        setBLVText(el, winner ? winner.name + ' vô địch!' : 'Cuộc đua kết thúc!');
+        setBLVText(el, winner ? winner.name + ' wins the race!' : 'Race over!');
         return;
     }
 
     if (gameState === GameState.PAUSED) {
-        setBLVText(el, 'Tạm dừng...');
+        setBLVText(el, 'Paused...');
         return;
     }
 
@@ -2797,26 +2829,34 @@ function updateCommentator() {
     const second = sorted[1];
 
     if (leader && leader.finished) {
-        msgs.push(leader.name + ' đã về đích! 🏁');
-        msgs.push('Xuất sắc! ' + leader.name + ' hoàn thành!');
+        msgs.push(leader.name + ' crosses the finish line!');
+        msgs.push('Unbelievable! ' + leader.name + ' takes the win!');
+        msgs.push(leader.name + ' finishes in style!');
     } else if (leader) {
         const prog = Math.round(leader.y / CONFIG.TRACK_LENGTH * 100);
-        msgs.push(leader.name + ' đang dẫn đầu!');
-        msgs.push(leader.name + ' băng băng về đích!');
-        if (prog > 75) msgs.push(leader.name + ' sắp cán đích! ⏩');
+        msgs.push(leader.name + ' is in the lead!');
+        msgs.push(leader.name + ' is on fire today!');
+        msgs.push(leader.name + ' charging through the pack!');
+        if (prog > 75) msgs.push(leader.name + ' is heading for victory!');
+        if (prog > 50) msgs.push('More than halfway there! ' + leader.name + ' is flying!');
         if (second && (leader.y - second.y) < 150) {
-            msgs.push('Căng thẳng! ' + second.name + ' bám sát ' + leader.name + '! 🔥');
-            msgs.push('Ngang ngửa! Ai sẽ thắng?');
+            msgs.push('It\'s a close race! ' + second.name + ' is right behind!');
+            msgs.push('Can ' + second.name + ' catch ' + leader.name + '?');
+            msgs.push('What a battle at the front!');
         }
         if (active.length <= 3 && active.length > 1) {
-            msgs.push('Chỉ còn ' + active.length + ' kỳ thủ trên đường đua!');
+            msgs.push('Only ' + active.length + ' marbles still racing!');
+            msgs.push('Down to the final ' + active.length + '! Who will survive?');
         }
         if (active.length === 1) {
-            msgs.push(leader.name + ' sắp về đích! Cố lên! 💪');
+            msgs.push(leader.name + ' is about to take the crown!');
+            msgs.push('Almost there! ' + leader.name + ' is the champion!');
         }
-        msgs.push('Các kỳ thủ đang thể hiện phong độ cao!');
-        msgs.push('Vượt chướng ngại vật đầy ngoạn mục!');
-        msgs.push('Đường đua năm nay đầy thử thách!');
+        msgs.push('What a spectacular race!');
+        msgs.push('The crowd is going wild!');
+        msgs.push('Amazing performance from all racers!');
+        msgs.push('This track is full of surprises!');
+        msgs.push('Hold onto your seats, folks!');
     }
 
     if (msgs.length > 0) {
@@ -3027,16 +3067,29 @@ function setupUI() {
     // Restart button
     document.getElementById('restartBtn').addEventListener('click', restartRace);
 
-    // BLV voice toggle
+    // BLV voice toggle + test
     const blvBtn = document.getElementById('blvToggle');
     if (blvBtn) {
         blvBtn.addEventListener('click', () => {
             blvEnabled = !blvEnabled;
             blvBtn.textContent = blvEnabled ? '🔊 Bật' : '🔇 Tắt';
             blvBtn.classList.toggle('active', blvEnabled);
-            if (!blvEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+            if (!blvEnabled) {
+                if (window.speechSynthesis) window.speechSynthesis.cancel();
+            }
         });
     }
+    const blvTestBtn = document.getElementById('blvTestBtn');
+    if (blvTestBtn) {
+        blvTestBtn.addEventListener('click', () => {
+            if (!blvEnabled) {
+                blvEnabled = true;
+                if (blvBtn) { blvBtn.textContent = '🔊 Bật'; blvBtn.classList.add('active'); }
+            }
+            speakCommentary('Ladies and gentlemen, welcome to the Marble Race! The excitement is building!');
+        });
+    }
+    updateBLVStatus();
 
     // Keyboard
     document.addEventListener('keydown', (e) => {
