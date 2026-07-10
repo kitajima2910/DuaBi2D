@@ -64,6 +64,8 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
 .hud-item .hud-label { color: #666; font-size: 9px; text-transform: uppercase; }
 .hud-item .hud-value { color: #fff; font-weight: 700; }
 .hud-fps { color: #6bcbff !important; }
+.hud-commentator-box { flex:1; max-width:320px; min-width:100px; }
+.hud-commentator { font-size:12px; color:#ffd93d !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px; transition:opacity 0.3s; }
 .leaderboard-mini { display: flex; gap: 8px; font-size: 10px; }
 .leaderboard-mini .lb-entry { display: flex; align-items: center; gap: 3px; }
 .lb-pos { color: #ffd93d; font-weight: 700; width: 16px; }
@@ -228,9 +230,9 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
         <span class="hud-label">Xếp hạng</span>
         <div class="leaderboard-mini" id="leaderboardMini"></div>
       </div>
-      <div class="hud-item">
-        <span class="hud-label">Tiến độ</span>
-        <span class="hud-value" id="hudProgress">0%</span>
+      <div class="hud-item hud-commentator-box">
+        <span class="hud-label">Bình luận</span>
+        <span class="hud-value hud-commentator" id="hudCommentator">Sẵn sàng!</span>
       </div>
       <div class="hud-item">
         <span class="hud-label">FPS</span>
@@ -1678,6 +1680,8 @@ let countdownActive = false;
 let raceStartTime = 0;
 let raceTime = 0;
 let leaderboardCache = [];
+let lastCommentatorChange = 0;
+let commentatorText = 'Sẵn sàng!';
 let canvasW = 800, canvasH = 600;
 let renderAlpha = 0;
 let animationId = null;
@@ -2689,24 +2693,93 @@ function drawFinishLine() {
 function drawHUD() {
     const ctx2 = ctx;
 
-    // Progress bar (top center-ish)
+    // Active marbles count
     if (marbles && marbles.length > 0) {
         const active = marbles.filter(m => !m.eliminated);
-        let maxProgress = 0;
-        for (const m of active) {
-            const prog = m.y / CONFIG.TRACK_LENGTH;
-            if (prog > maxProgress) maxProgress = prog;
-        }
-        const pct = Math.min(100, Math.round(maxProgress * 100));
-        document.getElementById('hudProgress').textContent = pct + '%';
         document.getElementById('hudActive').textContent = active.length + '/' + marbles.length;
     }
 
     // FPS
     document.getElementById('hudFps').textContent = currentFps;
 
+    // Commentator
+    updateCommentator();
+
     // Mini leaderboard
     updateMiniLeaderboard();
+}
+
+function updateCommentator() {
+    const el = document.getElementById('hudCommentator');
+    if (!el) return;
+    if (!marbles || marbles.length === 0) {
+        el.textContent = 'Sẵn sàng!';
+        return;
+    }
+
+    if (gameState === GameState.COUNTDOWN) {
+        const v = Math.ceil(countdownTimer);
+        el.textContent = v > 0 ? 'Xuất phát sau ' + v + '...' : 'ĐI!';
+        return;
+    }
+
+    if (gameState === GameState.FINISHED) {
+        const winner = marbles.find(m => m.place === 1);
+        el.textContent = winner ? '🏆 ' + winner.name + ' vô địch!' : 'Cuộc đua kết thúc!';
+        return;
+    }
+
+    if (gameState === GameState.PAUSED) {
+        el.textContent = '⏸ Tạm dừng...';
+        return;
+    }
+
+    if (gameState !== GameState.RACING) return;
+
+    // Only change message every ~3s
+    const now = performance.now();
+    if (now - lastCommentatorChange < 3000) return;
+    lastCommentatorChange = now;
+
+    const active = marbles.filter(m => !m.eliminated && !m.finished);
+    const sorted = [...marbles].filter(m => !m.eliminated).sort((a, b) => {
+        if (a.finished && b.finished) return a.finishTime - b.finishTime;
+        if (a.finished) return -1;
+        if (b.finished) return 1;
+        return b.y - a.y; // higher y = ahead (track goes downward)
+    });
+
+    const msgs = [];
+    const leader = sorted[0];
+    const second = sorted[1];
+
+    if (leader && leader.finished) {
+        msgs.push(leader.name + ' đã về đích! 🏁');
+        msgs.push('Xuất sắc! ' + leader.name + ' hoàn thành!');
+    } else if (leader) {
+        const prog = Math.round(leader.y / CONFIG.TRACK_LENGTH * 100);
+        msgs.push(leader.name + ' đang dẫn đầu!');
+        msgs.push(leader.name + ' băng băng về đích!');
+        if (prog > 75) msgs.push(leader.name + ' sắp cán đích! ⏩');
+        if (second && (leader.y - second.y) < 150) {
+            msgs.push('Căng thẳng! ' + second.name + ' bám sát ' + leader.name + '! 🔥');
+            msgs.push('Ngang ngửa! Ai sẽ thắng?');
+        }
+        if (active.length <= 3 && active.length > 1) {
+            msgs.push('Chỉ còn ' + active.length + ' kỳ thủ trên đường đua!');
+        }
+        if (active.length === 1) {
+            msgs.push(leader.name + ' sắp về đích! Cố lên! 💪');
+        }
+        msgs.push('Các kỳ thủ đang thể hiện phong độ cao!');
+        msgs.push('Vượt chướng ngại vật đầy ngoạn mục!');
+        msgs.push('Đường đua năm nay đầy thử thách!');
+    }
+
+    if (msgs.length > 0) {
+        const msg = msgs[Math.floor(Math.random() * msgs.length)];
+        el.textContent = msg;
+    }
 }
 
 function updateMiniLeaderboard() {
@@ -2725,8 +2798,8 @@ function updateMiniLeaderboard() {
     let html = '';
     for (let i = 0; i < topN; i++) {
         const m = sorted[i];
-        const flag = COUNTRIES[m.countryIndex].colors[0];
-        html += `<span class="lb-entry"><span class="lb-pos">${i + 1}</span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${flag};"></span>${m.name}</span>`;
+        const flagURL = getFlagDataURL(m.countryIndex, 10);
+        html += `<span class="lb-entry"><span class="lb-pos">${i + 1}</span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background-image:url(${flagURL});background-size:cover;background-position:center;"></span>${m.name}</span>`;
     }
     el.innerHTML = html;
 }
@@ -2832,9 +2905,9 @@ function showResults() {
         html += '<tr><th>STT</th><th>Quốc Gia</th><th>Trạng Thái</th></tr>';
         const elimOrder = marbles.sort((a, b) => (a.place || 999) - (b.place || 999));
         elimOrder.forEach((m, i) => {
-            const flag = COUNTRIES[m.countryIndex].colors[0];
+            const flagURL = getFlagDataURL(m.countryIndex, 20);
             const status = m.eliminated ? 'Bị Loại' : m.finished ? 'Về Đích' : 'Sống Sót!';
-            html += `<tr><td class="pos">${i + 1}</td><td><span class="flag-dot" style="background:${flag}"></span>${m.name}</td><td>${status}</td></tr>`;
+            html += `<tr><td class="pos">${i + 1}</td><td><span class="flag-dot" style="background-image:url(${flagURL});background-size:cover;background-position:center;"></span>${m.name}</td><td>${status}</td></tr>`;
         });
         html += '</table>';
     }
