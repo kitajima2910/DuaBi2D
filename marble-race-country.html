@@ -206,6 +206,12 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
           <button class="btn btn-secondary btn-small speed-btn" data-speed="4">4×</button>
         </div>
       </div>
+      <div class="control-group">
+        <label>BLV (giọng nói)</label>
+        <div class="btn-group" style="display:flex;gap:4px;">
+          <button class="btn btn-secondary btn-small active" id="blvToggle" style="flex:1;">🔊 Bật</button>
+        </div>
+      </div>
     </div>
 
     <div class="action-row">
@@ -1682,6 +1688,8 @@ let raceTime = 0;
 let leaderboardCache = [];
 let lastCommentatorChange = 0;
 let commentatorText = 'Sẵn sàng!';
+let blvEnabled = true;
+let blvInitialized = false;
 let canvasW = 800, canvasH = 600;
 let renderAlpha = 0;
 let animationId = null;
@@ -1700,6 +1708,15 @@ function initGame() {
 
     setupUI();
     resetGameState();
+
+    // Pre-load Vietnamese voice for BLV
+    if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices(); // Trigger loading
+        window.speechSynthesis.onvoiceschanged = () => {
+            blvInitialized = false; // Will re-init on next speak
+        };
+    }
+
     isRunning = true;
     lastTime = performance.now();
     if (animationId) cancelAnimationFrame(animationId);
@@ -2709,28 +2726,54 @@ function drawHUD() {
     updateMiniLeaderboard();
 }
 
+function speakCommentary(text) {
+    if (!blvEnabled || !window.speechSynthesis) return;
+    try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'vi-VN';
+        utterance.rate = 1.15;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        // Try to find Vietnamese voice
+        if (!blvInitialized) {
+            const voices = window.speechSynthesis.getVoices();
+            const vi = voices.find(v => v.lang.startsWith('vi'));
+            if (vi) utterance.voice = vi;
+            blvInitialized = true;
+        }
+        window.speechSynthesis.speak(utterance);
+    } catch (e) { /* silently fail */ }
+}
+
+function setBLVText(el, text) {
+    const old = el.textContent;
+    el.textContent = text;
+    if (old !== text) speakCommentary(text.replace(/\p{Extended_Pictographic}/gu, '').trim());
+}
+
 function updateCommentator() {
     const el = document.getElementById('hudCommentator');
     if (!el) return;
     if (!marbles || marbles.length === 0) {
-        el.textContent = 'Sẵn sàng!';
+        setBLVText(el, 'Sẵn sàng!');
         return;
     }
 
     if (gameState === GameState.COUNTDOWN) {
         const v = Math.ceil(countdownTimer);
-        el.textContent = v > 0 ? 'Xuất phát sau ' + v + '...' : 'ĐI!';
+        setBLVText(el, v > 0 ? 'Xuất phát sau ' + v + '...' : 'Đi!');
         return;
     }
 
     if (gameState === GameState.FINISHED) {
         const winner = marbles.find(m => m.place === 1);
-        el.textContent = winner ? '🏆 ' + winner.name + ' vô địch!' : 'Cuộc đua kết thúc!';
+        setBLVText(el, winner ? winner.name + ' vô địch!' : 'Cuộc đua kết thúc!');
         return;
     }
 
     if (gameState === GameState.PAUSED) {
-        el.textContent = '⏸ Tạm dừng...';
+        setBLVText(el, 'Tạm dừng...');
         return;
     }
 
@@ -2778,7 +2821,7 @@ function updateCommentator() {
 
     if (msgs.length > 0) {
         const msg = msgs[Math.floor(Math.random() * msgs.length)];
-        el.textContent = msg;
+        setBLVText(el, msg);
     }
 }
 
@@ -2983,6 +3026,17 @@ function setupUI() {
 
     // Restart button
     document.getElementById('restartBtn').addEventListener('click', restartRace);
+
+    // BLV voice toggle
+    const blvBtn = document.getElementById('blvToggle');
+    if (blvBtn) {
+        blvBtn.addEventListener('click', () => {
+            blvEnabled = !blvEnabled;
+            blvBtn.textContent = blvEnabled ? '🔊 Bật' : '🔇 Tắt';
+            blvBtn.classList.toggle('active', blvEnabled);
+            if (!blvEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+        });
+    }
 
     // Keyboard
     document.addEventListener('keydown', (e) => {
