@@ -72,32 +72,33 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
 #overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 20; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
 #overlay.active { display: flex; }
 #overlay .overlay-content { background: linear-gradient(180deg, #1a1a2e, #14141f); border: 1px solid #2a2a4a; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
-#overlay h2 { text-align: center; font-size: 24px; margin-bottom: 16px; background: linear-gradient(135deg, #ffd93d, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-#overlay h3 { font-size: 16px; color: #aaa; margin: 12px 0 8px; text-align: center; }
+#overlay h2 { text-align: center; font-size: 26px; margin-bottom: 20px; background: linear-gradient(135deg, #ffd93d, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+#overlay h3 { font-size: 15px; color: #888; margin: 16px 0 10px; text-align: center; letter-spacing: 0.5px; font-weight: 600; }
 
 /* ===== PODIUM ===== */
-.podium { display: flex; justify-content: center; align-items: flex-end; gap: 12px; margin: 20px 0; height: 140px; }
-.podium-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.podium-item .flag-circle { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-.podium-item .name { font-size: 12px; font-weight: 600; text-align: center; }
-.podium-item .time { font-size: 10px; color: #888; }
-.podium-1 { transform: translateY(-10px); }
-.podium-1 .flag-circle { width: 56px; height: 56px; border-color: #ffd93d; }
-.podium-1 .name { font-size: 14px; color: #ffd93d; }
+.podium { display: flex; justify-content: center; align-items: flex-end; gap: 16px; margin: 24px 0; height: 160px; }
+.podium-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.podium-item .flag-circle { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); background-size: cover; background-position: center; }
+.podium-item .name { font-size: 12px; font-weight: 700; text-align: center; color: #ccc; letter-spacing: 0.3px; }
+.podium-item .time { font-size: 10px; color: #888; font-weight: 500; }
+.podium-1 { transform: translateY(-12px); }
+.podium-1 .flag-circle { width: 60px; height: 60px; border-color: #ffd93d; border-width: 3px; box-shadow: 0 0 30px rgba(255,217,61,0.4); }
+.podium-1 .name { font-size: 15px; color: #ffd93d; letter-spacing: 0.5px; }
 .podium-2 .flag-circle { border-color: #c0c0c0; }
 .podium-3 .flag-circle { border-color: #cd7f32; }
-.podium-stand { width: 60px; background: #2a2a4a; border-radius: 4px 4px 0 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; }
-.podium-1 .podium-stand { height: 60px; background: linear-gradient(180deg, #ffd93d, #b8860b); color: #000; font-weight: 700; }
-.podium-2 .podium-stand { height: 40px; background: linear-gradient(180deg, #c0c0c0, #808080); color: #000; font-weight: 700; }
-.podium-3 .podium-stand { height: 30px; background: linear-gradient(180deg, #cd7f32, #8b4513); color: #fff; font-weight: 700; }
+.podium-stand { width: 72px; padding: 6px 0; background: #2a2a4a; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #888; font-weight: 600; }
+.podium-1 .podium-stand { height: 64px; background: linear-gradient(180deg, #ffd93d, #b8860b); color: #000; font-size: 13px; letter-spacing: 0.5px; }
+.podium-2 .podium-stand { height: 44px; background: linear-gradient(180deg, #c0c0c0, #808080); color: #000; }
+.podium-3 .podium-stand { height: 34px; background: linear-gradient(180deg, #cd7f32, #8b4513); color: #fff; }
 
 /* ===== RESULTS TABLE ===== */
-.results-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 8px 0; }
-.results-table th { background: #2a2a4a; color: #888; padding: 6px 8px; text-align: left; font-weight: 600; font-size: 10px; text-transform: uppercase; }
-.results-table td { padding: 5px 8px; border-bottom: 1px solid #1a1a2e; }
+.results-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+.results-table th { background: #2a2a4a; color: #999; padding: 8px 10px; text-align: left; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.results-table td { padding: 7px 10px; border-bottom: 1px solid #1a1a2e; }
 .results-table tr:nth-child(even) { background: rgba(255,255,255,0.03); }
-.results-table .pos { color: #ffd93d; font-weight: 700; width: 24px; }
-.results-table .flag-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 6px; border: 1px solid rgba(255,255,255,0.3); }
+.results-table tr:hover { background: rgba(255,255,255,0.06); }
+.results-table .pos { color: #ffd93d; font-weight: 700; width: 32px; font-size: 13px; }
+.results-table .flag-dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; margin-right: 8px; border: 1.5px solid rgba(255,255,255,0.4); box-shadow: 0 0 4px rgba(0,0,0,0.3); }
 
 /* ===== COUNTDOWN OVERLAY ===== */
 #countdown { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 15; justify-content: center; align-items: center; pointer-events: none; }
@@ -124,8 +125,18 @@ body { background: #0a0a12; font-family: 'Segoe UI', system-ui, -apple-system, s
   .leaderboard-mini { gap: 4px; }
   #countdown-text { font-size: 72px; }
   #overlay .overlay-content { padding: 20px; }
+  #overlay h2 { font-size: 20px; margin-bottom: 14px; }
+  .podium { height: 130px; gap: 10px; margin: 16px 0; }
   .podium-item .flag-circle { width: 32px; height: 32px; }
-  .podium-1 .flag-circle { width: 42px; height: 42px; }
+  .podium-1 .flag-circle { width: 44px; height: 44px; }
+  .podium-1 .name { font-size: 13px; }
+  .podium-stand { width: 56px; font-size: 10px; padding: 4px 0; }
+  .podium-1 .podium-stand { height: 50px; }
+  .podium-2 .podium-stand { height: 36px; }
+  .podium-3 .podium-stand { height: 28px; }
+  .results-table { font-size: 11px; margin: 8px 0; }
+  .results-table th { padding: 6px 8px; font-size: 9px; }
+  .results-table td { padding: 5px 8px; }
 }
 
 @media (max-width: 480px) {
@@ -2709,6 +2720,22 @@ function updateMiniLeaderboard() {
 }
 
 // ============================================================
+// FLAG HELPER — Tạo flag texture data URL cho overlay
+// ============================================================
+
+const flagDataURLCache = new Map();
+
+function getFlagDataURL(countryIndex, size) {
+    const key = countryIndex + '_' + size;
+    if (flagDataURLCache.has(key)) return flagDataURLCache.get(key);
+    const country = COUNTRIES[countryIndex];
+    const canvas = renderFlagTexture(country, size);
+    const url = canvas.toDataURL();
+    flagDataURLCache.set(key, url);
+    return url;
+}
+
+// ============================================================
 // RESULTS & OVERLAY
 // ============================================================
 
@@ -2722,18 +2749,18 @@ function showResults() {
     if (sorted.length >= 3) {
         html += '<div class="podium">';
         // 2nd, 1st, 3rd
-        const order = [1, 0, 2]; // indexes for sorted[1], sorted[0], sorted[2]
+        const order = [1, 0, 2];
         for (const idx of order) {
             if (idx >= sorted.length) continue;
             const m = sorted[idx];
-            const flag = COUNTRIES[m.countryIndex].colors[0];
+            const flagURL = getFlagDataURL(m.countryIndex, 56);
             const cls = idx === 0 ? 'podium-1' : idx === 1 ? 'podium-2' : 'podium-3';
             const pos = idx + 1;
             html += `<div class="podium-item ${cls}">
-                <div class="flag-circle" style="background:${flag};"></div>
+                <div class="flag-circle" style="background-image:url(${flagURL});background-size:cover;background-position:center;"></div>
                 <div class="name">${pos}. ${m.name}</div>
                 <div class="time">${formatTime(m.finishTime)}</div>
-                <div class="podium-stand">${pos === 1 ? '🥇' : pos === 2 ? '🥈' : '🥉'}</div>
+                <div class="podium-stand">${pos === 1 ? '🥇 VÔ ĐỊCH' : pos === 2 ? '🥈 HẠ NHÌ' : '🥉 HẠ BA'}</div>
             </div>`;
         }
         html += '</div>';
@@ -2746,12 +2773,13 @@ function showResults() {
 
     const allSorted = [...marbles].sort((a, b) => (a.place || 999) - (b.place || 999));
     for (const m of allSorted) {
-        const flag = COUNTRIES[m.countryIndex].colors[0];
+        const flagURL = getFlagDataURL(m.countryIndex, 20);
         const timeStr = m.finishTime ? formatTime(m.finishTime) : 'KXĐ';
         const speedStr = Math.round(m.maxSpeedReached || 0);
+        const medal = m.place === 1 ? '🥇' : m.place === 2 ? '🥈' : m.place === 3 ? '🥉' : '';
         html += `<tr>
-            <td class="pos">${m.place || '-'}</td>
-            <td><span class="flag-dot" style="background:${flag}"></span>${m.name}</td>
+            <td class="pos">${medal}${m.place || '-'}</td>
+            <td><span class="flag-dot" style="background-image:url(${flagURL});background-size:cover;background-position:center;"></span>${m.name}</td>
             <td>${m.finishTime ? formatTime(m.finishTime) : '<span style="color:#ff6b6b">KXĐ</span>'}</td>
             <td>${speedStr}</td>
         </tr>`;
@@ -2765,10 +2793,10 @@ function showResults() {
         html += '<table class="results-table">';
         html += '<tr><th>STT</th><th>Quốc Gia</th><th>Điểm</th><th>Xuất Sắc</th></tr>';
         standings.forEach((s, i) => {
-            const flag = COUNTRIES[s.countryIndex].colors[0];
+            const flagURL = getFlagDataURL(s.countryIndex, 20);
             html += `<tr>
                 <td class="pos">${i + 1}</td>
-                <td><span class="flag-dot" style="background:${flag}"></span>${s.name}</td>
+                <td><span class="flag-dot" style="background-image:url(${flagURL});background-size:cover;background-position:center;"></span>${s.name}</td>
                 <td>${s.points}</td>
                 <td>${formatTime(s.best)}</td>
             </tr>`;
