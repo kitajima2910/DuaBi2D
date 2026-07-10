@@ -1204,7 +1204,7 @@ function generateTrack(seed) {
             case 'gravity-drop': {
                 track.obstacles.push({
                     type: 'gravity-drop', y: segMidY, height: segH * 0.6,
-                    width: segWidth, midX: midX, boost: -200
+                    width: segWidth, midX: midX, boost: 600
                 });
                 break;
             }
@@ -1962,7 +1962,13 @@ function fixedUpdate(dt) {
                 if (m.y > obs.y - halfH && m.y < obs.y + halfH) {
                     const dx = m.x - obs.midX;
                     if (Math.abs(dx) < obs.width / 2) {
-                        m.vy += 200 * dt; // extra gravity in drop zone
+                        m.vy += obs.boost * dt;
+                        // Particles để thấy rõ hiệu ứng
+                        if (Math.random() < 0.15 && CONFIG.PARTICLE_ENABLED) {
+                            particleSystem.emit(m.x, m.y, 1, {
+                                color: '#ff6b6b', speed: 30, life: 0.3, size: 3, gravity: 100
+                            });
+                        }
                     }
                 }
             }
@@ -2485,22 +2491,42 @@ function drawObstacles() {
             }
             case 'gravity-drop': {
                 const hw = obs.width / 2;
-                ctx2.fillStyle = 'rgba(255,100,100,0.1)';
-                ctx2.fillRect(sx - hw, camera.screenY(obs.y - obs.height / 2), hw * 2, obs.height);
-                // Zap indicators
-                ctx2.strokeStyle = 'rgba(255,200,100,0.3)';
+                const gTop = camera.screenY(obs.y - obs.height / 2);
+                const gBot = camera.screenY(obs.y + obs.height / 2);
+                const gH = gBot - gTop;
+                // Nền đỏ đậm hơn
+                ctx2.fillStyle = 'rgba(255,60,60,0.12)';
+                ctx2.fillRect(sx - hw, gTop, hw * 2, gH);
+                // Viền glow đỏ hai bên
+                ctx2.strokeStyle = 'rgba(255,60,60,0.25)';
+                ctx2.lineWidth = 3;
+                ctx2.beginPath();
+                ctx2.moveTo(sx - hw, gTop);
+                ctx2.lineTo(sx - hw, gBot);
+                ctx2.stroke();
+                ctx2.beginPath();
+                ctx2.moveTo(sx + hw, gTop);
+                ctx2.lineTo(sx + hw, gBot);
+                ctx2.stroke();
+                // Tia sét động (dùng sin theo thời gian)
+                const flash = 0.3 + 0.2 * Math.sin(performance.now() * 0.008);
+                ctx2.strokeStyle = `rgba(255,200,100,${flash})`;
                 ctx2.lineWidth = 2;
-                for (let i = 0; i < 5; i++) {
-                    const xOff = -hw + (i / 4) * hw * 2;
+                for (let i = 0; i < 7; i++) {
+                    const t = i / 6;
+                    const xOff = -hw + t * hw * 2;
+                    const wiggle = Math.sin(t * 12 + performance.now() * 0.01) * 6;
                     ctx2.beginPath();
-                    ctx2.moveTo(sx + xOff, camera.screenY(obs.y - obs.height / 2));
-                    ctx2.lineTo(sx + xOff + 10, camera.screenY(obs.y + obs.height / 2));
+                    ctx2.moveTo(sx + xOff + wiggle, gTop);
+                    ctx2.lineTo(sx + xOff + wiggle + 8, gBot);
                     ctx2.stroke();
                 }
-                ctx2.fillStyle = 'rgba(255,200,100,0.5)';
-                ctx2.font = '16px sans-serif';
+                // Icon ⚡ to hơn, nhấp nháy
+                ctx2.fillStyle = `rgba(255,220,80,${0.5 + 0.3 * Math.sin(performance.now() * 0.006)})`;
+                ctx2.font = 'bold 26px sans-serif';
                 ctx2.textAlign = 'center';
-                ctx2.fillText('⚡', sx, camera.screenY(obs.y));
+                ctx2.textBaseline = 'middle';
+                ctx2.fillText('⚡', sx, (gTop + gBot) / 2);
                 break;
             }
         }
