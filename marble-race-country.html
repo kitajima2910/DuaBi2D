@@ -317,6 +317,7 @@ body { background: #0a0a12; font-family: 'Montserrat', 'Segoe UI', system-ui, -a
       <div class="slider-container">
         <label>Số bi: <span class="slider-value" id="marbleCountDisplay">30</span></label>
         <input type="range" id="marbleCount" min="8" max="60" value="30">
+        <div id="marbleCountHint" style="font-size:9px;color:#666;margin-top:2px;min-height:14px;"></div>
       </div>
       <div class="control-group">
         <label>Mã Đường</label>
@@ -2000,18 +2001,9 @@ function startRace() {
 
     // Career mode: override settings
     if (gameMode.mode === 'career') {
-        const league = CAREER_LEAGUES[careerGetLeagueNum() - 1];
-        document.getElementById('marbleCount').value = league.marbleCount;
-        document.getElementById('marbleCountDisplay').textContent = league.marbleCount;
-        const seedBase = league.seedMin + (careerGetProfile().currentTournament % (league.seedMax - league.seedMin));
-        document.getElementById('trackSeed').value = Math.min(seedBase + gameMode.currentRace, league.seedMax);
-        document.getElementById('marbleCount').disabled = true;
-        document.getElementById('trackSeed').disabled = true;
-        document.getElementById('randomSeedBtn').disabled = true;
+        careerLockSettings();
     } else {
-        document.getElementById('marbleCount').disabled = false;
-        document.getElementById('trackSeed').disabled = false;
-        document.getElementById('randomSeedBtn').disabled = false;
+        careerUnlockSettings();
     }
 
     // Re-read count and seed in case career mode overrode them
@@ -3426,6 +3418,8 @@ function setupUI() {
             soundManager.playClick();
             if (newMode === 'career') {
                 careerInit();
+            } else {
+                careerUnlockSettings();
             }
             careerUpdatePanel();
         });
@@ -3443,11 +3437,16 @@ function setupUI() {
     // Marble count slider
     document.getElementById('marbleCount').addEventListener('input', (e) => {
         document.getElementById('marbleCountDisplay').textContent = e.target.value;
+        if (gameMode.mode !== 'career') {
+            window._savedMarbleCount = parseInt(e.target.value);
+        }
     });
 
     // Seed randomizer
     document.getElementById('randomSeedBtn').addEventListener('click', () => {
-        document.getElementById('trackSeed').value = Math.floor(Math.random() * 90000) + 1000;
+        const val = Math.floor(Math.random() * 90000) + 1000;
+        document.getElementById('trackSeed').value = val;
+        if (gameMode.mode !== 'career') window._savedSeed = val;
         soundManager.playClick();
     });
 
@@ -4320,7 +4319,40 @@ function careerInit() {
     careerLoadProfile();
     careerRefreshDailyMissions();
     careerRefreshWeeklyMissions();
+    careerLockSettings();
     careerUpdatePanel();
+}
+
+function careerLockSettings() {
+    const mcEl = document.getElementById('marbleCount');
+    if (!window._savedMarbleCount) {
+        window._savedMarbleCount = parseInt(mcEl.value) || 30;
+        window._savedSeed = parseInt(document.getElementById('trackSeed').value) || 42;
+    }
+    const league = CAREER_LEAGUES[careerGetLeagueNum() - 1];
+    mcEl.value = league.marbleCount;
+    document.getElementById('marbleCountDisplay').textContent = league.marbleCount;
+    document.getElementById('marbleCountHint').textContent = '🔒 Theo hạng ' + league.nameVN + ' (' + league.marbleCount + ' bi)';
+    const p = careerGetProfile();
+    const seedBase = league.seedMin + (p.currentTournament % (league.seedMax - league.seedMin));
+    document.getElementById('trackSeed').value = Math.min(seedBase + gameMode.currentRace, league.seedMax);
+    mcEl.disabled = true;
+    document.getElementById('trackSeed').disabled = true;
+    document.getElementById('randomSeedBtn').disabled = true;
+}
+
+function careerUnlockSettings() {
+    document.getElementById('marbleCount').disabled = false;
+    document.getElementById('trackSeed').disabled = false;
+    document.getElementById('randomSeedBtn').disabled = false;
+    document.getElementById('marbleCountHint').textContent = 'Kéo để chọn số bi (8–60)';
+    if (window._savedMarbleCount !== undefined) {
+        document.getElementById('marbleCount').value = window._savedMarbleCount;
+        document.getElementById('marbleCountDisplay').textContent = window._savedMarbleCount;
+        document.getElementById('trackSeed').value = window._savedSeed;
+        window._savedMarbleCount = undefined;
+        window._savedSeed = undefined;
+    }
 }
 
 function careerUpdatePanel() {
