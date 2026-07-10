@@ -604,10 +604,13 @@ function drawStar(ctx, cx, cy, points, outerR, innerR) {
 class SoundManager {
     constructor() {
         this.ctx = null;
-        this.masterVolume = 0.5;
+        this.masterVolume = 0.75;
         this.initialized = false;
-        this.bounceBuffer = null;
         this.noiseBuffer = null;
+        this.crowdNodes = [];
+        this.crowdActive = false;
+        this.crowdChantTimer = null;
+        this.crowdChantEnabled = false;
     }
 
     init() {
@@ -617,17 +620,21 @@ class SoundManager {
             this.masterGain = this.ctx.createGain();
             this.masterGain.gain.value = this.masterVolume;
             this.masterGain.connect(this.ctx.destination);
-            // Generate noise buffer for rolling sounds
-            const sr = this.ctx.sampleRate;
-            const len = sr * 0.5;
-            const buf = this.ctx.createBuffer(1, len, sr);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-            this.noiseBuffer = buf;
+            // Pre-generate noise buffers
+            this.noiseBuffer = this._createNoiseBuffer(1.0);
             this.initialized = true;
         } catch (e) {
             console.warn('Audio not available');
         }
+    }
+
+    _createNoiseBuffer(duration) {
+        const sr = this.ctx.sampleRate;
+        const len = sr * duration;
+        const buf = this.ctx.createBuffer(1, len, sr);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+        return buf;
     }
 
     resume() {
@@ -654,6 +661,245 @@ class SoundManager {
         gain.connect(this.masterGain);
         osc.start();
         osc.stop(this.ctx.currentTime + duration);
+    }
+
+    // ─── CROWD AMBIENCE ───────────────────────────────────────
+    startCrowd() {
+        if (!this.initialized || this.crowdActive) return;
+        this.resume();
+        this.crowdActive = true;
+        this.crowdNodes = [];
+
+        // Layer 1: Deep rumble (low-frequency crowd murmur)
+        const noise1 = this.ctx.createBufferSource();
+        noise1.buffer = this._createNoiseBuffer(4);
+        noise1.loop = true;
+        const bp1 = this.ctx.createBiquadFilter();
+        bp1.type = 'bandpass';
+        bp1.frequency.value = 180;
+        bp1.Q.value = 0.6;
+        const gain1 = this.ctx.createGain();
+        gain1.gain.value = 0.55;
+        noise1.connect(bp1).connect(gain1).connect(this.masterGain);
+        noise1.start();
+        this.crowdNodes.push({ src: noise1, gain: gain1, base: 0.55 });
+
+        // Layer 2: Mid crowd chatter
+        const noise2 = this.ctx.createBufferSource();
+        noise2.buffer = this._createNoiseBuffer(2);
+        noise2.loop = true;
+        const bp2 = this.ctx.createBiquadFilter();
+        bp2.type = 'bandpass';
+        bp2.frequency.value = 480;
+        bp2.Q.value = 0.4;
+        const gain2 = this.ctx.createGain();
+        gain2.gain.value = 0.35;
+        noise2.connect(bp2).connect(gain2).connect(this.masterGain);
+        noise2.start();
+        this.crowdNodes.push({ src: noise2, gain: gain2, base: 0.35 });
+
+        // Slow volume pulse to avoid "static" feeling
+        this._pulseCrowd();
+        // Start crowd vocal chants
+        this.startCrowdChants();
+    }
+
+    _pulseCrowd() {
+        if (!this.crowdActive) return;
+        const now = this.ctx.currentTime;
+        for (const n of this.crowdNodes) {
+            const b = n.base;
+            // Oscillate between 50% and 110% of base volume (up AND down)
+            const target = b * (0.5 + Math.random() * 0.6);
+            n.gain.gain.linearRampToValueAtTime(target, now + 0.4 + Math.random() * 0.4);
+        }
+        setTimeout(() => { if (this.crowdActive) this._pulseCrowd(); }, 500 + Math.random() * 400);
+    }
+
+    stopCrowd() {
+        this.crowdActive = false;
+        this.stopCrowdChants();
+        for (const n of this.crowdNodes) {
+            try {
+                n.gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.3);
+                setTimeout(() => { try { n.src.stop(); } catch(e) {} }, 350);
+            } catch(e) {}
+        }
+        this.crowdNodes = [];
+    }
+
+    // ─── CROWD CHANTS (TTS) ───────────────────────────────────
+    _crowdChantsGeneric() {
+        return [
+            "Let's go! Let's go!", "Go! Go! Go!", "Come on! Come on!",
+            "Woo!", "Yeah!", "Alright!", "Let's go!", "Whoo!",
+            "Come on!", "Yeah baby!"
+        ];
+    }
+
+    _crowdChantsExcited() {
+        return [
+            "Oh! So close!", "Come on, push!", "This is intense!",
+            "Amazing race!", "Incredible!", "Ohhh!", "Nice move!",
+            "Look at that!", "Oh my god!", "No way!"
+        ];
+    }
+
+    _crowdChantsFinish() {
+        return [
+            "He did it!", "Yes! Yes! Yes!", "Woo! Champion!",
+            "What a race!", "Amazing finish!", "Number one!"
+        ];
+    }
+
+    startCrowdChants() {
+        if (!this.initialized || this.crowdChantEnabled) return;
+        this.crowdChantEnabled = true;
+        this.resume();
+        // First chant after a short delay
+        this.crowdChantTimer = setTimeout(() => this._scheduleNextChant(), 2000 + Math.random() * 2000);
+    }
+
+    stopCrowdChants() {
+        this.crowdChantEnabled = false;
+        if (this.crowdChantTimer) {
+            clearTimeout(this.crowdChantTimer);
+            this.crowdChantTimer = null;
+        }
+    }
+
+    _scheduleNextChant() {
+        if (!this.crowdChantEnabled) return;
+        this._sayRandomChant();
+        // Next chant in 4-10 seconds
+        this.crowdChantTimer = setTimeout(() => this._scheduleNextChant(), 4000 + Math.random() * 6000);
+    }
+
+    _sayRandomChant() {
+        if (!this.initialized || !window.speechSynthesis) return;
+        // Don't interrupt BLV (commentator)
+        if (window.speechSynthesis.speaking) return;
+        const category = Math.random();
+        let phrases;
+        if (category < 0.6) phrases = this._crowdChantsGeneric();
+        else if (category < 0.85) phrases = this._crowdChantsExcited();
+        else phrases = this._crowdChantsFinish();
+        const text = phrases[Math.floor(Math.random() * phrases.length)];
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 1.5 + Math.random() * 0.3;
+        u.pitch = 0.9 + Math.random() * 0.4;
+        u.volume = 1;
+        // Find an English voice
+        const voices = window.speechSynthesis.getVoices();
+        const en = voices.find(v => v.lang.startsWith('en') && v.name.includes('Natural'))
+            || voices.find(v => v.lang.startsWith('en') && v.name.includes('Online'))
+            || voices.find(v => v.lang.startsWith('en'));
+        if (en) u.voice = en;
+        window.speechSynthesis.speak(u);
+    }
+
+    // ─── CROWD REACTIONS ──────────────────────────────────────
+
+    playApplause(duration = 2.5) {
+        if (!this.initialized) return;
+        this.resume();
+        const now = this.ctx.currentTime;
+        // Multiple noise bursts with randomized timing = applause
+        for (let i = 0; i < 30; i++) {
+            const t = now + (i / 30) * duration + Math.random() * 0.06;
+            const src = this.ctx.createBufferSource();
+            src.buffer = this._createNoiseBuffer(0.04 + Math.random() * 0.06);
+            const bp = this.ctx.createBiquadFilter();
+            bp.type = 'bandpass';
+            bp.frequency.value = 2000 + Math.random() * 3000;
+            bp.Q.value = 2 + Math.random() * 3;
+            const g = this.ctx.createGain();
+            const vol = (0.45 + Math.random() * 0.25) * (1 - (i / 30) * 0.5);
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(vol, t + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.08 + Math.random() * 0.1);
+            src.connect(bp).connect(g).connect(this.masterGain);
+            src.start(t);
+            src.stop(t + 0.15);
+        }
+    }
+
+    playCheer(intensity = 1.0) {
+        if (!this.initialized) return;
+        this.resume();
+        const now = this.ctx.currentTime;
+        // Rising whoosh + noise = crowd cheer
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(800 * intensity, now + 0.6);
+        const gOsc = this.ctx.createGain();
+        gOsc.gain.setValueAtTime(0.3 * intensity, now);
+        gOsc.gain.linearRampToValueAtTime(0.55 * intensity, now + 0.15);
+        gOsc.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.connect(gOsc).connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.9);
+
+        // Noise burst layered on top
+        const src = this.ctx.createBufferSource();
+        src.buffer = this._createNoiseBuffer(0.5);
+        const bp = this.ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 1000 + 800 * intensity;
+        bp.Q.value = 0.5;
+        const gNoise = this.ctx.createGain();
+        gNoise.gain.setValueAtTime(0.35 * intensity, now);
+        gNoise.gain.linearRampToValueAtTime(0.6 * intensity, now + 0.1);
+        gNoise.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+        src.connect(bp).connect(gNoise).connect(this.masterGain);
+        src.start(now);
+        src.stop(now + 0.8);
+    }
+
+    playVictoryFanfare() {
+        if (!this.initialized) return;
+        this.resume();
+        const now = this.ctx.currentTime;
+        // Epic brass-like fanfare: ascending arpeggio
+        const notes = [523, 659, 784, 1047, 1319];
+        notes.forEach((freq, i) => {
+            const t = now + i * 0.13;
+            const osc = this.ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const g = this.ctx.createGain();
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(0.5, t + 0.03);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+            osc.connect(g).connect(this.masterGain);
+            osc.start(t);
+            osc.stop(t + 0.4);
+        });
+        // Follow with applause
+        setTimeout(() => { if (this.initialized) this.playApplause(3.0); }, 700);
+    }
+
+    playExcited() {
+        // Quick excited crowd burst for overtakes / close action
+        this.playCheer(0.6);
+    }
+
+    playGasps() {
+        // Crowd disappointment / shock
+        if (!this.initialized) return;
+        this.resume();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.4);
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(0.35, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.connect(g).connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.6);
     }
 
     playBounce(volume = 0.15) {
@@ -691,11 +937,6 @@ class SoundManager {
 
     playGo() {
         this._playTone(880, 0.3, 'sine', 0.3);
-    }
-
-    startRolling() {
-        // Rolling noise - handled per-frame in game loop
-        // This is a placeholder for continuous rolling sound
     }
 }
 
@@ -1683,12 +1924,13 @@ let fpsCounter = 0;
 let fpsTimer = 0;
 let currentFps = 60;
 let countdownTimer = 0;
-let countdownValue = 3;
+let countdownValue = 4;
 let countdownActive = false;
 let raceStartTime = 0;
 let raceTime = 0;
 let leaderboardCache = [];
 let lastCommentatorChange = 0;
+let lastCrowdReaction = 0;
 let commentatorText = 'Ready!';
 let blvEnabled = true;
 let blvSpeechTimer = null;
@@ -1746,6 +1988,7 @@ function resetGameState() {
     raceTime = 0;
     nextMarbleId = 0;
     leaderboardCache = [];
+    if (soundManager) soundManager.stopCrowd();
     updateUI();
 }
 
@@ -1905,19 +2148,19 @@ function startRace() {
 
     // Start countdown
     gameState = GameState.COUNTDOWN;
-    countdownTimer = 3;
-    countdownValue = 3;
+    countdownTimer = CONFIG.COUNTDOWN_SECONDS;
+    countdownValue = CONFIG.COUNTDOWN_SECONDS;
     countdownActive = true;
     raceStartTime = performance.now();
 
     updateUI();
-    showCountdown(3);
+    showCountdown(CONFIG.COUNTDOWN_SECONDS);
 }
 
 function showCountdown(value) {
     const el = document.getElementById('countdown-text');
     if (value <= 0) {
-        el.textContent = 'ĐI!';
+        el.textContent = 'GO!';
         el.style.color = '#00ff88';
         soundManager.playGo();
     } else {
@@ -2059,7 +2302,10 @@ function fixedUpdate(dt) {
         if (m.y >= track.finishLine) {
             m.finished = true;
             m.finishTime = raceTime;
-            if (soundManager) soundManager.playFinish();
+            if (soundManager) {
+                soundManager.playFinish();
+                soundManager.playCheer(0.7);
+            }
             particleSystem.emitConfetti(m.x, m.y, 20);
         }
     }
@@ -2079,7 +2325,10 @@ function fixedUpdate(dt) {
                 const slowest = passed[passed.length - 1];
                 if (!slowest.eliminated && !slowest.finished) {
                     slowest.eliminated = true;
-                    if (soundManager) soundManager.playElimination();
+                    if (soundManager) {
+                        soundManager.playElimination();
+                        soundManager.playGasps();
+                    }
                     particleSystem.emit(slowest.x, slowest.y, 15, {
                         color: '#ff0000', speed: 150, life: 0.6, size: 4
                     });
@@ -2132,6 +2381,11 @@ function endRace() {
     // Show results
     showResults();
     updateUI();
+    // Crowd celebration!
+    if (soundManager) {
+        soundManager.stopCrowd();
+        soundManager.playVictoryFanfare();
+    }
 }
 
 function pauseRace() {
@@ -2737,14 +2991,20 @@ function updateBLVStatus() {
     el.style.color = '#4ade80';
 }
 
-function speakCommentary(text) {
+function speakCommentary(text, force) {
     if (!blvEnabled || !window.speechSynthesis) return;
     try {
-        window.speechSynthesis.cancel();
+        // Don't overlap — skip if already speaking (unless forced)
+        if (!force && window.speechSynthesis.speaking) return;
+
+        // Force mode: cancel current speech first
+        if (force && window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+        }
 
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US';
-        u.rate = 0.95;
+        u.rate = 0.9;
         u.pitch = 0.85;
         u.volume = 1.0;
 
@@ -2761,16 +3021,14 @@ function speakCommentary(text) {
             u.voice = best;
         }
 
-        // Retry if speech doesn't start (Chrome bug workaround)
+        // Chrome fix: re-trigger speak if it didn't start
         let started = false;
         u.onstart = () => { started = true; };
+        u.onend = () => { started = false; };
         if (blvSpeechTimer) clearTimeout(blvSpeechTimer);
         blvSpeechTimer = setTimeout(() => {
-            if (!started) {
-                // Try once more with a different approach
-                window.speechSynthesis.speak(u);
-            }
-        }, 250);
+            if (!started) window.speechSynthesis.speak(u);
+        }, 300);
 
         window.speechSynthesis.speak(u);
     } catch (e) {
@@ -2778,42 +3036,42 @@ function speakCommentary(text) {
     }
 }
 
-function setBLVText(el, text) {
+function setBLVText(el, text, force) {
     const old = el.textContent;
     el.textContent = text;
-    if (old !== text) speakCommentary(text.replace(/\p{Extended_Pictographic}/gu, '').trim());
+    if (old !== text) speakCommentary(text.replace(/\p{Extended_Pictographic}/gu, '').trim(), force);
 }
 
 function updateCommentator() {
     const el = document.getElementById('hudCommentator');
     if (!el) return;
     if (!marbles || marbles.length === 0) {
-        setBLVText(el, 'Ready!');
+        setBLVText(el, 'Ready!', true);
         return;
     }
 
     if (gameState === GameState.COUNTDOWN) {
         const v = Math.ceil(countdownTimer);
-        setBLVText(el, v > 0 ? 'Starting in ' + v + '...' : 'GO!');
+        setBLVText(el, v > 0 ? '' + v : 'Go!', true);
         return;
     }
 
     if (gameState === GameState.FINISHED) {
         const winner = marbles.find(m => m.place === 1);
-        setBLVText(el, winner ? winner.name + ' wins the race!' : 'Race over!');
+        setBLVText(el, winner ? winner.name + ' wins the race!' : 'Race over!', true);
         return;
     }
 
     if (gameState === GameState.PAUSED) {
-        setBLVText(el, 'Paused...');
+        setBLVText(el, 'Paused...', true);
         return;
     }
 
     if (gameState !== GameState.RACING) return;
 
-    // Only change message every ~3s
+    // Only change message every ~6s (let speech finish naturally)
     const now = performance.now();
-    if (now - lastCommentatorChange < 3000) return;
+    if (now - lastCommentatorChange < 6000) return;
     lastCommentatorChange = now;
 
     const active = marbles.filter(m => !m.eliminated && !m.finished);
@@ -2843,6 +3101,12 @@ function updateCommentator() {
             msgs.push('It\'s a close race! ' + second.name + ' is right behind!');
             msgs.push('Can ' + second.name + ' catch ' + leader.name + '?');
             msgs.push('What a battle at the front!');
+            // Crowd excited reaction (with cooldown)
+            const now = performance.now();
+            if (soundManager && now - lastCrowdReaction > 8000) {
+                lastCrowdReaction = now;
+                soundManager.playExcited();
+            }
         }
         if (active.length <= 3 && active.length > 1) {
             msgs.push('Only ' + active.length + ' marbles still racing!');
@@ -2851,6 +3115,12 @@ function updateCommentator() {
         if (active.length === 1) {
             msgs.push(leader.name + ' is about to take the crown!');
             msgs.push('Almost there! ' + leader.name + ' is the champion!');
+            // Crowd gets excited for the finish
+            const now = performance.now();
+            if (soundManager && now - lastCrowdReaction > 8000) {
+                lastCrowdReaction = now;
+                soundManager.playExcited();
+            }
         }
         msgs.push('What a spectacular race!');
         msgs.push('The crowd is going wild!');
@@ -3075,7 +3345,9 @@ function setupUI() {
             blvBtn.textContent = blvEnabled ? '🔊 Bật' : '🔇 Tắt';
             blvBtn.classList.toggle('active', blvEnabled);
             if (!blvEnabled) {
-                if (window.speechSynthesis) window.speechSynthesis.cancel();
+                if (window.speechSynthesis && window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                }
             }
         });
     }
@@ -3168,6 +3440,8 @@ function gameLoop(timestamp) {
             document.getElementById('countdown').classList.remove('active');
             raceStartTime = performance.now();
             updateUI();
+            // Crowd roar when race starts!
+            if (soundManager) soundManager.startCrowd();
         }
     }
 
