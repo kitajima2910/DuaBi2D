@@ -1818,6 +1818,46 @@ function startRace() {
                 physicsEngine.addStaticBody(body);
                 obs._bodies.push(body);
             }
+        } else if (obs.type === 'funnel') {
+            obs._bodies = [];
+            const halfH = obs.height / 2;
+            const w = obs.segW * 0.4;
+            const gap = obs.gap;
+            const topY = obs.y - halfH;
+            const botY = obs.y + halfH;
+            const ctrY = obs.y;
+            const lx = obs.midX - w;
+            const rx = obs.midX + w;
+            const clx = obs.midX - gap / 2;
+            const crx = obs.midX + gap / 2;
+            // 4 diagonal segments: bodies with small radius, dense spacing for overlap
+            // Body radius 4 → đệm chỉ 4px, marble gần như chạm sát wall funnel
+            // Số body tự động theo độ dài segment để đảm bảo spacing ≤ 2*radius (overlap)
+            const bodyRadius = 4;
+            const segs = [
+                { x1: lx, y1: topY, x2: clx, y2: ctrY },  // upper-left
+                { x1: clx, y1: ctrY, x2: lx, y2: botY },   // lower-left
+                { x1: rx, y1: topY, x2: crx, y2: ctrY },   // upper-right
+                { x1: crx, y1: ctrY, x2: rx, y2: botY },   // lower-right
+            ];
+            for (const seg of segs) {
+                const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+                const segLen = Math.sqrt(dx * dx + dy * dy);
+                const step = bodyRadius * 2; // 8px spacing → overlap
+                const count = Math.max(3, Math.ceil(segLen / step));
+                for (let i = 0; i < count; i++) {
+                    const t = (i + 0.5) / count;
+                    const body = {
+                        x: seg.x1 + dx * t,
+                        y: seg.y1 + dy * t,
+                        radius: bodyRadius, isStatic: true, type: 'funnel', mass: 9999,
+                        bounce: 0.3, finished: false, eliminated: false,
+                        vx: 0, vy: 0, rotation: 0,
+                    };
+                    physicsEngine.addStaticBody(body);
+                    obs._bodies.push(body);
+                }
+            }
         }
     }
 
