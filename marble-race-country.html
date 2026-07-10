@@ -1547,18 +1547,15 @@ function initMarbles(count, seed) {
     const rng = createRNG(seed * 7 + 13);
     const marbles = [];
     const selectedIndices = [];
-    // Pick unique countries (or allow repeats if count > countries length)
-    const pool = [...Array(COUNTRIES.length).keys()];
+    // Pick unique countries; if count > available, cycle through shuffled list
+    const available = [...Array(COUNTRIES.length).keys()];
+    // Fisher-Yates shuffle the available indices
+    for (let i = available.length - 1; i > 0; i--) {
+        const j = rng.nextInt(0, i);
+        [available[i], available[j]] = [available[j], available[i]];
+    }
     for (let i = 0; i < count; i++) {
-        let idx;
-        if (pool.length > 0 && i < COUNTRIES.length) {
-            const pi = rng.nextInt(0, pool.length - 1);
-            idx = pool[pi];
-            pool.splice(pi, 1);
-        } else {
-            idx = rng.nextInt(0, COUNTRIES.length - 1);
-        }
-        selectedIndices.push(idx);
+        selectedIndices.push(available[i % available.length]);
     }
 
     // Shuffle for start positions
@@ -2166,6 +2163,14 @@ function startRace() {
         if (careerHasPlayerCountry()) {
             const pm = marbles[0];
             const ci = p.playerCountry;
+            // If another marble already has this country, swap their country with marble 0's original
+            const dupe = marbles.findIndex((m, idx) => idx > 0 && m.countryIndex === ci);
+            if (dupe > 0) {
+                const tmpOrig = pm.countryIndex;
+                marbles[dupe].countryIndex = tmpOrig;
+                marbles[dupe].name = COUNTRIES[tmpOrig].name;
+                marbles[dupe].texture = renderFlagTexture(COUNTRIES[tmpOrig], CONFIG.MARBLE_RADIUS * 2);
+            }
             pm.countryIndex = ci;
             pm.name = COUNTRIES[ci].name;
             pm.texture = renderFlagTexture(COUNTRIES[ci], CONFIG.MARBLE_RADIUS * 2);
