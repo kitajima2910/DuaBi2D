@@ -1,0 +1,6 @@
+{
+  "name": "Marble Race Country",
+  "description": "A polished 2D procedural physics marble racing game with country flags, multiple modes, and Web Audio sound effects.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
