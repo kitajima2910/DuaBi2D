@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!-- Background gradient -->
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a1a30"/>
+      <stop offset="100%" stop-color="#0a0a12"/>
+    </radialGradient>
+    <!-- Marble core gradient (red → gold → blue) -->
+    <linearGradient id="marbleGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="35%" stop-color="#ffd93d"/>
+      <stop offset="70%" stop-color="#6bcbff"/>
+      <stop offset="100%" stop-color="#6b6bff"/>
+    </linearGradient>
+    <!-- 3D highlight/shine -->
+    <radialGradient id="shine" cx="32%" cy="28%" r="62%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="30%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Inner shadow -->
+    <radialGradient id="innerShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
+    </radialGradient>
+    <!-- Track ring gradient -->
+    <linearGradient id="trackRing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="50%" stop-color="#ffd93d"/>
+      <stop offset="100%" stop-color="#6bcbff"/>
+    </linearGradient>
+    <!-- Trophy gold -->
+    <linearGradient id="goldAccent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd93d"/>
+      <stop offset="100%" stop-color="#b8860b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer circle with background -->
+  <circle cx="32" cy="32" r="31" fill="url(#bg)" stroke="#2a2a4a" stroke-width="1.5"/>
+
+  <!-- Outer decorative ring (racetrack) -->
+  <circle cx="32" cy="32" r="27" fill="none" stroke="url(#trackRing)" stroke-width="2" stroke-dasharray="3 3" opacity="0.5"/>
+
+  <!-- Speed arcs (motion lines) -->
+  <g opacity="0.3" stroke="url(#trackRing)" stroke-width="1.5" fill="none" stroke-linecap="round">
+    <path d="M10 20 Q6 24 8 32" transform="rotate(-20 32 32)"/>
+    <path d="M10 20 Q6 24 8 32" transform="rotate(40 32 32)"/>
+    <path d="M10 20 Q6 24 8 32" transform="rotate(100 32 32)"/>
+    <path d="M10 20 Q6 24 8 32" transform="rotate(160 32 32)"/>
+    <path d="M10 20 Q6 24 8 32" transform="rotate(220 32 32)"/>
+    <path d="M10 20 Q6 24 8 32" transform="rotate(280 32 32)"/>
+  </g>
+
+  <!-- Marble body -->
+  <circle cx="32" cy="32" r="17" fill="url(#marbleGrad)"/>
+
+  <!-- Checkered flag overlay on marble -->
+  <g opacity="0.12">
+    <rect x="23" y="23" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="30.5" y="23" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="38" y="23" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="26.75" y="26.75" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="34.25" y="26.75" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="23" y="30.5" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="30.5" y="30.5" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="38" y="30.5" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="26.75" y="34.25" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="34.25" y="34.25" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="23" y="38" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="30.5" y="38" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+    <rect x="38" y="38" width="3.5" height="3.5" fill="#000" rx="0.5"/>
+  </g>
+
+  <!-- 3D gloss highlight -->
+  <circle cx="32" cy="32" r="17" fill="url(#shine)"/>
+
+  <!-- Inner shadow for depth -->
+  <circle cx="32" cy="32" r="17" fill="url(#innerShadow)"/>
+
+  <!-- Specular highlight dot -->
+  <ellipse cx="26" cy="26" rx="5" ry="3.5" fill="#ffffff" opacity="0.35" transform="rotate(-30 26 26)"/>
+
+  <!-- Small secondary highlight -->
+  <circle cx="38" cy="40" r="2" fill="#ffffff" opacity="0.1"/>
+
+  <!-- Trophy/star accent at bottom -->
+  <g transform="translate(32, 51)">
+    <polygon points="0,-4 1,-1.2 4,-1.2 1.5,0.8 2.5,4 0,1.8 -2.5,4 -1.5,0.8 -4,-1.2 -1,-1.2" fill="url(#goldAccent)" opacity="0.7"/>
+  </g>
+</svg>
